@@ -1,0 +1,16 @@
+{
+  "app": {
+    "name": "Philippine Community",
+    "tagline": "Suporta sa pamumuhay ng mga Pilipino sa Japan"
+  },
+  "landing": {
+    "title": "Suporta sa pamumuhay ng mga Pilipino sa Japan",
+    "subtitle": "Tutulong ang AI at mga eksperto sa visa, social insurance, mga pamamaraan sa pamahalaan, at mga usaping pampamilya",
+    "ctaPrimary": "Mag-login gamit ang Facebook",
+    "ctaSecondary": "Alamin pa"
+  },
+  "common": {
+    "loading": "Naglo-load...",
+    "error": "May naganap na error"
+  }
+}

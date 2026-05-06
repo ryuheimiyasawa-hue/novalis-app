@@ -1,0 +1,16 @@
+{
+  "app": {
+    "name": "Philippine Community",
+    "tagline": "Life support for Filipinos in Japan"
+  },
+  "landing": {
+    "title": "Life support for Filipinos in Japan",
+    "subtitle": "AI and experts help with visa, social insurance, government procedures, and family matters",
+    "ctaPrimary": "Login with Facebook",
+    "ctaSecondary": "Learn more"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred"
+  }
+}
