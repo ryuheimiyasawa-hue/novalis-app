@@ -48,17 +48,84 @@
 
 ## Phase B — W2: 認証・i18n・骨格
 
-### W2 開始前の必須対応（W1 監査からの繰越事項）
+**設計フェーズ文書**: `tasks/W2-design.md`（ユーザー承認待ち）
+**着手条件**: 設計文書の承認 + ユーザー側作業（環境変数取得）の完了
 
-- [ ] **H1（高）**: `apps/v2/src/proxy.ts` で `/api/*` と `/admin/*` を素通し中。各 API ルート / admin ページに認可ガード（`requireAuth()` / `requireAdmin()` / `requireEditor()`）を実装し、proxy 側の素通しは「公開webhook の早期通過」のみに限定する。Whitelist 方式で公開パスを厳格管理。
-- [ ] **W2 セットアップ**: Sentry 接続（`sentry.client.config.ts`、`sentry.server.config.ts`、`instrumentation.ts`）
-- [ ] **W2 セットアップ**: `lib/supabase/{client,server,admin}.ts` 作成（既存 v1 の実装パターン参考）
-- [ ] **W2 セットアップ**: `lib/auth/{require-auth,require-admin,require-editor}.ts` 作成
-- [ ] **W2 セットアップ**: `app/auth/callback/route.ts`（Facebook OAuth コールバック、`profiles` の `prefecture_code`/`city_name` 空文字を検出してオンボーディングへ誘導）
-- [ ] **W2 機能**: 初回モーダル（言語選択 → localStorage 永続化）
-- [ ] **W2 機能**: オンボーディングフロー（都道府県+市区町村 必須入力、利用規約同意）
-- [ ] **W2 機能**: 利用規約・プラポリのドラフト 3言語版（弁護士監修は並行）
-- [ ] **W2 テスト**: handle_new_user trigger 後にオンボーディングを完了させる E2E テスト
+### W2 実装タスク（設計承認後に展開）
+
+#### B-1. H1 修正（最優先）
+- [ ] proxy.ts のホワイトリスト方式書き換え（公開パスのみ素通し、それ以外は session 取得）
+- [ ] `lib/auth/require-auth.ts` / `require-onboarded.ts` / `require-consent.ts` / `require-admin.ts` / `require-editor.ts` / `require-operator-role.ts`
+- [ ] `app/[locale]/(public)/` と `app/[locale]/(authed)/` の Route Group 分離
+- [ ] `(authed)` route group の layout で session ガード
+
+#### B-2. Supabase クライアント基盤
+- [ ] `lib/supabase/{client,server,admin}.ts` 作成
+- [ ] env 検証ヘルパー（必須 env が無ければ起動時エラー）
+
+#### B-3. Sentry 接続
+- [ ] `sentry.client.config.ts` / `sentry.server.config.ts` / `sentry.edge.config.ts` / `instrumentation.ts`
+- [ ] `beforeSend` で PII を除去するフィルター（ユーザー発話・メールアドレス等）
+
+#### B-4. Facebook OAuth
+- [ ] `app/[locale]/login/page.tsx`
+- [ ] `app/auth/callback/route.ts`（access_denied エラー処理含む）
+- [ ] handle_new_user trigger を補完する `ensureProfile()` ヘルパー
+
+#### B-5. 同意・オンボーディング
+- [ ] migration 002: `profiles.onboarded_at` 追加 + `consent_logs` UNIQUE(user_id, document_type, version)
+- [ ] `lib/legal/versions.ts`（CURRENT_TERMS_VERSION, CURRENT_PRIVACY_VERSION）
+- [ ] `public/legal/{terms,privacy}/1.0.0/{ja,en,tl}.md` ドラフト版
+- [ ] `app/[locale]/consent/page.tsx`
+- [ ] `app/[locale]/onboard/page.tsx`（都道府県＋市区町村）
+- [ ] `app/[locale]/components/initial-language-modal.tsx`
+- [ ] API: `/api/profile/me`, `/api/profile/onboard`, `/api/consent`, `/api/consent/me`
+- [ ] prebuild script: `versions.ts` に対応する legal ファイルが存在するか検証
+
+#### B-6. テスト
+- [ ] `lib/auth/*` のユニットテスト
+- [ ] API ルートの統合テスト（未認証 / 他人リソース / 権限不足）
+- [ ] RLS テスト（pgtap）
+- [ ] E2E: 新規登録ゴールデンパス、同意拒否、言語切替、Admin アクセス
+
+### W2 Definition of Done
+- [ ] tasks/W2-design.md のすべての設計項目が実装済み
+- [ ] H1 が解消（proxy.ts でホワイトリスト方式、各ルートで個別ガード）
+- [ ] typecheck / lint / build エラー 0
+- [ ] 統合テスト・E2E テスト pass
+- [ ] RLS テスト pass
+- [ ] 5役割監査（致命・高 0件）
+- [ ] 利用規約・プラポリ ドラフト版が3言語で配置（弁護士監修は並行で W7 まで）
+
+---
+
+## ユーザー側作業（W2 着手前に並行進行）
+
+### A. 即着手・今夜中に完了可能（自分で完結）
+- [ ] **Supabase v2 新規プロジェクト作成**（10分）
+  - リージョン: ap-northeast-1 (Tokyo)
+  - 取得値: Project URL / anon key / service_role key
+- [ ] **Gemini API key 発行**（5分）— https://aistudio.google.com/app/apikey
+- [ ] **Sentry プロジェクト作成**（10分）
+  - 取得値: SENTRY_DSN / SENTRY_ORG / SENTRY_PROJECT
+- [ ] **Komoju テストアカウント作成**（15分）
+  - 取得値: テスト用 KOMOJU_PUBLIC_KEY / KOMOJU_SECRET_KEY / KOMOJU_WEBHOOK_SECRET
+
+### B. 即着手・審査待ち（最優先で発信）
+- [ ] **Facebook Page 作成 → Developer App → Messenger 製品 → permission 申請**
+  - 必要 permission: `pages_messaging`, `pages_show_list`, `email` (OAuth)
+  - 審査期間: 数日〜数週間（最早期に着手）
+  - 取得値: FACEBOOK_APP_ID / FACEBOOK_APP_SECRET / MESSENGER_PAGE_ACCESS_TOKEN / MESSENGER_VERIFY_TOKEN / MESSENGER_APP_SECRET
+- [ ] **Komoju 本番アカウント審査申請**（数日〜2週間）
+
+### C. 並行で外部発注/連絡
+- [ ] **弁護士監修の依頼**（利用規約・プラポリ 3言語、W7 完成目標）
+- [ ] **協業企業へクローズドベータ参加者の打診**（W7 までに 10〜20名）
+
+### D. 後回し可（環境変数設定後）
+- [ ] `apps/v2/.env.example` を `.env.local` にコピーして全 env を設定
+- [ ] `cd apps/v2 && supabase link --project-ref <ref> && supabase db push`
+- [ ] `pnpm --filter v2 dev` でローカル起動確認
 
 ---
 
