@@ -65,6 +65,21 @@
 ## Phase C — W3: データモデル + 管理画面骨格
 ## Phase D — W4: Whitelist + Gemini 接続
 ## Phase E — W5: RAG + チャット完成
+
+主要タスク（W5 着手時に詳細化）:
+- content_embeddings テーブルへの初期投入バッチ
+- `/api/chat/send`（同期 fallback、Messenger Webhook と Web 同期送信兼用）
+- `/api/chat/stream`（**Web 専用 SSE ストリーミング**、Gemini ストリーミング → トークン逐次送信）
+- Web チャット UI（`app/[locale]/chat/`）
+  - 会話一覧（`channel='web'|'messenger'` 統合表示、チャネル識別バッジ）
+  - メッセージ送信フォーム + ストリーミング応答受信
+  - 記事リンクのインラインプレビュー（RAG ソースを展開）
+  - エスカレ案内のインライン CTA
+  - ディスクレーマーの常時表示
+- 月次カウンタ lazy reset 実装（JST 月初）
+- Welcome Trial 判定の API ガード
+- E2E: 会話送信 → ストリーミング受信 → 履歴反映
+
 ## Phase F — W6: Komoju 課金
 ## Phase G — W7: Messenger Bot + オペレーターモード
 ## Phase H — W8: 飲食店カタログ + 仕上げ
