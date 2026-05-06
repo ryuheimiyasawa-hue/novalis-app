@@ -48,7 +48,17 @@
 
 ## Phase B — W2: 認証・i18n・骨格
 
-（W1 完了後に展開）
+### W2 開始前の必須対応（W1 監査からの繰越事項）
+
+- [ ] **H1（高）**: `apps/v2/src/proxy.ts` で `/api/*` と `/admin/*` を素通し中。各 API ルート / admin ページに認可ガード（`requireAuth()` / `requireAdmin()` / `requireEditor()`）を実装し、proxy 側の素通しは「公開webhook の早期通過」のみに限定する。Whitelist 方式で公開パスを厳格管理。
+- [ ] **W2 セットアップ**: Sentry 接続（`sentry.client.config.ts`、`sentry.server.config.ts`、`instrumentation.ts`）
+- [ ] **W2 セットアップ**: `lib/supabase/{client,server,admin}.ts` 作成（既存 v1 の実装パターン参考）
+- [ ] **W2 セットアップ**: `lib/auth/{require-auth,require-admin,require-editor}.ts` 作成
+- [ ] **W2 セットアップ**: `app/auth/callback/route.ts`（Facebook OAuth コールバック、`profiles` の `prefecture_code`/`city_name` 空文字を検出してオンボーディングへ誘導）
+- [ ] **W2 機能**: 初回モーダル（言語選択 → localStorage 永続化）
+- [ ] **W2 機能**: オンボーディングフロー（都道府県+市区町村 必須入力、利用規約同意）
+- [ ] **W2 機能**: 利用規約・プラポリのドラフト 3言語版（弁護士監修は並行）
+- [ ] **W2 テスト**: handle_new_user trigger 後にオンボーディングを完了させる E2E テスト
 
 ---
 

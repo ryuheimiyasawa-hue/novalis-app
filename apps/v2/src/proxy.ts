@@ -10,7 +10,7 @@ const PUBLIC_API_PATHS = [
   "/api/auth/callback",
 ];
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (PUBLIC_API_PATHS.some((p) => pathname.startsWith(p))) {

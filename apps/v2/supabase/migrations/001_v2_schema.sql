@@ -441,9 +441,10 @@ CREATE POLICY messages_owner_select ON messages FOR SELECT
 CREATE POLICY messages_owner_insert ON messages FOR INSERT
   WITH CHECK (EXISTS (SELECT 1 FROM conversations c WHERE c.id = conversation_id AND c.user_id = auth.uid()));
 
--- operator_takeover_logs（admin/service role経由のみ。一般ユーザーアクセス不可）
+-- operator_takeover_logs: RLSは有効、ポリシーは意図的に作らない。
+-- service_role 経由（admin API ルート内の admin client）でのみ書き込み・参照する。
+-- これにより一般ユーザーは介入ログにアクセス不可となる（士業法対応の証跡保護）。
 ALTER TABLE operator_takeover_logs ENABLE ROW LEVEL SECURITY;
--- 一般ユーザー向けポリシーは作らず、service_role のみアクセス可
 
 -- messenger_links
 ALTER TABLE messenger_links ENABLE ROW LEVEL SECURITY;
@@ -474,7 +475,8 @@ ALTER TABLE inquiries ENABLE ROW LEVEL SECURITY;
 CREATE POLICY inquiries_self_select ON inquiries FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY inquiries_self_insert ON inquiries FOR INSERT WITH CHECK (auth.uid() = user_id);
 
--- content_embeddings（service_role のみ）
+-- content_embeddings: RLSは有効、ポリシーは意図的に作らない（service_role 専用）。
+-- 一般ユーザーから embedding を直接参照する用途はなく、検索は match_content RPC 経由で行う。
 ALTER TABLE content_embeddings ENABLE ROW LEVEL SECURITY;
 
 -- consent_logs
@@ -482,7 +484,9 @@ ALTER TABLE consent_logs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY consent_logs_self_select ON consent_logs FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY consent_logs_self_insert ON consent_logs FOR INSERT WITH CHECK (auth.uid() = user_id);
 
--- webhook_logs（service_role のみ）
+-- webhook_logs: RLSは有効、ポリシーは意図的に作らない（service_role 専用）。
+-- Komoju/Messenger Webhook 受信処理が UNIQUE(source, external_event_id) で
+-- idempotency を担保するための内部テーブルで、一般ユーザーがアクセスする用途はない。
 ALTER TABLE webhook_logs ENABLE ROW LEVEL SECURITY;
 
 -- =============================================================================
