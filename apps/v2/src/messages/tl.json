@@ -9,6 +9,20 @@
     "ctaPrimary": "Mag-login gamit ang Facebook",
     "ctaSecondary": "Alamin pa"
   },
+  "login": {
+    "heading": "Mag-sign in",
+    "subheading": "Mag-sign in gamit ang iyong Facebook account",
+    "facebookButton": "Magpatuloy gamit ang Facebook",
+    "switchLanguage": "Wika",
+    "supportLink": "Makipag-ugnayan sa suporta",
+    "supportText": "May problema sa pag-sign in?"
+  },
+  "loginErrors": {
+    "fbDenied": "Kinansela ang pag-login sa Facebook. Pakisubukang muli.",
+    "fbFailed": "Nabigo ang pag-login sa Facebook. Pakisubukang muli mamaya.",
+    "callbackFailed": "Nabigo ang pagproseso ng sign-in.",
+    "tooManyAttempts": "Maraming beses na nabigo ang sign-in. Pakikontak ang suporta."
+  },
   "common": {
     "loading": "Naglo-load...",
     "error": "May naganap na error"

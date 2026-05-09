@@ -61,11 +61,14 @@
 - [ ] `(authed)` route group の layout で session ガード
 - [ ] `lib/env/validate.ts`（必須 env 検証、起動時エラー化）
 
-#### B-2. 認証フロー（Facebook OAuth）
-- [ ] `lib/supabase/{client,server,admin}.ts` 作成（cookie domain は §6-6 仕様）
-- [ ] `app/[locale]/login/page.tsx`（`signInWithOAuth` 呼出）
-- [ ] `app/auth/callback/route.ts`（access_denied エラー処理含む）
-- [ ] handle_new_user trigger を補完する `ensureProfile()` ヘルパー
+#### B-2. 認証フロー（Facebook OAuth）✅ 完了
+- [x] `lib/supabase/{client,server,admin}.ts` 作成（cookie domain は §6-6 仕様）
+- [x] `app/[locale]/login/page.tsx`（`signInWithOAuth` 呼出）+ login-form / error-banner / language-switcher
+- [x] `app/auth/callback/route.ts`（access_denied エラー処理含む、HttpOnly cookie で失敗カウント管理）
+- [x] handle_new_user trigger を補完する `ensureProfile()` ヘルパー（PK 違反 23505 を捕捉して冪等化）
+- [x] `lib/auth/redirect-validator.ts` + 12 テストケース（5攻撃ベクトル含む）
+- [x] vitest テスト基盤
+- [ ] **将来 TODO**: 実機 Supabase 接続後、`supabase gen types typescript` で `src/types/database.ts` を全テーブル網羅版に置換（現状は W2 で必要な profiles/consent_logs/admin_roles のみ手書き）
 
 #### B-3. 利用規約同意フロー＋同意ログ
 - [ ] migration 002: `profiles.onboarded_at` 追加 + `consent_logs` UNIQUE(user_id, document_type, version) + 関連 INDEX
@@ -92,6 +95,7 @@
 #### B-7. Sentry 接続
 - [ ] `sentry.client.config.ts` / `sentry.server.config.ts` / `sentry.edge.config.ts` / `instrumentation.ts`
 - [ ] `beforeSend` で PII を除去するフィルター（ユーザー発話・メールアドレス等）
+- [ ] `app/auth/callback/route.ts` の `console.warn` / `console.error` を `Sentry.captureMessage` / `Sentry.captureException` に置換（B-2 で残した監視 TODO）
 
 #### B-8. UI: 「無料開放中」バッジ
 - [ ] `components/layout/free-trial-badge.tsx`（feature flag false 時のみ表示）

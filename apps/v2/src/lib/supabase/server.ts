@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import type { Database } from "@/types/database";
 
 function getCookieDomain(): string | undefined {
   const url = process.env.NEXT_PUBLIC_APP_URL;
@@ -16,7 +17,7 @@ export async function createClient() {
   const cookieStore = await cookies();
   const cookieDomain = getCookieDomain();
 
-  return createServerClient(
+  return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {

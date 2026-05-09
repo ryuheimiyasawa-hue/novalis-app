@@ -9,6 +9,20 @@
     "ctaPrimary": "Facebookでログイン",
     "ctaSecondary": "もっと詳しく"
   },
+  "login": {
+    "heading": "ログイン",
+    "subheading": "Facebookアカウントでログインしてください",
+    "facebookButton": "Facebookでログイン",
+    "switchLanguage": "言語",
+    "supportLink": "サポートに連絡",
+    "supportText": "ログインできない場合は"
+  },
+  "loginErrors": {
+    "fbDenied": "Facebookログインがキャンセルされました。もう一度お試しください。",
+    "fbFailed": "Facebookログインに失敗しました。時間を置いて再度お試しください。",
+    "callbackFailed": "ログイン処理に失敗しました。",
+    "tooManyAttempts": "ログインに連続して失敗しました。サポートにお問い合わせください。"
+  },
   "common": {
     "loading": "読み込み中...",
     "error": "エラーが発生しました"

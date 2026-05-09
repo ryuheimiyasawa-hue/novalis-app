@@ -9,6 +9,20 @@
     "ctaPrimary": "Login with Facebook",
     "ctaSecondary": "Learn more"
   },
+  "login": {
+    "heading": "Sign in",
+    "subheading": "Sign in with your Facebook account",
+    "facebookButton": "Continue with Facebook",
+    "switchLanguage": "Language",
+    "supportLink": "Contact support",
+    "supportText": "Trouble signing in?"
+  },
+  "loginErrors": {
+    "fbDenied": "Facebook login was cancelled. Please try again.",
+    "fbFailed": "Facebook login failed. Please try again later.",
+    "callbackFailed": "Sign-in processing failed.",
+    "tooManyAttempts": "Sign-in has failed several times. Please contact support."
+  },
   "common": {
     "loading": "Loading...",
     "error": "An error occurred"
