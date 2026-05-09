@@ -17,12 +17,29 @@ W2 のリリース計画上の位置: プランファイル §12 W2「認証・i
 6. **オンボーディングフロー**: 都道府県＋市区町村 必須入力、利用規約同意
 7. **認可レイヤー**: `requireAuth` / `requireOnboarded` / `requireAdmin` / `requireEditor`
 8. **3言語の利用規約・プラポリ ドラフト版**（弁護士監修は並行作業）
+9. **Feature flag 基盤**: `NEXT_PUBLIC_PAYMENT_ENABLED`（後述 §6-5）— W2 ではすべての paywall 判定に関わるが、デフォルト false で UI/API は無効化
 
 W2 で実装しないもの（後続フェーズ）:
 - AI チャット（W4-W5）
-- 課金（W6）
+- 課金 UI / Komoju 統合（**W2 では実装しない、リリース後しばらくは無料開放のため**。スキーマと feature flag だけ用意し、将来 flag を true に切替えるだけで起動できる構成にする）
 - Messenger Bot（W7）
 - オペレーターモード（W7）
+
+---
+
+## 0-bis. ドメイン構成（2026-05-07 確定）
+
+| サービス | URL | リポジトリ | 役割 |
+|---|---|---|---|
+| LP | `https://novalis.ph/` | 別リポジトリ `novalis-ph`（既デプロイ） | 静的サイト、サービス案内、登録誘導 |
+| 本サービス | `https://app.novalis.ph/` | 本リポジトリ `apps/v2/` | PWA、認証、Web チャット、管理画面 |
+| API | `https://app.novalis.ph/api/*` | 同上 | Route Handler |
+
+**設計上の影響**:
+- Facebook OAuth callback URL: `https://app.novalis.ph/api/auth/callback`
+- `NEXT_PUBLIC_APP_URL=https://app.novalis.ph`
+- 認証 Cookie の domain: **`app.novalis.ph` 専用**（後述 §6-6）
+- LP → 登録フロー: LP の CTA から `https://app.novalis.ph/[locale]/login` へ単純遷移（CORS 不要、cross-origin リダイレクトのみ）
 
 ---
 
@@ -59,6 +76,20 @@ W2 で実装しないもの（後続フェーズ）:
 
 **確定**: 利用規約に「18歳以上限定」明記。データモデルに生年月日カラムは追加しない。
 
+### Q4. 認証 Cookie の domain は app.novalis.ph 専用 vs .novalis.ph どちら？
+
+**確定**: **`app.novalis.ph` 専用**（Cookie の Domain 属性は付けない、または `app.novalis.ph` 明示）
+
+**理由**:
+- LP（`novalis.ph`）は静的サイトとして独立、個人化 UI（マイページ等）は持たない
+- LP に脆弱性が見つかった場合に認証 Cookie が漏れるリスクを排除
+- 将来 LP に個人化 UI を足したくなったら、その時点で `.novalis.ph` への昇格を検討（ユーザーは再ログインだけで対応可能）
+- Supabase Auth の Cookie は HttpOnly + Secure + SameSite=Lax が既定。これに加えて Domain を `app.novalis.ph` に固定
+
+**具体的な実装**:
+- Supabase Auth の cookie option で `domain: "app.novalis.ph"` を指定（本番のみ。開発は `localhost`）
+- `lib/supabase/{client,server}.ts` で env から domain を読む（`NEXT_PUBLIC_APP_URL` から派生）
+
 ### Q3. 利用規約の改訂時、既存ユーザーの再同意フローは？
 
 **確定**:
@@ -82,6 +113,27 @@ ALTER TABLE profiles
 - 非 NULL: 完了済み
 
 理由: `prefecture_code = ''` を空文字判定するより、オンボーディング完了フラグを別カラムで持つ方が（1）アプリ層の判定がシンプル、（2）将来的にオンボーディング項目が増えても拡張しやすい。
+
+### 2-1-bis. 決済関連テーブル（無料開放中の扱い）
+
+W1 で作成済みの `subscriptions`, `bank_transfer_pending`, `webhook_logs` は **W2 では INSERT/UPDATE しない**。スキーマだけ温存し、`NEXT_PUBLIC_PAYMENT_ENABLED=true` に切替えるタイミングで利用開始する。
+
+**W2 でのアプリ側の扱い**:
+- すべての paywall 判定箇所で **`process.env.NEXT_PUBLIC_PAYMENT_ENABLED !== "true"` のとき早期 return で全許可**
+- `subscriptions` テーブルには触れない（`profiles` に `plan` カラムは追加しない、テーブル間の参照を増やさない）
+- UI のヘッダー or 設定画面に「**無料開放中**」バッジを常時表示（i18n 対応、後で flag を切替えた時に自動で消える）
+- Welcome Trial の `trial_started_at` / `trial_ends_at` は profiles に保存し続ける（将来 flag 切替時に「あなたの Trial は X 日まで有効」表示に使う）
+
+**Migration 002 内容（W2）**:
+```sql
+ALTER TABLE profiles
+  ADD COLUMN onboarded_at TIMESTAMPTZ;
+
+ALTER TABLE consent_logs
+  ADD CONSTRAINT consent_logs_uniq UNIQUE (user_id, document_type, version);
+
+CREATE INDEX idx_consent_logs_user_doc ON consent_logs(user_id, document_type, consented_at DESC);
+```
 
 ### 2-2. consent_logs（既存スキーマ §4-2 に定義済み、変更不要）
 
@@ -146,7 +198,7 @@ export const CURRENT_PRIVACY_VERSION = "1.0.0";
 |---|---|---|---|
 | `/api/auth/callback` | GET | Facebook OAuth コールバック（Supabase Auth が処理） | なし（OAuth flow） |
 | `/api/messenger/webhook` | GET/POST | Messenger 認証 + 受信（**W7 で実装、W2 では proxy.ts の許可リストにだけ追加**） | 内部実装 |
-| `/api/komoju/webhook` | POST | Komoju Webhook（**W6 で実装、W2 では許可リストにだけ追加**） | 内部実装 |
+| ~~`/api/komoju/webhook`~~ | POST | **W2 ではホワイトリストに追加しない**。`NEXT_PUBLIC_PAYMENT_ENABLED=true` に切替えるフェーズ（W7 以降）で proxy.ts に追加 | — |
 
 ### 3-2. 認証必須 API（W2 で実装するもののみ）
 
@@ -157,6 +209,15 @@ export const CURRENT_PRIVACY_VERSION = "1.0.0";
 | `/api/profile/onboard` | POST | requireAuth | オンボーディング完了処理（位置情報を確定し `onboarded_at` を NOW() に） | 10/min |
 | `/api/consent` | POST | requireAuth | 利用規約・プラポリ同意の記録（`document_type`, `version`, `language` 受領） | 10/min |
 | `/api/consent/me` | GET | requireAuth | 自身の最新同意状態取得（terms/privacy のバージョン確認用） | 60/min |
+
+### 3-2-bis. W2 で実装しない決済系 API（将来の TODO）
+
+| ルート | フェーズ | 概要 |
+|---|---|---|
+| `/api/komoju/webhook` | W7+（flag 切替時） | Komoju 決済 Webhook |
+| `/api/subscriptions/checkout` | W7+ | Komoju Checkout セッション作成 |
+| `/api/subscriptions/me` | W7+ | 自身のサブスク状態取得 |
+| `/api/usage/me` | W7+（flag 切替時） | 月次利用カウンタ取得 |
 
 ### 3-3. リクエスト/レスポンスのスキーマ（Zod 定義）
 
@@ -262,28 +323,34 @@ proxy.ts: /api/* と /admin/* は NextResponse.next() で素通し ← H1
 
 ### 6-2. 認可マトリクス（W2 範囲）
 
-| ルート | 公開 | session 必要 | 同意必要 | onboard 必要 | admin |
-|---|:---:|:---:|:---:|:---:|:---:|
-| `/[locale]` (ランディング) | ✓ | | | | |
-| `/[locale]/articles/*` | ✓ | | | | |
-| `/[locale]/restaurants/*` | ✓ | | | | |
-| `/[locale]/legal/*` | ✓ | | | | |
-| `/[locale]/login` | ✓ | | | | |
-| `/[locale]/consent` | | ✓ | | | |
-| `/[locale]/onboard` | | ✓ | ✓ | | |
-| `/[locale]/chat` (W5 で実装) | | ✓ | ✓ | ✓ | |
-| `/[locale]/settings` | | ✓ | ✓ | ✓ | |
-| `/[locale]/inquiry/*` (W5) | | ✓ | ✓ | ✓ | |
-| `/admin/*` | | ✓ | ✓ | ✓ | ✓ |
-| `/api/auth/callback` | ✓ | | | | |
-| `/api/messenger/webhook` | ✓ | | | | (内部署名検証) |
-| `/api/komoju/webhook` | ✓ | | | | (内部署名検証) |
-| `/api/profile/me` GET | | ✓ | | | |
-| `/api/profile/me` PATCH | | ✓ | ✓ | | |
-| `/api/profile/onboard` | | ✓ | ✓ | | |
-| `/api/consent` | | ✓ | | | |
-| `/api/consent/me` | | ✓ | | | |
-| `/api/admin/*` | | ✓ | ✓ | ✓ | ✓ |
+「Pay flag」列は `NEXT_PUBLIC_PAYMENT_ENABLED=true` のときのみ追加でチェックすることを示す（W2 ではすべての行で false 想定、追加チェック無効）。
+
+| ルート | 公開 | session 必要 | 同意必要 | onboard 必要 | admin | Pay flag |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| `/[locale]` (ランディング) | ✓ | | | | | |
+| `/[locale]/articles/*` | ✓ | | | | | |
+| `/[locale]/restaurants/*` | ✓ | | | | | |
+| `/[locale]/legal/*` | ✓ | | | | | |
+| `/[locale]/login` | ✓ | | | | | |
+| `/[locale]/consent` | | ✓ | | | | |
+| `/[locale]/onboard` | | ✓ | ✓ | | | |
+| `/[locale]/chat` (W5 で実装) | | ✓ | ✓ | ✓ | | △ |
+| `/[locale]/settings` | | ✓ | ✓ | ✓ | | |
+| `/[locale]/inquiry/*` (W5) | | ✓ | ✓ | ✓ | | |
+| `/[locale]/subscription` (W7+) | | ✓ | ✓ | ✓ | | ✓ |
+| `/admin/*` | | ✓ | ✓ | ✓ | ✓ | |
+| `/api/auth/callback` | ✓ | | | | | |
+| `/api/messenger/webhook` | ✓ | | | | (内部署名検証) | |
+| `/api/profile/me` GET | | ✓ | | | | |
+| `/api/profile/me` PATCH | | ✓ | ✓ | | | |
+| `/api/profile/onboard` | | ✓ | ✓ | | | |
+| `/api/consent` | | ✓ | | | | |
+| `/api/consent/me` | | ✓ | | | | |
+| `/api/admin/*` | | ✓ | ✓ | ✓ | ✓ | |
+| `/api/komoju/webhook` (W7+) | ✓ | | | | (内部署名検証) | ✓ |
+| `/api/subscriptions/*` (W7+) | | ✓ | ✓ | ✓ | | ✓ |
+
+**△ チャット**: flag false のときは Welcome Trial / 月3回制限を適用しない（無制限利用）。flag true のときはプランファイル §6-2 のフローを適用。
 
 ### 6-3. テナント越境防止
 
@@ -330,6 +397,91 @@ export async function requireOperatorRole() {
 1. ユーザー（運営者本人）が Facebook OAuth でログイン
 2. Supabase ダッシュボードから手動で SQL: `INSERT INTO admin_roles (user_id, role) VALUES ('<your-uuid>', 'admin');`
 3. 以降は管理画面の `/admin/users` から他のロール付与可能（W3 で実装）
+
+### 6-5. Feature flag: NEXT_PUBLIC_PAYMENT_ENABLED
+
+**経営判断**: リリース後しばらくは全機能無料。Komoju 本番審査を行わず、課金 UI/API も実装しない。
+
+**flag の扱い**:
+
+| flag 値 | デフォルト | アプリ動作 |
+|---|:---:|---|
+| `false` または未設定 | ✓ | 全ユーザー全機能無制限。Welcome Trial カウンタも無視。「無料開放中」バッジ常時表示。`/[locale]/subscription` ルートは 404 |
+| `true` | | プランファイル §6-2 / §6-3 / §6-4 のフロー（trial/月3回制限/購入導線/Komoju webhook）を有効化 |
+
+**実装規約**:
+- `lib/payment/is-payment-enabled.ts` に1関数だけ用意し、すべての paywall 判定箇所はこれを参照する
+- API ルート: flag false なら `requireConsent()` まではチェック、その後の plan/usage チェックは早期 return で全許可
+- UI: `<PaymentEnabled>...</PaymentEnabled>` ラッパーコンポーネントで囲い、flag 依存の UI 要素を一括管理
+- ヘッダー or 設定画面に **`<FreeTrialBadge />`** （flag false のとき表示、true で自動非表示）
+
+**flag 切替時のチェックリスト**（W7 完了後 or 一定 MAU 達成時に実行する想定）:
+1. Komoju 本番アカウント審査通過確認
+2. Stripe Webhook → Komoju Webhook の url 設定（`https://app.novalis.ph/api/komoju/webhook`）
+3. proxy.ts の公開ホワイトリストに `/api/komoju/webhook` を追加
+4. 利用規約に「料金体系」セクションを追加した新バージョン発行
+5. 全既存ユーザーへ規約改訂の再同意要求（既存の §1 Q3 フロー）
+6. `NEXT_PUBLIC_PAYMENT_ENABLED=true` をプロダクションに設定
+7. 月初の chat_usage カウンタを全員 0 リセット（lazy reset で問題ないが、明示）
+8. ヘッダーから「無料開放中」バッジが消えることを確認
+
+### 6-6. Cookie domain 設定
+
+| 環境 | domain | 理由 |
+|---|---|---|
+| 本番 | `app.novalis.ph` 専用（subdomain 共有しない） | LP 経由の Cookie 漏洩リスク回避 |
+| 開発 | `localhost` | デフォルト |
+| プレビュー (Vercel) | `*.vercel.app` のデプロイ URL | プレビュー環境ごとに独立 |
+
+**実装**: `lib/supabase/server.ts` の `createServerClient` の cookie option に下記:
+```ts
+const url = new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000");
+const cookieDomain = url.hostname === "localhost" ? undefined : url.hostname;
+// → 本番: "app.novalis.ph"、開発: undefined
+```
+
+その他の Cookie 属性:
+- `Secure: true`（本番）
+- `HttpOnly: true`
+- `SameSite: "Lax"`（OAuth リダイレクトで失われないように）
+
+### 6-7. Facebook OAuth 設定
+
+**Meta App 側の設定（ユーザー側作業）**:
+- App Domains: `app.novalis.ph`
+- Site URL: `https://app.novalis.ph`
+- Valid OAuth Redirect URIs:
+  - `https://app.novalis.ph/api/auth/callback` （本番）
+  - `https://<vercel-preview-url>/api/auth/callback` （プレビュー、必要に応じ追加）
+  - `http://localhost:3000/api/auth/callback` （開発）
+- 必要 permission: `email`, `public_profile`（`pages_messaging` は W7 で別途）
+
+**Supabase Dashboard 側の設定**:
+- Auth → Providers → Facebook を有効化
+- App ID, App Secret を入力
+- Redirect URL を Supabase が自動生成する `https://<project-ref>.supabase.co/auth/v1/callback` を Meta App の OAuth Redirect URIs にも追加
+
+**コード側**:
+```ts
+// app/[locale]/login/page.tsx
+const supabase = createBrowserClient();
+await supabase.auth.signInWithOAuth({
+  provider: "facebook",
+  options: {
+    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback`,
+    scopes: "email,public_profile",
+  },
+});
+```
+
+### 6-8. CORS
+
+**結論**: W2 では CORS 設定不要。
+
+理由:
+- LP（`novalis.ph`）と本サービス（`app.novalis.ph`）はリンク遷移のみで通信しない
+- LP から `app.novalis.ph` の API を fetch する用途は現状無し
+- 将来必要になったら、Next.js Route Handler で `Access-Control-Allow-Origin: https://novalis.ph` を許可する形で追加
 
 ---
 
@@ -389,6 +541,24 @@ export async function requireOperatorRole() {
 **対処**:
 - `INSERT INTO consent_logs ... ON CONFLICT (user_id, document_type, version) DO NOTHING` で冪等化
 - UNIQUE 制約: `UNIQUE(user_id, document_type, version)` を migration 002 で追加
+
+### S9. Feature flag 切替（false → true）
+
+**シナリオ**: 数ヶ月後 `NEXT_PUBLIC_PAYMENT_ENABLED=false → true` に切替える時、既存ユーザー全員のチャット履歴・Trial 期限・カウンタが急に paywall に当たる。
+
+**影響**:
+- Trial 期限切れ（登録 30 日以上経過）のユーザーは即時 4 回目以降を拒否される
+- 「無料だったのに突然有料化された」と SNS で反発される可能性
+
+**対処**:
+1. flag 切替の **少なくとも 30 日前**に利用規約改訂版を発行し、料金体系セクションを追記
+2. 全ユーザーに再同意要求（既存 §1 Q3 のフロー）— 同意しないユーザーは従来通り無料閲覧のみ可能
+3. flag 切替時に **`profiles.trial_started_at = NOW()` を全員一斉 UPDATE**（migration スクリプトで実行）→ 切替日から 30 日間は全員無料 Trial 扱いにし、ソフトランディング
+4. ヘッダーバナー「○月○日から有料化します。詳しくはこちら」を切替 14 日前から表示
+
+**W2 で実装すべきこと**:
+- flag false 時に Welcome Trial カウンタを表示しない（混乱防止）
+- flag 切替時の再 trial 発動が可能になるよう、`profiles.trial_started_at` の UPDATE 権限は service_role のみに限定（既に RLS で保護済み）
 
 ### S8. 利用規約改訂時の既存ユーザー大量同時アクセス
 
@@ -472,11 +642,18 @@ SELECT plan(6);
 
 ## 10. 未確定事項
 
+### 解決済み（2026-05-07）
+- ~~Cookie domain~~ → `app.novalis.ph` 専用に確定（§6-6）
+- ~~Komoju 本番審査~~ → 当面行わない、`NEXT_PUBLIC_PAYMENT_ENABLED=false` で全機能無料開放（§6-5）
+
+### 残る未確定事項
 1. **Facebook OAuth permission**: `email` permission を必須にするか任意にするか（任意でも `profiles.email` は NULL 許容済み）
 2. **管理者初期登録の手順**: Supabase ダッシュボードから手動 SQL で良いか、それとも CLI スクリプト化するか
 3. **規約改訂時のサマリー表示**: 規約改訂で「変更点要約」を専用テーブル or markdown front-matter で持つか
 4. **Sentry のデータマスキング**: ユーザー発話・PII を Sentry に送らない設定（`beforeSend` で除去）の具体的フィルター条件
 5. **言語スイッチャーをフォーム画面で非表示にするか**: S2 の対処で「非表示にする」を推奨したが、UX 観点で要確認
+6. **Feature flag 切替タイミング**: W7 完了後 vs 一定 MAU 達成後（例: MAU 1,000 以上）vs 経営判断のみ
+7. **「無料開放中」バッジのコピー**: 3言語版でどう書くか（ja「無料開放中」/ en「Free during launch」/ tl「Libre sa launch period」 等）
 
 ---
 
