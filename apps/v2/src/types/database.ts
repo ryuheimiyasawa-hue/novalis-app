@@ -18,6 +18,7 @@ export type Database = {
           trial_started_at: string;
           trial_ends_at: string;
           onboarded_at: string | null;
+          age_verified: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -33,6 +34,7 @@ export type Database = {
           trial_started_at?: string;
           trial_ends_at: string;
           onboarded_at?: string | null;
+          age_verified?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -45,6 +47,7 @@ export type Database = {
           prefecture_code: string;
           city_name: string;
           onboarded_at: string | null;
+          age_verified: boolean;
           updated_at: string;
         }>;
         Relationships: [];
@@ -53,22 +56,22 @@ export type Database = {
         Row: {
           id: string;
           user_id: string;
-          document_type: "terms" | "privacy";
-          version: string;
-          language: string;
+          terms_version: string;
+          privacy_version: string;
+          age_verified: boolean;
           consented_at: string;
         };
         Insert: {
           id?: string;
           user_id: string;
-          document_type: "terms" | "privacy";
-          version: string;
-          language: string;
+          terms_version: string;
+          privacy_version: string;
+          age_verified: boolean;
           consented_at?: string;
         };
         Update: Partial<{
-          version: string;
-          language: string;
+          terms_version: string;
+          privacy_version: string;
         }>;
         Relationships: [];
       };

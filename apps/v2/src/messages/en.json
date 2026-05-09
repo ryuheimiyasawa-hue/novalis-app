@@ -23,6 +23,21 @@
     "callbackFailed": "Sign-in processing failed.",
     "tooManyAttempts": "Sign-in has failed several times. Please contact support."
   },
+  "onboarding": {
+    "heading": "Welcome to Novalis",
+    "subheading": "Please agree to the following before continuing.",
+    "termsLabel": "I agree to the Terms of Service",
+    "privacyLabel": "I agree to the Privacy Policy",
+    "ageLabel": "I am 18 years of age or older",
+    "viewTerms": "Read the Terms",
+    "viewPrivacy": "Read the Privacy Policy",
+    "submit": "Agree and continue",
+    "error": "Could not record your consent. Please try again."
+  },
+  "legal": {
+    "termsTitle": "Terms of Service",
+    "privacyTitle": "Privacy Policy"
+  },
   "common": {
     "loading": "Loading...",
     "error": "An error occurred"

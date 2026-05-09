@@ -72,6 +72,29 @@
 
 ---
 
+## 2026-05-09 W2 B-3 で得た学び
+
+### Lesson 6: vitest の `clearAllMocks` vs `resetAllMocks`
+
+**事象**: `beforeEach(() => vi.clearAllMocks())` を使ったところ、前のテストで設定した `mockReturnValueOnce` の queue が次のテストに持ち越され、5番目のテストが意図と違う mock 値を消費して fail。`clearAllMocks` は call history のみクリア、queue は残る仕様。
+
+**根本対処**: mock の implementation/queue ごと初期化したい場合は **`vi.resetAllMocks()`** を使う。実装も含めて完全にリセットされる（vi.restoreAllMocks は元の実装を復元するため、vi.fn() 系の mock では使えない）。
+
+**適用基準**: vitest を使う際、`beforeEach` でデフォルトは `resetAllMocks()`。`clearAllMocks` を使うのは「mock の implementation は据置きで、call history だけクリアしたい」明確な意図がある場合のみ。
+
+### Lesson 7: middleware (proxy.ts) で DB クエリは性能 anti-pattern
+
+**事象**: ユーザー指示で proxy.ts に `profiles.onboarded_at` チェックを追加。毎リクエストで `getUser()` + `profiles select` の 2 DB round-trip が発生する設計になった。本来 middleware は edge で動く軽量レイヤで、DB アクセスは layout / page で行う方が安全。
+
+**やむを得ず採用した設計**: ユーザーが多層防御の第1層を proxy に置く方針を明示したため。コードに `// Phase 2 で JWT claim 化等で最適化予定` のコメントを残し、tasks/todo.md にも記録。
+
+**適用基準**: middleware で DB アクセスを書くときは:
+1. 本当に middleware でなければならないか確認（layout でも済むケースが多い）
+2. やる場合は fail-open ポリシー（DB エラーで全ユーザーを締め出さない）
+3. JWT claim や short-lived cookie cache での回避策を Phase 2 タスクに記録
+
+---
+
 ## テンプレート: 新しい教訓を追加するときの形式
 
 ```markdown

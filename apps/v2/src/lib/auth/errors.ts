@@ -1,8 +1,4 @@
-export type AuthErrorCode =
-  | "UNAUTHORIZED"
-  | "FORBIDDEN"
-  | "STALE_CONSENT"
-  | "ONBOARDING_REQUIRED";
+export type AuthErrorCode = "UNAUTHORIZED" | "FORBIDDEN";
 
 export class AuthError extends Error {
   status: number;
@@ -12,10 +8,6 @@ export class AuthError extends Error {
     super(message ?? code);
     this.name = "AuthError";
     this.code = code;
-    this.status =
-      code === "UNAUTHORIZED" ? 401 :
-      code === "STALE_CONSENT" ? 412 :
-      code === "ONBOARDING_REQUIRED" ? 409 :
-      403;
+    this.status = code === "UNAUTHORIZED" ? 401 : 403;
   }
 }

@@ -23,6 +23,21 @@
     "callbackFailed": "Nabigo ang pagproseso ng sign-in.",
     "tooManyAttempts": "Maraming beses na nabigo ang sign-in. Pakikontak ang suporta."
   },
+  "onboarding": {
+    "heading": "Maligayang pagdating sa Novalis",
+    "subheading": "Mangyaring sumang-ayon sa sumusunod bago magpatuloy.",
+    "termsLabel": "Sumasang-ayon ako sa Mga Tuntunin ng Serbisyo",
+    "privacyLabel": "Sumasang-ayon ako sa Patakaran sa Privacy",
+    "ageLabel": "Ako ay 18 taong gulang o mas matanda",
+    "viewTerms": "Basahin ang Mga Tuntunin",
+    "viewPrivacy": "Basahin ang Patakaran sa Privacy",
+    "submit": "Sumang-ayon at magpatuloy",
+    "error": "Hindi maitala ang iyong pagsang-ayon. Pakisubukang muli."
+  },
+  "legal": {
+    "termsTitle": "Mga Tuntunin ng Serbisyo",
+    "privacyTitle": "Patakaran sa Privacy"
+  },
   "common": {
     "loading": "Naglo-load...",
     "error": "May naganap na error"

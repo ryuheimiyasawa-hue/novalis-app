@@ -61,6 +61,10 @@
 - [ ] `(authed)` route group の layout で session ガード
 - [ ] `lib/env/validate.ts`（必須 env 検証、起動時エラー化）
 
+#### Phase 2 持ち越し（W2 中に発見、本フェーズでは対応しない）
+- [ ] proxy.ts の `checkOnboarded` を JWT custom claim or short-lived cookie cache に切替（毎リクエスト DB 往復を回避）
+- [ ] proxy.ts / api/consent の `console.warn`/`console.error` を Sentry 化（B-7 で）
+
 #### B-2. 認証フロー（Facebook OAuth）✅ 完了
 - [x] `lib/supabase/{client,server,admin}.ts` 作成（cookie domain は §6-6 仕様）
 - [x] `app/[locale]/login/page.tsx`（`signInWithOAuth` 呼出）+ login-form / error-banner / language-switcher
