@@ -32,7 +32,30 @@
     "viewTerms": "Basahin ang Mga Tuntunin",
     "viewPrivacy": "Basahin ang Patakaran sa Privacy",
     "submit": "Sumang-ayon at magpatuloy",
-    "error": "Hindi maitala ang iyong pagsang-ayon. Pakisubukang muli."
+    "error": "Hindi maitala ang iyong pagrerehistro. Pakisubukang muli.",
+    "locationHeading": "Saan ka nakatira",
+    "prefectureLabel": "Prefecture",
+    "prefectureSelectPlaceholder": "Pumili",
+    "cityLabel": "Lungsod / Ward (opsyonal)",
+    "cityPlaceholder": "hal. Shibuya"
+  },
+  "welcomeModal": {
+    "heading": "Maligayang pagdating",
+    "subheading": "Pumili ng iyong wika",
+    "ja": "日本語",
+    "en": "English",
+    "tl": "Tagalog",
+    "skip": "Laktawan"
+  },
+  "dashboard": {
+    "headerLogo": "Novalis",
+    "greeting": "Maligayang pagdating, {name}",
+    "freeBadge": "Libre sa launch period",
+    "comingSoon": "Malapit nang dumating",
+    "comingSoonBody": "Ilalabas sa mga yugto ang mga artikulo at konsultasyon sa AI chat.",
+    "footerTerms": "Tuntunin",
+    "footerPrivacy": "Privacy",
+    "footerLanguage": "Wika"
   },
   "legal": {
     "termsTitle": "Mga Tuntunin ng Serbisyo",

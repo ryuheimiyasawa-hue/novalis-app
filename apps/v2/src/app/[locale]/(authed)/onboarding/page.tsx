@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { hasLocale } from "next-intl";
 import { routing } from "@/lib/i18n/routing";
@@ -5,7 +6,12 @@ import {
   CURRENT_TERMS_VERSION,
   CURRENT_PRIVACY_VERSION,
 } from "@/lib/legal/versions";
+import {
+  PREFERRED_LANGUAGE_COOKIE,
+  parsePreferredLanguage,
+} from "@/lib/i18n/preferred-language-cookie";
 import { OnboardingForm } from "./onboarding-form";
+import { WelcomeModal } from "./welcome-modal";
 
 export default async function OnboardingPage({
   params,
@@ -23,8 +29,15 @@ export default async function OnboardingPage({
     namespace: "onboarding",
   });
 
+  const cookieStore = await cookies();
+  const stored = parsePreferredLanguage(
+    cookieStore.get(PREFERRED_LANGUAGE_COOKIE)?.value,
+  );
+  const showWelcomeModal = stored === null;
+
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
+      <WelcomeModal currentLocale={safeLocale} initialShow={showWelcomeModal} />
       <div className="max-w-xl w-full space-y-6">
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-bold">{t("heading")}</h1>
@@ -44,6 +57,11 @@ export default async function OnboardingPage({
             viewPrivacy: t("viewPrivacy"),
             submit: t("submit"),
             error: t("error"),
+            locationHeading: t("locationHeading"),
+            prefectureLabel: t("prefectureLabel"),
+            prefectureSelectPlaceholder: t("prefectureSelectPlaceholder"),
+            cityLabel: t("cityLabel"),
+            cityPlaceholder: t("cityPlaceholder"),
           }}
         />
       </div>

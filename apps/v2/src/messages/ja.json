@@ -32,7 +32,30 @@
     "viewTerms": "利用規約を読む",
     "viewPrivacy": "プライバシーポリシーを読む",
     "submit": "同意して始める",
-    "error": "同意の記録に失敗しました。もう一度お試しください。"
+    "error": "登録の記録に失敗しました。もう一度お試しください。",
+    "locationHeading": "お住まいの地域",
+    "prefectureLabel": "都道府県",
+    "prefectureSelectPlaceholder": "選択してください",
+    "cityLabel": "市区町村（任意）",
+    "cityPlaceholder": "例: 渋谷区"
+  },
+  "welcomeModal": {
+    "heading": "ようこそ",
+    "subheading": "ご利用言語を選択してください",
+    "ja": "日本語",
+    "en": "English",
+    "tl": "Tagalog",
+    "skip": "スキップ"
+  },
+  "dashboard": {
+    "headerLogo": "Novalis",
+    "greeting": "ようこそ {name} さん",
+    "freeBadge": "現在無料開放中",
+    "comingSoon": "準備中",
+    "comingSoonBody": "記事閲覧やAIチャット相談の機能を順次公開予定です。",
+    "footerTerms": "利用規約",
+    "footerPrivacy": "プライバシーポリシー",
+    "footerLanguage": "言語"
   },
   "legal": {
     "termsTitle": "利用規約",

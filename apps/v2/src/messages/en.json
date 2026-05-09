@@ -32,7 +32,30 @@
     "viewTerms": "Read the Terms",
     "viewPrivacy": "Read the Privacy Policy",
     "submit": "Agree and continue",
-    "error": "Could not record your consent. Please try again."
+    "error": "Could not record your registration. Please try again.",
+    "locationHeading": "Where do you live",
+    "prefectureLabel": "Prefecture",
+    "prefectureSelectPlaceholder": "Select",
+    "cityLabel": "City / Ward (optional)",
+    "cityPlaceholder": "e.g. Shibuya"
+  },
+  "welcomeModal": {
+    "heading": "Welcome",
+    "subheading": "Choose your language",
+    "ja": "日本語",
+    "en": "English",
+    "tl": "Tagalog",
+    "skip": "Skip"
+  },
+  "dashboard": {
+    "headerLogo": "Novalis",
+    "greeting": "Welcome, {name}",
+    "freeBadge": "Free during launch",
+    "comingSoon": "Coming soon",
+    "comingSoonBody": "Articles and AI chat consultations will be released in stages.",
+    "footerTerms": "Terms",
+    "footerPrivacy": "Privacy",
+    "footerLanguage": "Language"
   },
   "legal": {
     "termsTitle": "Terms of Service",

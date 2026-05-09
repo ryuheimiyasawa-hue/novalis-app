@@ -63,7 +63,8 @@
 
 #### Phase 2 持ち越し（W2 中に発見、本フェーズでは対応しない）
 - [ ] proxy.ts の `checkOnboarded` を JWT custom claim or short-lived cookie cache に切替（毎リクエスト DB 往復を回避）
-- [ ] proxy.ts / api/consent の `console.warn`/`console.error` を Sentry 化（B-7 で）
+- [ ] proxy.ts / api/consent / api/onboarding の `console.warn`/`console.error` を Sentry 化（B-7 で）
+- [ ] dashboard の display_name NULL 時のフォールバック表示改善（"ようこそ さん" を回避、locale 別に「ゲスト」等の表示に）
 
 #### B-2. 認証フロー（Facebook OAuth）✅ 完了
 - [x] `lib/supabase/{client,server,admin}.ts` 作成（cookie domain は §6-6 仕様）
