@@ -64,5 +64,11 @@
   "common": {
     "loading": "Loading...",
     "error": "An error occurred"
+  },
+  "chat": {
+    "disclaimer": "This is general information. Please consult a professional for your specific situation.",
+    "escalation": "Your question requires professional judgment based on your specific situation. We recommend consulting an expert. Novalis-affiliated professionals are listed below.",
+    "piiBlock": "Personal information (residence card number, passport number, phone number, email, etc.) cannot be sent through chat. Please rephrase your question without including personal information.",
+    "tooLong": "Your message is too long. Please keep it under 2000 characters."
   }
 }

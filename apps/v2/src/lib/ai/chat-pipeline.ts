@@ -6,10 +6,10 @@ import {
 } from "./whitelist-keywords";
 import { classifyIndividualLLM } from "./whitelist-llm";
 import {
-  ANSWER_DISCLAIMER,
-  ESCALATION_MESSAGE,
-  PII_BLOCK_MESSAGE,
-  TOO_LONG_MESSAGE,
+  getAnswerDisclaimer,
+  getEscalationMessage,
+  getPiiBlockMessage,
+  getTooLongMessage,
 } from "./disclaimers";
 
 // Maximum user input length. Set conservatively to prevent prompt
@@ -104,7 +104,7 @@ export async function processChat(input: {
     return {
       kind: "blocked",
       reason: "empty",
-      text: TOO_LONG_MESSAGE[input.locale], // shared "please rephrase" copy
+      text: getTooLongMessage(input.locale), // shared "please rephrase" copy
     };
   }
   if (trimmed.length > MAX_INPUT_CHARS) {
@@ -114,7 +114,7 @@ export async function processChat(input: {
     return {
       kind: "blocked",
       reason: "too_long",
-      text: TOO_LONG_MESSAGE[input.locale],
+      text: getTooLongMessage(input.locale),
     };
   }
 
@@ -128,7 +128,7 @@ export async function processChat(input: {
     return {
       kind: "blocked",
       reason: "pii",
-      text: PII_BLOCK_MESSAGE[input.locale],
+      text: getPiiBlockMessage(input.locale),
       piiTypes: summary.types,
     };
   }
@@ -142,7 +142,7 @@ export async function processChat(input: {
     return {
       kind: "escalate",
       reason: "keyword",
-      text: ESCALATION_MESSAGE[input.locale],
+      text: getEscalationMessage(input.locale),
       detail: `kw:${kwHit.keyword}`,
     };
   }
@@ -156,7 +156,7 @@ export async function processChat(input: {
     return {
       kind: "escalate",
       reason: "llm_failsafe",
-      text: ESCALATION_MESSAGE[input.locale],
+      text: getEscalationMessage(input.locale),
       detail: `failsafe:${llm.failsafeError ?? "unknown"}`,
     };
   }
@@ -167,7 +167,7 @@ export async function processChat(input: {
     return {
       kind: "escalate",
       reason: "llm_individual",
-      text: ESCALATION_MESSAGE[input.locale],
+      text: getEscalationMessage(input.locale),
       detail: llm.reason,
     };
   }
@@ -187,7 +187,7 @@ export async function processChat(input: {
     return {
       kind: "escalate",
       reason: "llm_failsafe",
-      text: ESCALATION_MESSAGE[input.locale],
+      text: getEscalationMessage(input.locale),
       detail: `generate_error:${message.slice(0, 200)}`,
     };
   }
@@ -200,7 +200,7 @@ export async function processChat(input: {
     return {
       kind: "escalate",
       reason: "safety_block",
-      text: ESCALATION_MESSAGE[input.locale],
+      text: getEscalationMessage(input.locale),
       detail: "finishReason=SAFETY",
     };
   }
@@ -221,7 +221,7 @@ export async function processChat(input: {
   return {
     kind: "answer",
     text: maskedText,
-    disclaimer: ANSWER_DISCLAIMER[input.locale],
+    disclaimer: getAnswerDisclaimer(input.locale),
     meta: {
       model: answer.model,
       tokensIn: answer.tokensIn,
