@@ -5,6 +5,7 @@ import { AuthError } from "@/lib/auth/errors";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { ok, fail } from "@/lib/api/response";
 import { ArticleUpdateSchema } from "@/lib/admin/schemas";
+import { revalidateArticles } from "@/lib/cache/revalidate-content";
 import type { Database } from "@/types/database";
 
 type ArticleUpdate = Database["public"]["Tables"]["articles"]["Update"];
@@ -103,6 +104,9 @@ export async function PATCH(
     return fail("INTERNAL_ERROR");
   }
   if (!data) return fail("NOT_FOUND");
+  // Always invalidate detail (slug may have changed, status may have
+  // toggled draft<->published) plus the index pages.
+  revalidateArticles({ slug: data.slug });
   return ok(data);
 }
 
@@ -121,10 +125,21 @@ export async function DELETE(
   if (!UuidSchema.safeParse(id).success) return fail("INVALID_INPUT", "id");
 
   const admin = getAdminClient();
+
+  // Capture slug before delete so we can invalidate the detail page
+  // alongside the index. Best-effort: if the row is already gone we
+  // still revalidate the index.
+  const { data: target } = await admin
+    .from("articles")
+    .select("slug")
+    .eq("id", id)
+    .maybeSingle();
+
   const { error } = await admin.from("articles").delete().eq("id", id);
   if (error) {
     console.error("[admin/articles DELETE] db error:", error.message);
     return fail("INTERNAL_ERROR");
   }
+  revalidateArticles(target ? { slug: target.slug } : undefined);
   return ok({ id });
 }

@@ -5,6 +5,7 @@ import { AuthError } from "@/lib/auth/errors";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { ok, fail } from "@/lib/api/response";
 import { ExpertUpdateSchema } from "@/lib/admin/schemas";
+import { revalidateExperts } from "@/lib/cache/revalidate-content";
 
 const UuidSchema = z.string().uuid();
 
@@ -76,6 +77,8 @@ export async function PATCH(
     return fail("INTERNAL_ERROR");
   }
   if (!data) return fail("NOT_FOUND");
+  // is_active may have flipped; always invalidate the public list.
+  revalidateExperts();
   return ok(data);
 }
 
@@ -119,5 +122,6 @@ export async function DELETE(
     console.error("[admin/experts DELETE] db error:", error.message);
     return fail("INTERNAL_ERROR");
   }
+  revalidateExperts();
   return ok({ id });
 }

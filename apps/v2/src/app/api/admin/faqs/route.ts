@@ -5,6 +5,7 @@ import { AuthError } from "@/lib/auth/errors";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { ok, fail } from "@/lib/api/response";
 import { FaqCreateSchema, FaqListQuerySchema } from "@/lib/admin/schemas";
+import { revalidateFaqs } from "@/lib/cache/revalidate-content";
 
 const LIST_SELECT =
   "id, category_id, question_ja, prefecture_code, is_published, sort_order, updated_at, created_at, category:categories(id, slug, name_ja)";
@@ -79,5 +80,8 @@ export async function POST(req: NextRequest) {
     console.error("[admin/faqs POST] db error:", error.message);
     return fail("INTERNAL_ERROR");
   }
+  // FAQ visibility flips on is_published; only invalidate when actually
+  // public. Index pages get rebuilt either way (cheap).
+  if (data.is_published) revalidateFaqs();
   return ok(data, { status: 201 });
 }

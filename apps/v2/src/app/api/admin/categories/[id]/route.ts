@@ -9,6 +9,7 @@ import {
   checkDeleteAllowed,
   checkSlugRenameAllowed,
 } from "@/lib/admin/system-category-guard";
+import { revalidateCategories } from "@/lib/cache/revalidate-content";
 
 const UuidSchema = z.string().uuid();
 
@@ -78,6 +79,7 @@ export async function PATCH(
     return fail("INTERNAL_ERROR");
   }
   if (!data) return fail("NOT_FOUND");
+  revalidateCategories({ slug: data.slug });
   return ok(data);
 }
 
@@ -103,7 +105,7 @@ export async function DELETE(
   // future operator inspecting Supabase Dashboard can see the protection.
   const { data: target, error: targetErr } = await admin
     .from("categories")
-    .select("is_system, name_ja")
+    .select("is_system, name_ja, slug")
     .eq("id", id)
     .maybeSingle();
   if (targetErr) {
@@ -149,5 +151,6 @@ export async function DELETE(
     console.error("[admin/categories DELETE] db error:", error.message);
     return fail("INTERNAL_ERROR");
   }
+  revalidateCategories({ slug: target.slug });
   return ok({ id });
 }

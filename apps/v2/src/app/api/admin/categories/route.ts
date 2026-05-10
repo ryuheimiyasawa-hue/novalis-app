@@ -5,6 +5,7 @@ import { AuthError } from "@/lib/auth/errors";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { ok, fail } from "@/lib/api/response";
 import { CategoryCreateSchema } from "@/lib/admin/schemas";
+import { revalidateCategories } from "@/lib/cache/revalidate-content";
 
 export async function GET() {
   try {
@@ -60,5 +61,6 @@ export async function POST(req: NextRequest) {
     console.error("[admin/categories POST] db error:", error.message);
     return fail("INTERNAL_ERROR");
   }
+  revalidateCategories({ slug: data.slug });
   return ok(data, { status: 201 });
 }

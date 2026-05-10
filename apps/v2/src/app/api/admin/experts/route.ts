@@ -5,6 +5,7 @@ import { AuthError } from "@/lib/auth/errors";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { ok, fail } from "@/lib/api/response";
 import { ExpertCreateSchema, ExpertListQuerySchema } from "@/lib/admin/schemas";
+import { revalidateExperts } from "@/lib/cache/revalidate-content";
 
 const LIST_SELECT =
   "id, name, title, prefecture_code, city_name, calendar_url, is_active, created_at";
@@ -71,5 +72,6 @@ export async function POST(req: NextRequest) {
     console.error("[admin/experts POST] db error:", error.message);
     return fail("INTERNAL_ERROR");
   }
+  if (data.is_active) revalidateExperts();
   return ok(data, { status: 201 });
 }

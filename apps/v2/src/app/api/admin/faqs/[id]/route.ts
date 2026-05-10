@@ -5,6 +5,7 @@ import { AuthError } from "@/lib/auth/errors";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { ok, fail } from "@/lib/api/response";
 import { FaqUpdateSchema } from "@/lib/admin/schemas";
+import { revalidateFaqs } from "@/lib/cache/revalidate-content";
 
 const UuidSchema = z.string().uuid();
 
@@ -78,6 +79,9 @@ export async function PATCH(
     return fail("INTERNAL_ERROR");
   }
   if (!data) return fail("NOT_FOUND");
+  // PATCH could flip is_published either way; safest to always invalidate
+  // index. (Cheap; the public page does not exist yet.)
+  revalidateFaqs();
   return ok(data);
 }
 
@@ -101,5 +105,6 @@ export async function DELETE(
     console.error("[admin/faqs DELETE] db error:", error.message);
     return fail("INTERNAL_ERROR");
   }
+  revalidateFaqs();
   return ok({ id });
 }

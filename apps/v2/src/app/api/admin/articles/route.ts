@@ -8,6 +8,7 @@ import {
   ArticleCreateSchema,
   ArticleListQuerySchema,
 } from "@/lib/admin/schemas";
+import { revalidateArticles } from "@/lib/cache/revalidate-content";
 
 const LIST_SELECT =
   "id, category_id, slug, status, title_ja, prefecture_code, published_at, updated_at, created_at, category:categories(id, slug, name_ja)";
@@ -88,5 +89,10 @@ export async function POST(req: NextRequest) {
     console.error("[admin/articles POST] db error:", error.message);
     return fail("INTERNAL_ERROR");
   }
+  // Only revalidate detail page when the new article is published.
+  // Drafts are not exposed publicly so their cache is irrelevant.
+  revalidateArticles(
+    data.status === "published" ? { slug: data.slug } : undefined,
+  );
   return ok(data, { status: 201 });
 }
