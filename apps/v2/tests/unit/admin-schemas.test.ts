@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  ArticleCreateSchema,
+  ArticleListQuerySchema,
+  ArticleUpdateSchema,
   CategoryCreateSchema,
   CategoryUpdateSchema,
+  PrefectureCodeSchema,
   SlugSchema,
 } from "@/lib/admin/schemas";
 
@@ -81,6 +85,116 @@ describe("CategoryUpdateSchema", () => {
   it("rejects an invalid slug update", () => {
     expect(
       CategoryUpdateSchema.safeParse({ slug: "Has Space" }).success,
+    ).toBe(false);
+  });
+});
+
+describe("PrefectureCodeSchema", () => {
+  it("accepts JP-NN", () => {
+    expect(PrefectureCodeSchema.safeParse("JP-13").success).toBe(true);
+    expect(PrefectureCodeSchema.safeParse("JP-01").success).toBe(true);
+    expect(PrefectureCodeSchema.safeParse("JP-47").success).toBe(true);
+  });
+
+  it("rejects malformed values", () => {
+    expect(PrefectureCodeSchema.safeParse("13").success).toBe(false);
+    expect(PrefectureCodeSchema.safeParse("JP13").success).toBe(false);
+    expect(PrefectureCodeSchema.safeParse("jp-13").success).toBe(false);
+    expect(PrefectureCodeSchema.safeParse("JP-1").success).toBe(false);
+    expect(PrefectureCodeSchema.safeParse("US-CA").success).toBe(false);
+  });
+});
+
+describe("ArticleCreateSchema", () => {
+  const valid = {
+    slug: "visa-update-2026",
+    title_ja: "在留資格の更新方法",
+    body_ja: "在留期限の3か月前から申請できます。",
+  };
+
+  it("accepts the minimum required fields", () => {
+    expect(ArticleCreateSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("defaults status omitted (route side stamps 'draft')", () => {
+    const r = ArticleCreateSchema.safeParse(valid);
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.status).toBeUndefined();
+  });
+
+  it("accepts a published status with prefecture/city scope", () => {
+    expect(
+      ArticleCreateSchema.safeParse({
+        ...valid,
+        status: "published",
+        prefecture_code: "JP-13",
+        city_name: "渋谷区",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects an unknown status", () => {
+    expect(
+      ArticleCreateSchema.safeParse({ ...valid, status: "deleted" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects empty body_ja and oversized body", () => {
+    expect(
+      ArticleCreateSchema.safeParse({ ...valid, body_ja: "" }).success,
+    ).toBe(false);
+    expect(
+      ArticleCreateSchema.safeParse({
+        ...valid,
+        body_ja: "x".repeat(50_001),
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects an invalid category UUID", () => {
+    expect(
+      ArticleCreateSchema.safeParse({ ...valid, category_id: "not-a-uuid" })
+        .success,
+    ).toBe(false);
+  });
+
+  it("accepts null category_id", () => {
+    expect(
+      ArticleCreateSchema.safeParse({ ...valid, category_id: null }).success,
+    ).toBe(true);
+  });
+});
+
+describe("ArticleUpdateSchema", () => {
+  it("accepts a status-only update", () => {
+    expect(ArticleUpdateSchema.safeParse({ status: "published" }).success).toBe(
+      true,
+    );
+  });
+
+  it("accepts an empty object (caller rejects with 400)", () => {
+    expect(ArticleUpdateSchema.safeParse({}).success).toBe(true);
+  });
+
+  it("rejects empty title when present", () => {
+    expect(ArticleUpdateSchema.safeParse({ title_ja: "" }).success).toBe(false);
+  });
+});
+
+describe("ArticleListQuerySchema", () => {
+  it("accepts no filters", () => {
+    expect(ArticleListQuerySchema.safeParse({}).success).toBe(true);
+  });
+
+  it("rejects bogus status", () => {
+    expect(
+      ArticleListQuerySchema.safeParse({ status: "deleted" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects bogus category_id", () => {
+    expect(
+      ArticleListQuerySchema.safeParse({ category_id: "not-uuid" }).success,
     ).toBe(false);
   });
 });

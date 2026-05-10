@@ -31,3 +31,51 @@ export const CategoryUpdateSchema = z.object({
   sort_order: z.number().int().min(0).max(9999).optional(),
 });
 export type CategoryUpdateInput = z.infer<typeof CategoryUpdateSchema>;
+
+// ---------- shared helpers ----------
+
+// JIS X 0401 (`JP-NN`). Used for prefecture-scoped articles, faqs, experts.
+export const PrefectureCodeSchema = z
+  .string()
+  .regex(/^JP-\d{2}$/, "expected JP-NN (e.g. JP-13)");
+
+const ArticleStatusEnum = z.enum(["draft", "published", "archived"]);
+
+// ---------- articles ----------
+
+export const ArticleCreateSchema = z.object({
+  category_id: z.string().uuid().nullable().optional(),
+  slug: SlugSchema,
+  status: ArticleStatusEnum.optional(), // defaults DB-side to 'draft'
+  title_ja: z.string().min(1).max(200),
+  title_en: z.string().max(200).nullable().optional(),
+  title_tl: z.string().max(200).nullable().optional(),
+  body_ja: z.string().min(1).max(50_000),
+  body_en: z.string().max(50_000).nullable().optional(),
+  body_tl: z.string().max(50_000).nullable().optional(),
+  prefecture_code: PrefectureCodeSchema.nullable().optional(),
+  city_name: z.string().max(100).nullable().optional(),
+});
+export type ArticleCreateInput = z.infer<typeof ArticleCreateSchema>;
+
+export const ArticleUpdateSchema = z.object({
+  category_id: z.string().uuid().nullable().optional(),
+  slug: SlugSchema.optional(),
+  status: ArticleStatusEnum.optional(),
+  title_ja: z.string().min(1).max(200).optional(),
+  title_en: z.string().max(200).nullable().optional(),
+  title_tl: z.string().max(200).nullable().optional(),
+  body_ja: z.string().min(1).max(50_000).optional(),
+  body_en: z.string().max(50_000).nullable().optional(),
+  body_tl: z.string().max(50_000).nullable().optional(),
+  prefecture_code: PrefectureCodeSchema.nullable().optional(),
+  city_name: z.string().max(100).nullable().optional(),
+});
+export type ArticleUpdateInput = z.infer<typeof ArticleUpdateSchema>;
+
+// Whitelist of fields the admin list can sort on. Prevents SQL injection
+// via the `?sort=` query param and keeps the list endpoint deterministic.
+export const ArticleListQuerySchema = z.object({
+  status: ArticleStatusEnum.optional(),
+  category_id: z.string().uuid().optional(),
+});

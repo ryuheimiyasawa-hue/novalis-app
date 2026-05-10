@@ -20,7 +20,7 @@ const SECTIONS = [
     title: "記事",
     description:
       "生活情報・行政手続案内などの記事を作成・公開します。markdown で執筆。",
-    status: "C-4 で実装",
+    status: "C-4 実装済",
   },
   {
     href: "/admin/faqs",
