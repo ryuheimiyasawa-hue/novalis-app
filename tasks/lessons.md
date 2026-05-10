@@ -175,6 +175,61 @@
 - ランタイム挙動に影響する「特殊データ」マーカー（system / featured / locked 等）は **DB 列**に置く。コード定数は最後の手段
 - 例外: 完全に固定で外部標準（ISO 国コード等）は code で OK
 
+### Lesson 14: W3 全体振り返り — W4 以降に持ち越す設計パターン
+
+**事象**: W3 で 14 commits・113 tests 通過 + RLS 検証合格で完了。後続の W4-W8 で繰り返し再利用すべきパターンを以下に集約する。
+
+**確立した API 設計パターン**:
+- **共通レスポンスエンベロープ** (`lib/api/response.ts`): `ok(data, init?)` / `fail(code, message?)` の2関数。HTTP status は code → status マップで一元管理。**全ての route handler はこの2関数経由**で返すこと。直接 `NextResponse.json` しない。
+- **入力 validation スキーマ分離**: 書き込み (`lib/admin/schemas.ts`) と公開 read (`lib/public/schemas.ts`) を別ファイル。書き込みは「DB 制約と一致」、read は「ユーザー入力を緩く受け付け」が責務。
+- **Path param validation**: 動的ルートは route handler 内で必ず `UuidSchema.safeParse(id)` 等で再検証する（Zod は body しか見ない）。
+- **`HttpsUrlSchema`**: `href` として render される URL は `https://` のみ許可。`javascript:` `data:` を必ず弾く。
+- **`escapeLike()`**: `ILIKE` クエリの wildcards を escape。「ユーザー入力で `%` 1文字でフルスキャン」を防ぐ。
+- **Postgres エラーコード翻訳**: 23505→409 CONFLICT、23503→400 INVALID_INPUT。生 `code` を返さない。
+
+**システムデータ保護の設計判断**:
+- ランタイム挙動を駆動する「特殊データ」マーカーは **DB 列**に置き、API ガードで参照（W3 では `categories.is_system`）。コード定数 (`SYSTEM_CATEGORY_SLUGS`) は使わない（2 source of truth → 必ず drift する）。
+- ガードロジックは **純粋関数**として `lib/admin/<resource>-guard.ts` に切り出し、unit test で網羅する（route 内で書くと Supabase mock が必要になり負担増）。
+
+**ペイロード設計のトレードオフ思考フレーム**:
+- LIST endpoint: `body` `bio` 等の重フィールドを **省略**。サイズを `(1 row size) × (max items per page)` で見積もり、3MB を超えるなら省略。
+- DETAIL endpoint: 全 locale の本文を返す。クライアントは locale 切替時に再 fetch しない（即座に切替）。
+- ページネーション: 数百件規模で必須、数十件規模では省略可（`Array<T>` 直接返却）。endpoint ごとの判断を `tasks/<phase>-design.md` の §3-3 に明記。
+
+**多層防御の構造（W3 で確立）**:
+1. **proxy.ts**: 認証ホワイトリスト（PUBLIC_API_PATHS）
+2. **route handler**: `requireAuth/requireEditor/requireAdmin` でロール検証
+3. **Zod schema**: 入力 validation
+4. **API code**: `status='published'` 等のフィルタ
+5. **RLS policy**: anon/authenticated role の SELECT を DB レベルで制限
+6. **`supabase/tests/rls.test.sql`**: 上記の連続検証
+
+各層が独立。**1層が壊れても他で食い止める**前提で設計する。
+
+**ISR revalidation**:
+- `lib/cache/revalidate-content.ts` の helper を **公開ページ未存在の段階で wire up**。no-op で済む期間の負担はゼロ、retrofitting コストはゼロにできる。
+- write API の最後に `revalidate{Resource}({ slug? })` を呼ぶ。helper 経由なので忘れない限り locale ループも自動で正しい。
+
+**テスト戦略**:
+- 純粋関数（schemas, guards, helpers）は **vitest で 100% カバー**を目指す。Supabase mock は最終手段（重い）。
+- DB-bound な機能（RLS 等）は **SQL test スクリプト**を `supabase/tests/` に置き、Dashboard SQL Editor で実行する運用を設計書に明記。
+- E2E (Playwright) は MVP では設定コスト過大、Phase 2 で「critical user-facing path がある」状態になってから。
+
+**W4 以降で必ず再利用すべきもの**:
+1. `lib/api/response.ts` の `ok` / `fail`
+2. `lib/admin/schemas.ts` のパターン（Create / Update / ListQuery の3スキーマ）
+3. `requireAuth` / `requireEditor` / `requireAdmin` の認可ガード
+4. `lib/cache/revalidate-content.ts` の helper（W4 で chat 履歴ページを追加するなら）
+5. `tests/unit/` の Zod schema 検証パターン（境界値・XSS スキーム拒否・oversized 入力拒否）
+
+**W4 以降で新たに必要になるもの**（W3 では発生しなかった）:
+- 外部 API クライアント（Gemini）の **timeout + retry + circuit breaker**
+- LLM 出力の **post-processing**（disclaimer 付与、危険発言フィルタ）
+- **長時間処理**のキャンセル可能性（streaming で abort 等）
+- **コスト監視**（Gemini 使用量 ログ → 月次集計）
+
+**適用基準**: 新しい route や新しい module を作るとき、本 Lesson の「確立した API 設計パターン」と「多層防御の構造」を**チェックリストとして毎回参照**する。何か逸脱する場合は理由をコード内コメント or design doc に明記。
+
 ### Lesson 13: ISR revalidate は早めに wire up（公開ページ未存在でも no-op で済む）
 
 **事象**: W3 C-8 段階で公開閲覧 UI (`/[locale]/articles` 等) はまだ存在しないが、admin 側の write API に `revalidatePath()` をすべて組み込んだ。後で W4-W5 で公開ページを追加したとき、cache 無効化を retrofitting する必要がない。
