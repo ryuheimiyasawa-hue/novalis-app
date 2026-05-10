@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import type { Locale } from "@/lib/i18n/config";
+import { hasLocale } from "next-intl";
+import { routing } from "@/lib/i18n/routing";
 
 export default async function LandingPage({
   params,
@@ -7,7 +9,10 @@ export default async function LandingPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  setRequestLocale(locale as Locale);
+  const safeLocale = hasLocale(routing.locales, locale)
+    ? locale
+    : routing.defaultLocale;
+  setRequestLocale(safeLocale);
   const t = await getTranslations("landing");
   const tApp = await getTranslations("app");
 
@@ -24,18 +29,18 @@ export default async function LandingPage({
           {t("subtitle")}
         </p>
         <div className="flex gap-3 justify-center pt-4">
-          <button
-            type="button"
+          <Link
+            href={`/${safeLocale}/login`}
             className="px-6 py-3 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700"
           >
             {t("ctaPrimary")}
-          </button>
-          <button
-            type="button"
+          </Link>
+          <Link
+            href={`/${safeLocale}/legal/terms`}
             className="px-6 py-3 rounded-md border border-neutral-300 font-medium hover:bg-neutral-50"
           >
             {t("ctaSecondary")}
-          </button>
+          </Link>
         </div>
       </div>
     </main>
