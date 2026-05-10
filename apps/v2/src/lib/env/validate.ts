@@ -8,6 +8,7 @@ const baseSchema = z.object({
   FACEBOOK_APP_SECRET: z.string().min(1),
   GEMINI_API_KEY: z.string().min(1),
   SENTRY_DSN: z.string().min(1),
+  NEXT_PUBLIC_SENTRY_DSN: z.string().min(1),
   SENTRY_ORG: z.string().min(1),
   SENTRY_PROJECT: z.string().min(1),
   NEXT_PUBLIC_APP_URL: z.string().url(),
