@@ -7,9 +7,17 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const intl = createIntlMiddleware(routing);
 
-// Strict allowlist: only callback paths Supabase OAuth needs.
+// Strict allowlist: only callback paths Supabase OAuth needs and the
+// read-only public content endpoints. Each entry is matched as a path
+// prefix (so /api/articles also covers /api/articles/[slug]).
 // Adding a path here removes its authentication check, so be conservative.
-const PUBLIC_API_PATHS = ["/api/auth/callback"];
+const PUBLIC_API_PATHS = [
+  "/api/auth/callback",
+  "/api/categories",
+  "/api/articles",
+  "/api/faqs",
+  "/api/experts",
+];
 
 const LOCALE_RE = "(ja|en|tl)";
 const PUBLIC_UI_PATTERNS: RegExp[] = [
