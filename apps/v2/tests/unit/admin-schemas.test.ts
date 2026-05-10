@@ -5,6 +5,9 @@ import {
   ArticleUpdateSchema,
   CategoryCreateSchema,
   CategoryUpdateSchema,
+  ExpertCreateSchema,
+  ExpertListQuerySchema,
+  ExpertUpdateSchema,
   FaqCreateSchema,
   FaqListQuerySchema,
   FaqUpdateSchema,
@@ -271,6 +274,96 @@ describe("FaqListQuerySchema", () => {
   it("rejects bogus category_id", () => {
     expect(
       FaqListQuerySchema.safeParse({ category_id: "not-uuid" }).success,
+    ).toBe(false);
+  });
+});
+
+describe("ExpertCreateSchema", () => {
+  const valid = { name: "山田 太郎", title: "弁護士" };
+
+  it("accepts the minimum required fields", () => {
+    expect(ExpertCreateSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("accepts https calendar/avatar URLs", () => {
+    expect(
+      ExpertCreateSchema.safeParse({
+        ...valid,
+        calendar_url: "https://calendly.com/tanaka",
+        avatar_url: "https://cdn.example.com/a.png",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects http (non-TLS) URLs", () => {
+    expect(
+      ExpertCreateSchema.safeParse({
+        ...valid,
+        calendar_url: "http://calendly.com/tanaka",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects javascript: / data: URLs (XSS via href)", () => {
+    expect(
+      ExpertCreateSchema.safeParse({
+        ...valid,
+        calendar_url: "javascript:alert(1)",
+      }).success,
+    ).toBe(false);
+    expect(
+      ExpertCreateSchema.safeParse({
+        ...valid,
+        avatar_url: "data:image/png;base64,AAAA",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects empty name or title", () => {
+    expect(
+      ExpertCreateSchema.safeParse({ ...valid, name: "" }).success,
+    ).toBe(false);
+    expect(
+      ExpertCreateSchema.safeParse({ ...valid, title: "" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects oversized bio", () => {
+    expect(
+      ExpertCreateSchema.safeParse({
+        ...valid,
+        bio_ja: "x".repeat(5_001),
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("ExpertUpdateSchema", () => {
+  it("accepts is_active toggle alone", () => {
+    expect(ExpertUpdateSchema.safeParse({ is_active: false }).success).toBe(
+      true,
+    );
+  });
+
+  it("rejects empty name when present", () => {
+    expect(ExpertUpdateSchema.safeParse({ name: "" }).success).toBe(false);
+  });
+});
+
+describe("ExpertListQuerySchema", () => {
+  it("accepts no filters", () => {
+    expect(ExpertListQuerySchema.safeParse({}).success).toBe(true);
+  });
+
+  it("rejects bogus prefecture", () => {
+    expect(
+      ExpertListQuerySchema.safeParse({ prefecture_code: "JP-XX" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects bogus is_active value", () => {
+    expect(
+      ExpertListQuerySchema.safeParse({ is_active: "yes" }).success,
     ).toBe(false);
   });
 });

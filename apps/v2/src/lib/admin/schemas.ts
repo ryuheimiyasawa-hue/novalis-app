@@ -119,3 +119,52 @@ export const FaqListQuerySchema = z.object({
   category_id: z.string().uuid().optional(),
   is_published: z.enum(["true", "false"]).optional(),
 });
+
+// ---------- experts ----------
+
+// External URLs are restricted to https — calendar_url ends up rendered
+// as an `href` for booking, so we refuse data:/javascript: schemes that
+// could ride along.
+const HttpsUrlSchema = z
+  .string()
+  .url()
+  .refine((u) => u.startsWith("https://"), "must be https://");
+
+export const ExpertCreateSchema = z.object({
+  name: z.string().min(1).max(100),
+  title: z.string().min(1).max(100),
+  specialty_ja: z.string().max(500).nullable().optional(),
+  specialty_en: z.string().max(500).nullable().optional(),
+  specialty_tl: z.string().max(500).nullable().optional(),
+  bio_ja: z.string().max(5_000).nullable().optional(),
+  bio_en: z.string().max(5_000).nullable().optional(),
+  bio_tl: z.string().max(5_000).nullable().optional(),
+  prefecture_code: PrefectureCodeSchema.nullable().optional(),
+  city_name: z.string().max(100).nullable().optional(),
+  avatar_url: HttpsUrlSchema.nullable().optional(),
+  calendar_url: HttpsUrlSchema.nullable().optional(),
+  is_active: z.boolean().optional(),
+});
+export type ExpertCreateInput = z.infer<typeof ExpertCreateSchema>;
+
+export const ExpertUpdateSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  title: z.string().min(1).max(100).optional(),
+  specialty_ja: z.string().max(500).nullable().optional(),
+  specialty_en: z.string().max(500).nullable().optional(),
+  specialty_tl: z.string().max(500).nullable().optional(),
+  bio_ja: z.string().max(5_000).nullable().optional(),
+  bio_en: z.string().max(5_000).nullable().optional(),
+  bio_tl: z.string().max(5_000).nullable().optional(),
+  prefecture_code: PrefectureCodeSchema.nullable().optional(),
+  city_name: z.string().max(100).nullable().optional(),
+  avatar_url: HttpsUrlSchema.nullable().optional(),
+  calendar_url: HttpsUrlSchema.nullable().optional(),
+  is_active: z.boolean().optional(),
+});
+export type ExpertUpdateInput = z.infer<typeof ExpertUpdateSchema>;
+
+export const ExpertListQuerySchema = z.object({
+  prefecture_code: PrefectureCodeSchema.optional(),
+  is_active: z.enum(["true", "false"]).optional(),
+});

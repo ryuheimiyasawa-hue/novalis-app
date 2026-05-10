@@ -33,7 +33,7 @@ const SECTIONS = [
     title: "士業",
     description:
       "弁護士・行政書士・社労士などのエスカレ先を登録します。AI チャットの誘導先。",
-    status: "C-6 で実装",
+    status: "C-6 実装済",
   },
 ];
 
