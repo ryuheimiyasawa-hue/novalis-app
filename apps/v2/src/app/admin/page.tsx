@@ -13,7 +13,7 @@ const SECTIONS = [
     title: "カテゴリ",
     description:
       "コンテンツの分類を管理します。記事と FAQ の親階層になります。",
-    status: "C-3 で実装",
+    status: "C-3 実装済",
   },
   {
     href: "/admin/articles",
