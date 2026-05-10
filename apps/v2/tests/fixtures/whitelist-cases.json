@@ -1,0 +1,204 @@
+[
+  {
+    "input": "私のビザは技術・人文知識・国際業務ですが、転職したら手続きは何が必要ですか？",
+    "locale": "ja",
+    "expected": "escalate",
+    "category": "individual",
+    "notes": "user-owned visa + concrete event (転職)"
+  },
+  {
+    "input": "在留期限が来月切れます。間に合わない場合どうなりますか？",
+    "locale": "ja",
+    "expected": "escalate",
+    "category": "individual",
+    "notes": "expiration tied to user's own visa"
+  },
+  {
+    "input": "夫から生活費を渡されません。離婚したいのですが手続きは？",
+    "locale": "ja",
+    "expected": "escalate",
+    "category": "individual",
+    "notes": "DV-adjacent + 離婚したい"
+  },
+  {
+    "input": "解雇されました。退職金は請求できますか？",
+    "locale": "ja",
+    "expected": "escalate",
+    "category": "individual",
+    "notes": "personal labor incident"
+  },
+  {
+    "input": "私の場合、配偶者ビザから永住権は何年必要ですか？",
+    "locale": "ja",
+    "expected": "escalate",
+    "category": "individual",
+    "notes": "explicit '私の場合'"
+  },
+  {
+    "input": "うちの子の就学手続きはどこですればよいですか？",
+    "locale": "ja",
+    "expected": "escalate",
+    "category": "individual",
+    "notes": "personal child situation"
+  },
+  {
+    "input": "My visa expires next month, can I still apply for an extension?",
+    "locale": "en",
+    "expected": "escalate",
+    "category": "individual",
+    "notes": "ownership + time-bound"
+  },
+  {
+    "input": "My employer hasn't paid overtime for 6 months. Can I sue?",
+    "locale": "en",
+    "expected": "escalate",
+    "category": "individual",
+    "notes": "personal labor incident + can I sue"
+  },
+  {
+    "input": "I want to divorce my husband, what should I do first?",
+    "locale": "en",
+    "expected": "escalate",
+    "category": "individual",
+    "notes": "personal family situation"
+  },
+  {
+    "input": "Magkano ang pension na matatanggap ko sa Japan?",
+    "locale": "tl",
+    "expected": "escalate",
+    "category": "individual",
+    "notes": "personal money question"
+  },
+  {
+    "input": "Tinanggal ako sa trabaho kahapon, may benefits ba ako?",
+    "locale": "tl",
+    "expected": "escalate",
+    "category": "individual",
+    "notes": "personal labor incident"
+  },
+  {
+    "input": "Ako ay over-stay na ng 2 buwan, ano ang gagawin ko?",
+    "locale": "tl",
+    "expected": "escalate",
+    "category": "individual",
+    "notes": "personal immigration emergency"
+  },
+
+  {
+    "input": "在留資格「技術・人文知識・国際業務」の更新には何が必要ですか？",
+    "locale": "ja",
+    "expected": "answer",
+    "category": "general",
+    "notes": "公的制度の説明"
+  },
+  {
+    "input": "日本の社会保険制度の概要を教えてください",
+    "locale": "ja",
+    "expected": "answer",
+    "category": "general"
+  },
+  {
+    "input": "永住権の申請に必要な一般的な書類は何ですか？",
+    "locale": "ja",
+    "expected": "answer",
+    "category": "general"
+  },
+  {
+    "input": "市区町村への転入届はいつまでに出す必要がありますか？",
+    "locale": "ja",
+    "expected": "answer",
+    "category": "general"
+  },
+  {
+    "input": "DV相談ナビとはどのような窓口ですか？",
+    "locale": "ja",
+    "expected": "answer",
+    "category": "general",
+    "notes": "公的窓口の説明、DV キーワードで偽陽性するが MVP 受容"
+  },
+  {
+    "input": "国民年金と厚生年金の違いを教えてください",
+    "locale": "ja",
+    "expected": "answer",
+    "category": "general"
+  },
+  {
+    "input": "How long is a Working Visa valid in Japan?",
+    "locale": "en",
+    "expected": "answer",
+    "category": "general"
+  },
+  {
+    "input": "What documents are typically required for a Spouse Visa renewal?",
+    "locale": "en",
+    "expected": "answer",
+    "category": "general"
+  },
+  {
+    "input": "How does the Japanese pension system work for foreigners in general?",
+    "locale": "en",
+    "expected": "answer",
+    "category": "general"
+  },
+  {
+    "input": "Anong dokumento ang kailangan para mag-apply ng Spouse Visa?",
+    "locale": "tl",
+    "expected": "answer",
+    "category": "general"
+  },
+  {
+    "input": "Ilang taon ba ang validity ng Working Visa sa Japan?",
+    "locale": "tl",
+    "expected": "answer",
+    "category": "general"
+  },
+  {
+    "input": "Paano nag-uumpisa ang health insurance system sa Japan?",
+    "locale": "tl",
+    "expected": "answer",
+    "category": "general"
+  },
+
+  {
+    "input": "在留期限が切れた人はどうなりますか？",
+    "locale": "ja",
+    "expected": "escalate",
+    "category": "gray",
+    "notes": "abstract phrasing but really often a personal ask; conservatively escalate"
+  },
+  {
+    "input": "離婚するときに配偶者ビザはどうなりますか？",
+    "locale": "ja",
+    "expected": "answer",
+    "category": "gray",
+    "notes": "general rule about visa-on-divorce; キーワード '離婚する' で escalate される予定 → LLM stage で再評価期待"
+  },
+  {
+    "input": "生活保護を申請できる外国人の条件は？",
+    "locale": "ja",
+    "expected": "answer",
+    "category": "gray",
+    "notes": "borderline — eligibility rule is general, but askers often have a specific case in mind"
+  },
+  {
+    "input": "Can I apply for permanent residency after 5 years on a working visa?",
+    "locale": "en",
+    "expected": "answer",
+    "category": "gray",
+    "notes": "'can I' fires the keyword but the question is general about the rule"
+  },
+  {
+    "input": "How much overtime is legally required to be paid in Japan?",
+    "locale": "en",
+    "expected": "answer",
+    "category": "gray",
+    "notes": "'how much' triggers but topic is general labor law"
+  },
+  {
+    "input": "Puwede ko bang i-extend ang visa ko habang nasa ibang bansa?",
+    "locale": "tl",
+    "expected": "escalate",
+    "category": "gray",
+    "notes": "general procedure but tied to user's own visa"
+  }
+]
