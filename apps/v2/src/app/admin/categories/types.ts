@@ -6,5 +6,6 @@ export interface CategoryRow {
   name_tl: string;
   icon: string | null;
   sort_order: number;
+  is_system: boolean;
   created_at: string;
 }

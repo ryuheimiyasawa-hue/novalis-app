@@ -17,7 +17,9 @@ export async function GET() {
   const admin = getAdminClient();
   const { data, error } = await admin
     .from("categories")
-    .select("id, slug, name_ja, name_en, name_tl, icon, sort_order, created_at")
+    .select(
+      "id, slug, name_ja, name_en, name_tl, icon, sort_order, is_system, created_at",
+    )
     .order("sort_order", { ascending: true })
     .order("created_at", { ascending: true });
 
@@ -48,7 +50,9 @@ export async function POST(req: NextRequest) {
   const { data, error } = await admin
     .from("categories")
     .insert(body)
-    .select("id, slug, name_ja, name_en, name_tl, icon, sort_order, created_at")
+    .select(
+      "id, slug, name_ja, name_en, name_tl, icon, sort_order, is_system, created_at",
+    )
     .single();
 
   if (error) {

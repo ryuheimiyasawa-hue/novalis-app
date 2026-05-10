@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -175,7 +176,13 @@ export function CategoriesClient({ initial, canMutate }: Props) {
                       setForm((f) => ({ ...f, slug: e.target.value }))
                     }
                     placeholder="visa"
+                    disabled={editing?.is_system ?? false}
                   />
+                  {editing?.is_system && (
+                    <p className="text-xs text-muted-foreground">
+                      システムカテゴリの slug は AI ルーティングと連動しているため変更できません。
+                    </p>
+                  )}
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="space-y-1.5">
@@ -257,13 +264,14 @@ export function CategoriesClient({ initial, canMutate }: Props) {
               <TableHead>名前 (英)</TableHead>
               <TableHead>名前 (Tl)</TableHead>
               <TableHead className="w-32">アイコン</TableHead>
+              <TableHead className="w-24">区分</TableHead>
               <TableHead className="w-32 text-right">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {initial.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground py-6">
+                <TableCell colSpan={8} className="text-center text-muted-foreground py-6">
                   カテゴリがありません
                 </TableCell>
               </TableRow>
@@ -282,6 +290,13 @@ export function CategoriesClient({ initial, canMutate }: Props) {
                 <TableCell className="text-muted-foreground text-xs">
                   {row.icon ?? "-"}
                 </TableCell>
+                <TableCell>
+                  {row.is_system ? (
+                    <Badge variant="secondary">システム</Badge>
+                  ) : (
+                    <Badge variant="outline">追加</Badge>
+                  )}
+                </TableCell>
                 <TableCell className="text-right space-x-2">
                   {canMutate ? (
                     <>
@@ -292,13 +307,15 @@ export function CategoriesClient({ initial, canMutate }: Props) {
                       >
                         編集
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => remove(row)}
-                      >
-                        削除
-                      </Button>
+                      {!row.is_system && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => remove(row)}
+                        >
+                          削除
+                        </Button>
+                      )}
                     </>
                   ) : (
                     <span className="text-xs text-muted-foreground">

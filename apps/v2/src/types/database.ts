@@ -102,6 +102,7 @@ export type Database = {
           name_tl: string;
           icon: string | null;
           sort_order: number;
+          is_system: boolean;
           created_at: string;
         };
         Insert: {
@@ -112,6 +113,7 @@ export type Database = {
           name_tl: string;
           icon?: string | null;
           sort_order?: number;
+          is_system?: boolean;
           created_at?: string;
         };
         Update: Partial<{
@@ -121,6 +123,7 @@ export type Database = {
           name_tl: string;
           icon: string | null;
           sort_order: number;
+          is_system: boolean;
         }>;
         Relationships: [];
       };
