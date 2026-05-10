@@ -26,7 +26,7 @@ const SECTIONS = [
     href: "/admin/faqs",
     title: "FAQ",
     description: "よくある質問の Q/A を管理します。カテゴリ単位で並び順を変更可能。",
-    status: "C-5 で実装",
+    status: "C-5 実装済",
   },
   {
     href: "/admin/experts",

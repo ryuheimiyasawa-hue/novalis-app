@@ -5,6 +5,9 @@ import {
   ArticleUpdateSchema,
   CategoryCreateSchema,
   CategoryUpdateSchema,
+  FaqCreateSchema,
+  FaqListQuerySchema,
+  FaqUpdateSchema,
   PrefectureCodeSchema,
   SlugSchema,
 } from "@/lib/admin/schemas";
@@ -195,6 +198,79 @@ describe("ArticleListQuerySchema", () => {
   it("rejects bogus category_id", () => {
     expect(
       ArticleListQuerySchema.safeParse({ category_id: "not-uuid" }).success,
+    ).toBe(false);
+  });
+});
+
+describe("FaqCreateSchema", () => {
+  const valid = {
+    question_ja: "在留期限を過ぎたらどうなりますか？",
+    answer_ja: "速やかに入管に相談してください。",
+  };
+
+  it("accepts the minimum required fields", () => {
+    expect(FaqCreateSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("accepts published with sort order and prefecture", () => {
+    expect(
+      FaqCreateSchema.safeParse({
+        ...valid,
+        is_published: true,
+        sort_order: 5,
+        prefecture_code: "JP-13",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects empty question_ja or answer_ja", () => {
+    expect(
+      FaqCreateSchema.safeParse({ ...valid, question_ja: "" }).success,
+    ).toBe(false);
+    expect(
+      FaqCreateSchema.safeParse({ ...valid, answer_ja: "" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects oversized answer", () => {
+    expect(
+      FaqCreateSchema.safeParse({
+        ...valid,
+        answer_ja: "x".repeat(10_001),
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("FaqUpdateSchema", () => {
+  it("accepts is_published-only toggle", () => {
+    expect(FaqUpdateSchema.safeParse({ is_published: true }).success).toBe(true);
+  });
+
+  it("rejects empty question when present", () => {
+    expect(FaqUpdateSchema.safeParse({ question_ja: "" }).success).toBe(false);
+  });
+});
+
+describe("FaqListQuerySchema", () => {
+  it("accepts is_published as 'true' / 'false' strings", () => {
+    expect(FaqListQuerySchema.safeParse({ is_published: "true" }).success).toBe(
+      true,
+    );
+    expect(
+      FaqListQuerySchema.safeParse({ is_published: "false" }).success,
+    ).toBe(true);
+  });
+
+  it("rejects boolean primitives (URL params are strings)", () => {
+    expect(FaqListQuerySchema.safeParse({ is_published: true }).success).toBe(
+      false,
+    );
+  });
+
+  it("rejects bogus category_id", () => {
+    expect(
+      FaqListQuerySchema.safeParse({ category_id: "not-uuid" }).success,
     ).toBe(false);
   });
 });

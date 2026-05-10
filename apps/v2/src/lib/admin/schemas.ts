@@ -79,3 +79,43 @@ export const ArticleListQuerySchema = z.object({
   status: ArticleStatusEnum.optional(),
   category_id: z.string().uuid().optional(),
 });
+
+// ---------- faqs ----------
+
+// FAQs are scoped by category and surfaced as Q/A pairs. Answers are
+// plain text (not markdown) — the public UI renders with whitespace
+// preservation, no rich formatting needed.
+export const FaqCreateSchema = z.object({
+  category_id: z.string().uuid().nullable().optional(),
+  question_ja: z.string().min(1).max(500),
+  question_en: z.string().max(500).nullable().optional(),
+  question_tl: z.string().max(500).nullable().optional(),
+  answer_ja: z.string().min(1).max(10_000),
+  answer_en: z.string().max(10_000).nullable().optional(),
+  answer_tl: z.string().max(10_000).nullable().optional(),
+  prefecture_code: PrefectureCodeSchema.nullable().optional(),
+  is_published: z.boolean().optional(),
+  sort_order: z.number().int().min(0).max(9999).optional(),
+});
+export type FaqCreateInput = z.infer<typeof FaqCreateSchema>;
+
+export const FaqUpdateSchema = z.object({
+  category_id: z.string().uuid().nullable().optional(),
+  question_ja: z.string().min(1).max(500).optional(),
+  question_en: z.string().max(500).nullable().optional(),
+  question_tl: z.string().max(500).nullable().optional(),
+  answer_ja: z.string().min(1).max(10_000).optional(),
+  answer_en: z.string().max(10_000).nullable().optional(),
+  answer_tl: z.string().max(10_000).nullable().optional(),
+  prefecture_code: PrefectureCodeSchema.nullable().optional(),
+  is_published: z.boolean().optional(),
+  sort_order: z.number().int().min(0).max(9999).optional(),
+});
+export type FaqUpdateInput = z.infer<typeof FaqUpdateSchema>;
+
+// Coerce 'true' / 'false' query strings into booleans so the URL filter
+// stays human-typeable.
+export const FaqListQuerySchema = z.object({
+  category_id: z.string().uuid().optional(),
+  is_published: z.enum(["true", "false"]).optional(),
+});
