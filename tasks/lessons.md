@@ -95,6 +95,102 @@
 
 ---
 
+## 2026-05-11 W3 設計フェーズで確立した運用ルール
+
+### Lesson 8: admin_roles 直接 SQL 操作の安全プロトコル
+
+**事象**: W3 では `admin_roles` の管理 UI を実装しない（W3 スコープ外、Phase 2 で対応予定）。そのため admin_roles の追加・削除は Supabase Dashboard SQL Editor 経由の直接 SQL 操作になる。**唯一の admin を誤って削除するとサービス管理不能（誰も admin API を叩けなくなり、復旧には service_role 直接介入が必要）**。
+
+**運用ルール**:
+1. **削除前に必ず admin 数をカウント**:
+   ```sql
+   SELECT COUNT(*) FROM admin_roles WHERE role = 'admin';
+   ```
+2. **count が 1 の場合、その唯一の admin を削除しない**（別 admin を先に追加してから削除）
+3. **追加は冪等に**: 必ず `ON CONFLICT (user_id) DO NOTHING` を付ける
+4. **削除前に対象を SELECT で確認**:
+   ```sql
+   SELECT ar.*, p.email FROM admin_roles ar JOIN profiles p ON p.id = ar.user_id WHERE ar.id = '<対象 id>';
+   ```
+5. **作業はトランザクション**: 複数操作なら `BEGIN; ... COMMIT;` で囲む
+
+**適用基準**: admin_roles の Phase 2 UI 実装時に、上記をコード上の guard で強制する（最後の admin チェック関数を `lib/auth/admin-roles-guard.ts` に作る）。
+
+### Lesson 9: 公開 API が service_role 経由でも RLS を“裏で”働かせる
+
+**事象**: W3 C-7 の公開 GET API は実装の都合で service_role (admin client) を使い、コード側で `status='published'` `is_published=true` `is_active=true` を強制している。これは正しく動くが、**コードのフィルタを1か所書き忘れただけで全 draft / 非公開データが流出する**設計。
+
+**根本対処**:
+- migration 001 で各テーブルに `*_public_read` ポリシーを既に張ってある（`articles_public_read USING (status = 'published')` 等）
+- C-9 で `apps/v2/supabase/tests/rls.test.sql` を整備：anon role に切り替えて draft / 非公開 / 非アクティブが返らないことを毎回確認可能
+- 「コードでも DB でも」両層フィルタ。**どちらか片方が壊れても流出しない**多層防御
+
+**適用基準**:
+- 公開 API を新設するときは、対応する RLS ポリシーが既に存在するか先に確認する
+- ない場合は**ポリシーを追加してから**コードを書く（コード側フィルタ忘れの保険）
+- `rls.test.sql` に新エンドポイントの anon SELECT 検証ケースを追加
+
+### Lesson 10: shadcn の Tailwind v4 移行で globals.css は手動更新
+
+**事象**: C-1 で `pnpm dlx shadcn@latest add button card ...` を実行したが、`globals.css` の `@theme` ブロックは更新されなかった（Tailwind v3 想定の自動編集が v4 の `@theme inline` 構文と非互換）。各コンポーネントの `bg-card` `border-border` 等が CSS 変数未定義で transparent に落ち、UI が崩壊した。
+
+**根本対処**:
+- shadcn 公式テンプレ（new-york + neutral）の `globals.css` を**手動全置換**
+- `:root` / `.dark` で oklch ベースの全 CSS 変数を定義
+- `@theme inline` で `--color-*` `--radius-*` を CSS 変数にマップ
+- `@layer base` で `* { @apply border-border outline-ring/50; }` と `body { @apply bg-background text-foreground; }`
+
+**適用基準**:
+- shadcn を Tailwind v4 で使うときは、コンポーネント追加後に `globals.css` の oklch 変数 + `@theme inline` 全セットが揃っているか目視確認
+- 何か CSS が効かない症状が出たら、まず globals.css を疑う（`@theme` ブロックの不整合）
+
+### Lesson 11: Slug 検証は DB の既存値に合わせる（コードで縛らない）
+
+**事象**: W1 で seed した 7 カテゴリのうち `social_ins` `admin_proc` がアンダースコア表記。C-7 で公開 API の `category_slug` query param に `SlugSchema` を適用したところ、kebab-case のみ許可していた regex が `social_ins` を拒否し、フィルタ機能が壊れた。
+
+**根本対処**:
+- `SlugSchema` を `^[a-z0-9]+(?:[_-][a-z0-9]+)*$` に拡張（`-` `_` どちらも区切り文字として許可）
+- DB の現実に validation を合わせる（schema の責務は「DB に格納されている値を受け入れること」）
+- 統一したくなれば後で `UPDATE categories SET slug = REPLACE(slug, '_', '-')` migration（system category guard を一時解除する必要あり）
+
+**適用基準**:
+- 入力 validation regex は seed/既存 DB 値を全パターン通すか **schema 確定前に grep で確認**する
+- 「コードでベストプラクティスを強制」より「現実を受け入れる」を優先（API ユーザーが詰まる方が痛い）
+
+### Lesson 12: システムデータの保護はコードでなく DB 列に置く
+
+**事象**: W3 動作確認中、admin が誤って seed 済みの `visa` カテゴリを削除可能だった（記事 0 件で FK 制約も発火しなかった）。AI ルーティングの根幹が消えるリスクがあった。
+
+**選択肢比較**:
+- A: DB に `is_system BOOLEAN` 列を追加し、API ガードで参照
+- B: コードに `SYSTEM_CATEGORY_SLUGS = [...]` 配列を持つ
+- C: 削除確認ダイアログを強化
+
+**選択肢 A 採用、理由**:
+1. **2 source of truth 回避**: seed slug は migration 001 に既存。コードに同じリストを置くと片方更新事故が必ず起きる
+2. **slug rename 耐性**: rename しても `is_system=true` は残り、コード保護では rename で**サイレント無効化**する
+3. **DB inspection で見える**: 別運用者が SQL Editor で見たとき、protection が data として可視
+
+**適用基準**:
+- ランタイム挙動に影響する「特殊データ」マーカー（system / featured / locked 等）は **DB 列**に置く。コード定数は最後の手段
+- 例外: 完全に固定で外部標準（ISO 国コード等）は code で OK
+
+### Lesson 13: ISR revalidate は早めに wire up（公開ページ未存在でも no-op で済む）
+
+**事象**: W3 C-8 段階で公開閲覧 UI (`/[locale]/articles` 等) はまだ存在しないが、admin 側の write API に `revalidatePath()` をすべて組み込んだ。後で W4-W5 で公開ページを追加したとき、cache 無効化を retrofitting する必要がない。
+
+**根本対処**:
+- `lib/cache/revalidate-content.ts` の helper 4 つ (`revalidateArticles` / `revalidateFaqs` / `revalidateExperts` / `revalidateCategories`) を locale ループ込みで定義
+- admin POST/PATCH/DELETE の成功直後に呼び出し
+- 公開ページが存在しない間は no-op、存在し始めたら自動で動く
+
+**適用基準**:
+- 「ページが無いから revalidate もまだいらない」と後回しにしない
+- helper 関数化しておけば 1〜2 行追加で全 admin route を網羅できる
+- side effect 無視は将来の負債（n 個の admin route を周回することになる）
+
+---
+
 ## テンプレート: 新しい教訓を追加するときの形式
 
 ```markdown
