@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import type { AdminRole } from "@/lib/auth/require-admin";
+import { AdminNavLinks } from "./nav-links";
 
 interface Props {
   role: AdminRole;
@@ -15,9 +16,6 @@ const ITEMS = [
   { href: "/admin/experts", label: "士業" },
 ];
 
-// Server component sidebar for /admin layout. The nav itself doesn't need
-// active-state tracking yet (the W3 admin pages are still flat); when we
-// need it we can split out a small client component reading usePathname().
 export function AdminNav({ role, displayName }: Props) {
   return (
     <aside className="w-60 shrink-0 border-r border-border bg-sidebar text-sidebar-foreground flex flex-col">
@@ -27,18 +25,7 @@ export function AdminNav({ role, displayName }: Props) {
         </Link>
       </div>
       <nav className="flex-1 py-4">
-        <ul className="space-y-1 px-2">
-          {ITEMS.map((item) => (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                className="block px-3 py-2 rounded-md text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              >
-                {item.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <AdminNavLinks items={ITEMS} />
       </nav>
       <div className="px-4 py-3 border-t border-sidebar-border space-y-1">
         {displayName && (
