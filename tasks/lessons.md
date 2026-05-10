@@ -230,6 +230,31 @@
 
 **適用基準**: 新しい route や新しい module を作るとき、本 Lesson の「確立した API 設計パターン」と「多層防御の構造」を**チェックリストとして毎回参照**する。何か逸脱する場合は理由をコード内コメント or design doc に明記。
 
+### Lesson 15: 外部 API quota は live probe で実測する
+
+**事象**: W4 設計書執筆時、Gemini Free tier RPD を「1500」と書いた（公式ドキュメントの旧値か、tier 移行で変更されていた）。D-4 の live probe で実測したところ **RPD は 20**（75 倍小さい）。
+
+**もし発覚が遅れていた場合の経営インパクト**:
+- ベータユーザー 20 人 × 1 日 10 チャット = 200 calls/日
+- Free tier 20/日では 1 人で枯渇 → 全体停止
+- ローンチ初日に致命的事故、ユーザー信頼失墜
+
+**採用した対策**:
+- D-4 段階で `tests/integration/whitelist-live.test.ts` を作成、`RUN_LIVE_GEMINI=1` で実 API を probe → 30 calls 流して RPM 5・RPD 20 を実測
+- 開発時は明示的に opt-in した時のみ実 API を叩く（CI で勝手に消費しない）
+- 設計書 §15 「未確定事項」に正しい数値を記録、Lesson にも転記
+
+**ベータローンチ前夜のチェックリスト**（W7 完了後 + ベータ参加者通知前夜に必ず実施）:
+- [ ] Gemini billing 有効化（Google Cloud Console）
+- [ ] 課金アラート設定: 月 ¥5,000 超で通知メール
+- [ ] 月次予算上限: ¥10,000（hard limit）
+- [ ] API 使用量 dashboard URL を Notion に保存
+- [ ] billing 有効化後に live probe を再走、429 が消えること確認
+
+**適用基準**: 任意の外部 API（Anthropic / OpenAI / Twilio / SendGrid / Komoju 等）で free tier or rate limit がある場合、設計書の数値を信用せず**着手最初の week で必ず live probe**して実測する。実装の前に判定したいなら curl 1 発で十分。
+
+---
+
 **Gemini 2.5 Flash Free tier の実測クォータ (W4 D-4 で発見)**:
 
 - **RPM: 5** （設計書で書いた 15 は誤り）
