@@ -230,6 +230,24 @@
 
 **適用基準**: 新しい route や新しい module を作るとき、本 Lesson の「確立した API 設計パターン」と「多層防御の構造」を**チェックリストとして毎回参照**する。何か逸脱する場合は理由をコード内コメント or design doc に明記。
 
+**Gemini 2.5 Flash Free tier の実測クォータ (W4 D-4 で発見)**:
+
+- **RPM: 5** （設計書で書いた 15 は誤り）
+- **RPD: 20 per model** （= 1日 20 リクエストで枯渇）
+- 4xx 429 のリトライは無効（retryDelay が数十秒、こちらの 500ms backoff では追いつかない）→ `lib/ai/gemini.ts` で 429 を retry 対象から除外、failsafe にエスカレ
+- 開発時は Free tier で 1日 20 calls まで。それ以上必要なら billing 有効化（per-token 課金、smoke 程度なら月 100 円未満）
+- production では billing 必須。クライアントが 429 を見ることは事実上ゼロになる
+- Phase 2 検討: 429 レスポンスの `retryDelay` を parse して、短い (<5s) ものだけ retry する選択肢
+
+**Phase 2 / ベータ運用開始 +1週間後に思い出すべき改善ポイント**:
+
+- **Tagalog 個別助言キーワード拡充**: 現状 `lib/ai/whitelist-keywords.ts` の TL_PATTERNS は 5 件のみ（W4 D-3 時点）。コミュニティの実フレーズに即していない可能性が高い。
+  - 着手タイミング: クローズドベータ参加者 20 名から個別助言系発話 10 件以上を収集してから
+  - 収集方法: `messages.whitelist_decision` JSONB を月次で抽出 → 士業 + Tagalog ネイティブで「これは個別/一般」をラベル付け → KW patterns に追加 + LLM プロンプト調整
+  - 成功基準: fixture を 30 → 50 件に拡張し、偽陰性 0% を Tagalog 単独でも達成
+- **PII detector の Filipino 番号 / 住所**: 同様にベータユーザーから実例が出てから regex 追加。インシデント発生 1 件で `microsoft/presidio` 等のライブラリ導入を検討 (Lesson 12 続編)
+- **Whitelist 偽陰性検知**: 月次サンプリングレビュー UI を Phase 2 で構築し、運用者が「これは個別だった」とフラグ付けできる導線を作る
+
 ### Lesson 13: ISR revalidate は早めに wire up（公開ページ未存在でも no-op で済む）
 
 **事象**: W3 C-8 段階で公開閲覧 UI (`/[locale]/articles` 等) はまだ存在しないが、admin 側の write API に `revalidatePath()` をすべて組み込んだ。後で W4-W5 で公開ページを追加したとき、cache 無効化を retrofitting する必要がない。

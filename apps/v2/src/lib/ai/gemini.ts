@@ -59,15 +59,29 @@ export interface GenerateResult {
   finishReason: string | null;
 }
 
-const RETRYABLE_STATUS = new Set([408, 429, 500, 502, 503, 504]);
+// 429 (RESOURCE_EXHAUSTED) is intentionally NOT retried here. Gemini's
+// quota errors carry retryDelay values measured in tens of seconds —
+// far longer than our exponential backoff window — so re-attempts
+// almost always burn the next attempt the same way. The right answer
+// for the chat pipeline is to fail-safe immediately (escalate to a
+// human) rather than spend 10s pretending we might recover.
+// Live probe in W4 D-4 found Free-tier 2.5-flash RPM = 5; production
+// will run on a paid plan and rarely see 429 at all.
+const RETRYABLE_STATUS = new Set([408, 500, 502, 503, 504]);
 
 function isRetryable(err: unknown): boolean {
   if (err instanceof Error) {
     if (err.name === "AbortError") return false; // caller hit timeout
     // SDK errors carry the HTTP status either on .status or in the message
     const maybeStatus = (err as { status?: number }).status;
-    if (typeof maybeStatus === "number" && RETRYABLE_STATUS.has(maybeStatus)) return true;
-    if (/\b(429|500|502|503|504)\b/.test(err.message)) return true;
+    if (typeof maybeStatus === "number") {
+      if (maybeStatus === 429) return false;
+      if (RETRYABLE_STATUS.has(maybeStatus)) return true;
+    }
+    // Match status digits surrounded by word boundaries OR a quote (the
+    // SDK serializes errors as `"code":429` in the message body).
+    if (/(?:^|[^\d])429(?:[^\d]|$)/.test(err.message)) return false;
+    if (/(?:^|[^\d])(500|502|503|504|408)(?:[^\d]|$)/.test(err.message)) return true;
     if (/network|timeout|fetch failed/i.test(err.message)) return true;
   }
   return false;

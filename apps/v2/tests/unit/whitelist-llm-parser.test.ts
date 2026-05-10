@@ -1,0 +1,154 @@
+import { describe, expect, it, vi, beforeEach } from "vitest";
+import {
+  parseClassifierResponse,
+  classifyIndividualLLM,
+} from "@/lib/ai/whitelist-llm";
+
+// Mock the Gemini transport so the orchestration tests never call the
+// real API. The pure parser tests do not need a mock — they live in
+// their own describe block above.
+vi.mock("@/lib/ai/gemini", () => ({
+  generate: vi.fn(),
+}));
+
+import { generate } from "@/lib/ai/gemini";
+
+beforeEach(() => {
+  vi.resetAllMocks();
+});
+
+describe("parseClassifierResponse", () => {
+  it("returns isIndividual=true for valid {is_individual:true,...} JSON", () => {
+    const r = parseClassifierResponse(
+      '{"is_individual": true, "reason": "user owns the visa"}',
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.isIndividual).toBe(true);
+      expect(r.reason).toBe("user owns the visa");
+    }
+  });
+
+  it("returns isIndividual=false for valid general-info JSON", () => {
+    const r = parseClassifierResponse(
+      '{"is_individual": false, "reason": "asks about general visa rules"}',
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.isIndividual).toBe(false);
+  });
+
+  it("failsafes on completely invalid JSON", () => {
+    const r = parseClassifierResponse("not json at all");
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.failsafe).toBe(true);
+      expect(r.error).toBe("invalid_json");
+    }
+  });
+
+  it("failsafes when is_individual is missing", () => {
+    const r = parseClassifierResponse('{"reason": "missing field"}');
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toMatch(/^schema_violation/);
+  });
+
+  it("failsafes when is_individual is the wrong type", () => {
+    const r = parseClassifierResponse(
+      '{"is_individual": "yes", "reason": "wrong type"}',
+    );
+    expect(r.ok).toBe(false);
+  });
+
+  it("failsafes when reason is empty", () => {
+    const r = parseClassifierResponse(
+      '{"is_individual": true, "reason": ""}',
+    );
+    expect(r.ok).toBe(false);
+  });
+
+  it("failsafes when reason exceeds 500 chars", () => {
+    const r = parseClassifierResponse(
+      `{"is_individual": false, "reason": "${"x".repeat(501)}"}`,
+    );
+    expect(r.ok).toBe(false);
+  });
+});
+
+describe("classifyIndividualLLM (orchestration)", () => {
+  function geminiResult(text: string, tokensIn = 100, tokensOut = 30) {
+    return {
+      text,
+      model: "gemini-2.5-flash",
+      tokensIn,
+      tokensOut,
+      latencyMs: 800,
+      finishReason: "STOP",
+    };
+  }
+
+  it("forwards the message and a JSON-mode config to generate()", async () => {
+    vi.mocked(generate).mockResolvedValueOnce(
+      geminiResult('{"is_individual": false, "reason": "general"}'),
+    );
+    await classifyIndividualLLM("ビザの種類は？", "ja");
+    expect(generate).toHaveBeenCalledWith(
+      "ビザの種類は？",
+      expect.objectContaining({
+        responseMimeType: "application/json",
+        temperature: 0,
+        maxOutputTokens: 200,
+      }),
+    );
+  });
+
+  it("returns isIndividual=true on a clean true response", async () => {
+    vi.mocked(generate).mockResolvedValueOnce(
+      geminiResult('{"is_individual": true, "reason": "personal visa"}'),
+    );
+    const r = await classifyIndividualLLM("My visa expires soon", "en");
+    expect(r.isIndividual).toBe(true);
+    expect(r.failsafe).toBe(false);
+    expect(r.reason).toBe("personal visa");
+    expect(r.tokensIn).toBeGreaterThan(0);
+  });
+
+  it("returns isIndividual=false on a clean false response", async () => {
+    vi.mocked(generate).mockResolvedValueOnce(
+      geminiResult(
+        '{"is_individual": false, "reason": "asks about general rule"}',
+      ),
+    );
+    const r = await classifyIndividualLLM("How long is a working visa?", "en");
+    expect(r.isIndividual).toBe(false);
+    expect(r.failsafe).toBe(false);
+  });
+
+  it("FAILSAFES (escalates) when Gemini returns malformed JSON", async () => {
+    vi.mocked(generate).mockResolvedValueOnce(geminiResult("not json"));
+    const r = await classifyIndividualLLM("ambiguous", "en");
+    expect(r.isIndividual).toBe(true);
+    expect(r.failsafe).toBe(true);
+    expect(r.failsafeError).toBe("invalid_json");
+  });
+
+  it("FAILSAFES (escalates) when Gemini returns valid JSON missing fields", async () => {
+    vi.mocked(generate).mockResolvedValueOnce(
+      geminiResult('{"reason": "lone field"}'),
+    );
+    const r = await classifyIndividualLLM("ambiguous", "en");
+    expect(r.isIndividual).toBe(true);
+    expect(r.failsafe).toBe(true);
+    expect(r.failsafeError).toMatch(/^schema_violation/);
+  });
+
+  it("FAILSAFES (escalates) when generate() throws (timeout, 5xx, network)", async () => {
+    vi.mocked(generate).mockRejectedValueOnce(
+      new Error("upstream 503"),
+    );
+    const r = await classifyIndividualLLM("ambiguous", "en");
+    expect(r.isIndividual).toBe(true);
+    expect(r.failsafe).toBe(true);
+    expect(r.failsafeError).toMatch(/503/);
+    expect(r.tokensIn).toBe(0); // no tokens billed because the call never landed
+  });
+});

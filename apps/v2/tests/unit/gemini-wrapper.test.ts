@@ -61,10 +61,20 @@ describe("generate()", () => {
     delete process.env.GEMINI_MODEL;
   });
 
-  it("retries on a 429 and succeeds on the second attempt", async () => {
+  it("does NOT retry on 429 — Gemini quota delays exceed our backoff window", async () => {
+    // Discovered in W4 D-4 live probe: Gemini's retryDelay for 429 is
+    // tens of seconds, so retrying with our 500ms / 1500ms backoff is
+    // wasted effort. The chat pipeline fail-safes (escalates) instead.
     const fail = Object.assign(new Error("Resource exhausted: 429"), {
       status: 429,
     });
+    generateContentSpy.mockRejectedValueOnce(fail);
+    await expect(generate("hello", { maxAttempts: 3 })).rejects.toThrow(/429/);
+    expect(generateContentSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("still retries on transient 5xx and succeeds on the second attempt", async () => {
+    const fail = Object.assign(new Error("upstream 503"), { status: 503 });
     generateContentSpy
       .mockRejectedValueOnce(fail)
       .mockResolvedValueOnce(ok("recovered"));
@@ -87,10 +97,10 @@ describe("generate()", () => {
   });
 
   it("gives up after maxAttempts and rethrows the last error", async () => {
-    const fail = Object.assign(new Error("upstream 503"), { status: 503 });
+    const fail = Object.assign(new Error("Bad Gateway 502"), { status: 502 });
     generateContentSpy.mockRejectedValue(fail);
     await expect(generate("hello", { maxAttempts: 2 })).rejects.toThrow(
-      /503/,
+      /502/,
     );
     expect(generateContentSpy).toHaveBeenCalledTimes(2);
   });
