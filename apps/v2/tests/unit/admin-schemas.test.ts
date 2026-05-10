@@ -22,12 +22,29 @@ describe("SlugSchema", () => {
     expect(SlugSchema.safeParse("a1b2-c3").success).toBe(true);
   });
 
-  it("rejects uppercase, underscores, leading or trailing hyphens", () => {
+  it("accepts underscores (legacy seeds: social_ins, admin_proc)", () => {
+    expect(SlugSchema.safeParse("social_ins").success).toBe(true);
+    expect(SlugSchema.safeParse("admin_proc").success).toBe(true);
+    expect(SlugSchema.safeParse("a1_b2_c3").success).toBe(true);
+  });
+
+  it("accepts mixed _ and - within a slug", () => {
+    expect(SlugSchema.safeParse("social_ins-2024").success).toBe(true);
+  });
+
+  it("rejects uppercase, leading or trailing separators", () => {
     expect(SlugSchema.safeParse("Visa").success).toBe(false);
-    expect(SlugSchema.safeParse("social_ins").success).toBe(false);
     expect(SlugSchema.safeParse("-visa").success).toBe(false);
+    expect(SlugSchema.safeParse("_visa").success).toBe(false);
     expect(SlugSchema.safeParse("visa-").success).toBe(false);
+    expect(SlugSchema.safeParse("visa_").success).toBe(false);
+  });
+
+  it("rejects consecutive separators", () => {
     expect(SlugSchema.safeParse("visa--ins").success).toBe(false);
+    expect(SlugSchema.safeParse("visa__ins").success).toBe(false);
+    expect(SlugSchema.safeParse("visa-_ins").success).toBe(false);
+    expect(SlugSchema.safeParse("visa_-ins").success).toBe(false);
   });
 
   it("rejects empty and over-length input", () => {

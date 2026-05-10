@@ -1,13 +1,23 @@
 import { z } from "zod";
 
-// Slug rule: lowercase ASCII alphanumerics with hyphens, 1-80 chars.
-// Mirrored on the DB side via `categories.slug TEXT UNIQUE` (raw constraint),
-// the regex enforces URL-safety here so we don't need a normaliser later.
+// Slug rule: lowercase ASCII alphanumerics with hyphens or underscores,
+// 1-80 chars. The legacy seed categories (social_ins, admin_proc) use
+// underscores, so accepting both keeps the public API able to filter on
+// what is actually stored. Kebab-case is preferred for new slugs but the
+// schema does not enforce it — operators can rename later if we want a
+// uniform style.
+//
+// Constraint: slugs cannot start or end with a separator and cannot
+// contain consecutive separators. Mixed _ and - in the same slug is
+// allowed (e.g. social_ins-2024).
 export const SlugSchema = z
   .string()
   .min(1)
   .max(80)
-  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "lowercase letters / digits / hyphens only");
+  .regex(
+    /^[a-z0-9]+(?:[_-][a-z0-9]+)*$/,
+    "lowercase letters / digits, separated by single hyphen or underscore",
+  );
 
 // ---------- categories ----------
 
