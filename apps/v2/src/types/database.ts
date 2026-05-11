@@ -19,6 +19,7 @@ export type Database = {
           trial_ends_at: string;
           onboarded_at: string | null;
           age_verified: boolean;
+          chat_retention_permanent: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -35,6 +36,7 @@ export type Database = {
           trial_ends_at: string;
           onboarded_at?: string | null;
           age_verified?: boolean;
+          chat_retention_permanent?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -48,6 +50,7 @@ export type Database = {
           city_name: string;
           onboarded_at: string | null;
           age_verified: boolean;
+          chat_retention_permanent: boolean;
           updated_at: string;
         }>;
         Relationships: [];
