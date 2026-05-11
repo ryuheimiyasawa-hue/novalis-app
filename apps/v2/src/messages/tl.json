@@ -69,6 +69,26 @@
     "disclaimer": "Ito ay pangkalahatang impormasyon lamang. Mangyaring kumonsulta sa isang propesyonal para sa inyong partikular na sitwasyon.",
     "escalation": "Ang inyong tanong ay nangangailangan ng propesyonal na pag-aaral batay sa inyong partikular na sitwasyon. Inirerekomenda namin na kumonsulta sa isang eksperto. Nasa ibaba ang mga propesyonal na kasama ng Novalis.",
     "piiBlock": "Hindi maaaring ipadala sa chat ang personal na impormasyon (residence card number, passport number, phone number, email, atbp.). Mangyaring isulat muli ang inyong tanong nang walang kasamang personal na impormasyon.",
-    "tooLong": "Masyadong mahaba ang inyong mensahe. Mangyaring panatilihin itong wala pang 2000 karakter."
+    "tooLong": "Masyadong mahaba ang inyong mensahe. Mangyaring panatilihin itong wala pang 2000 karakter.",
+    "ui": {
+      "title": "AI Konsultasyon",
+      "subtitle": "Pangkalahatang tanong tungkol sa visa, social insurance, mga pamamaraan ng gobyerno, at iba pa.",
+      "newConversation": "Magsimula ng bagong usapan",
+      "inputPlaceholder": "I-type ang inyong tanong...",
+      "send": "Ipadala",
+      "stop": "Itigil",
+      "thinking": "Iniisip...",
+      "errorRetry": "Subukan muli",
+      "errorGeneric": "Nabigong magpadala. Subukan muli mamaya.",
+      "errorQuota": "Naubos na ang libreng quota ngayong buwan. Mangyaring mag-upgrade.",
+      "errorAuth": "Mag-sign in muna.",
+      "expertHeading": "Mga inirerekomendang eksperto",
+      "expertSchedule": "Mag-book",
+      "noExperts": "Walang available na eksperto sa ngayon. Subukan muli mamaya.",
+      "citationsHeading": "Mga Sanggunian",
+      "youLabel": "Ikaw",
+      "assistantLabel": "AI Assistant",
+      "systemLabel": "Sistema"
+    }
   }
 }

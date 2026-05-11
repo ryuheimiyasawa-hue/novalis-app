@@ -69,6 +69,26 @@
     "disclaimer": "This is general information. Please consult a professional for your specific situation.",
     "escalation": "Your question requires professional judgment based on your specific situation. We recommend consulting an expert. Novalis-affiliated professionals are listed below.",
     "piiBlock": "Personal information (residence card number, passport number, phone number, email, etc.) cannot be sent through chat. Please rephrase your question without including personal information.",
-    "tooLong": "Your message is too long. Please keep it under 2000 characters."
+    "tooLong": "Your message is too long. Please keep it under 2000 characters.",
+    "ui": {
+      "title": "AI Consultation",
+      "subtitle": "General questions about residence status, social insurance, government procedures and more.",
+      "newConversation": "Start a new conversation",
+      "inputPlaceholder": "Type your question...",
+      "send": "Send",
+      "stop": "Stop",
+      "thinking": "Thinking...",
+      "errorRetry": "Retry",
+      "errorGeneric": "Sending failed. Please try again in a moment.",
+      "errorQuota": "You have used up this month's free quota. Please upgrade.",
+      "errorAuth": "Please sign in.",
+      "expertHeading": "Recommended experts",
+      "expertSchedule": "Book",
+      "noExperts": "No experts available right now. Please try again later.",
+      "citationsHeading": "References",
+      "youLabel": "You",
+      "assistantLabel": "AI Assistant",
+      "systemLabel": "System"
+    }
   }
 }
