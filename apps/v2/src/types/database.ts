@@ -96,6 +96,119 @@ export type Database = {
         }>;
         Relationships: [];
       };
+      conversations: {
+        Row: {
+          id: string;
+          user_id: string;
+          channel: "web" | "messenger";
+          title: string | null;
+          mode: "auto" | "operator";
+          operator_user_id: string | null;
+          operator_started_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          channel: "web" | "messenger";
+          title?: string | null;
+          mode?: "auto" | "operator";
+          operator_user_id?: string | null;
+          operator_started_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<{
+          title: string | null;
+          mode: "auto" | "operator";
+          operator_user_id: string | null;
+          operator_started_at: string | null;
+          updated_at: string;
+        }>;
+        Relationships: [];
+      };
+      messages: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          role: "user" | "assistant" | "operator" | "system";
+          sender_user_id: string | null;
+          content: string;
+          is_escalated: boolean;
+          whitelist_decision: object | null;
+          citations: object;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          conversation_id: string;
+          role: "user" | "assistant" | "operator" | "system";
+          sender_user_id?: string | null;
+          content: string;
+          is_escalated?: boolean;
+          whitelist_decision?: object | null;
+          citations?: object;
+          created_at?: string;
+        };
+        Update: Partial<{
+          content: string;
+          is_escalated: boolean;
+          whitelist_decision: object | null;
+          citations: object;
+        }>;
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey";
+            columns: ["conversation_id"];
+            isOneToOne: false;
+            referencedRelation: "conversations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      chat_usage: {
+        Row: {
+          id: string;
+          user_id: string;
+          period_yyyymm: string;
+          message_count: number;
+          last_reset_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          period_yyyymm: string;
+          message_count?: number;
+          last_reset_at?: string;
+        };
+        Update: Partial<{
+          message_count: number;
+          last_reset_at: string;
+        }>;
+        Relationships: [];
+      };
+      subscriptions: {
+        Row: {
+          id: string;
+          user_id: string;
+          status: string;
+          ends_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          status: string;
+          ends_at?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<{
+          status: string;
+          ends_at: string | null;
+        }>;
+        Relationships: [];
+      };
       categories: {
         Row: {
           id: string;
