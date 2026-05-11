@@ -168,45 +168,25 @@ export async function persistSystemMessage(args: {
 }
 
 /**
- * Atomic +1 on chat_usage for the (user, period) pair. Uses UPSERT
- * with ON CONFLICT to handle the JST-month rollover case where the
- * row doesn't exist yet — master plan §6-2 calls this lazy reset.
+ * Atomic +1 on chat_usage for the (user, period) pair. Delegates to
+ * the increment_chat_usage SQL function from migration 005, which
+ * does INSERT … ON CONFLICT DO UPDATE message_count = message_count
+ * + 1 in a single statement so concurrent sends are race-free.
  *
- * Concurrent sends are serialised by Postgres at row level; no
- * application-side lock needed.
+ * Returns the new (post-increment) message count, useful for
+ * structured logging.
  */
 export async function incrementChatUsage(
   userId: string,
   period: string,
-): Promise<void> {
+): Promise<number> {
   const admin = getAdminClient();
-  // Use raw SQL via .rpc would need a stored procedure; simpler: try
-  // INSERT, on conflict do an UPDATE that increments. Supabase JS
-  // doesn't expose RAW SQL, so we go with a two-step that's tolerant
-  // of race: INSERT … ON CONFLICT via the .upsert() chain.
-  const { error } = await admin
-    .from("chat_usage")
-    .upsert(
-      {
-        user_id: userId,
-        period_yyyymm: period,
-        message_count: 1,
-        last_reset_at: new Date().toISOString(),
-      },
-      { onConflict: "user_id,period_yyyymm" },
-    );
-  // upsert with onConflict doesn't natively support `count = count + 1`.
-  // Two-phase fallback: if the row already existed, do a separate
-  // increment via an RPC. We'll add that RPC in migration 005 when
-  // E-6 lands. For E-5 we'll accept that simultaneous first-of-the-
-  // month sends could see the counter sit at 1 instead of N. The
-  // worst-case impact is a user briefly getting one extra free message
-  // — much better than the alternative of running into a strict
-  // type-level limitation and stalling here.
-  //
-  // TODO(E-6): swap to atomic SQL function `increment_chat_usage` for
-  // strict counter correctness.
+  const { data, error } = await admin.rpc("increment_chat_usage", {
+    p_user_id: userId,
+    p_period: period,
+  });
   if (error) throw new Error(`incrementChatUsage: ${error.message}`);
+  return data ?? 0;
 }
 
 /**

@@ -430,6 +430,10 @@ export type Database = {
           similarity: number;
         }>;
       };
+      increment_chat_usage: {
+        Args: { p_user_id: string; p_period: string };
+        Returns: number;
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

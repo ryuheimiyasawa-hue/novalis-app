@@ -1,0 +1,172 @@
+import { type NextRequest } from "next/server";
+import { z } from "zod";
+import { requireAuth } from "@/lib/auth/require-auth";
+import { AuthError } from "@/lib/auth/errors";
+import { fail } from "@/lib/api/response";
+import { processChatStream, type StreamEvent } from "@/lib/ai/chat-pipeline";
+import { checkChatQuota } from "@/lib/chat/trial-quota";
+import {
+  ConversationForbiddenError,
+  ConversationNotFoundError,
+  persistResult,
+  resolveConversation,
+} from "@/lib/chat/persistence";
+
+// /api/chat/send — W5 production SSE endpoint.
+//
+// Pre-stream guards:
+//   - requireAuth() → 401
+//   - Zod body validation → 400
+//   - checkChatQuota() → 402 QUOTA_EXCEEDED (non-SSE JSON)
+//   - resolveConversation() → 404 / 403 (non-SSE JSON) on bad
+//     desiredConversationId
+//
+// Once these pass we open the SSE stream and emit:
+//   data: {"type":"meta","conversationId":"...","period":"YYYY-MM"}
+//   data: {"type":"token","text":"..."}              (answer only)
+//   ...
+//   data: {"type":"done","kind":"answer","text":"...","disclaimer":"...","citations":[...],"replyMessageId":"...","userMessageId":"...","meta":{...}}
+//
+// For escalate / blocked the stream still opens (so the client gets
+// the same shape) but no tokens are emitted; the final `done` event
+// carries the system message text and reason.
+
+const BodySchema = z.object({
+  message: z.string().min(1).max(2500),
+  locale: z.enum(["ja", "en", "tl"]).default("ja"),
+  conversationId: z.string().uuid().optional(),
+});
+
+const encoder = new TextEncoder();
+function sse(payload: object): Uint8Array {
+  return encoder.encode(`data: ${JSON.stringify(payload)}\n\n`);
+}
+
+export async function POST(req: NextRequest) {
+  // 1. Auth
+  let userId: string;
+  try {
+    const user = await requireAuth();
+    userId = user.id;
+  } catch (e) {
+    if (e instanceof AuthError) return fail(e.code);
+    throw e;
+  }
+
+  // 2. Body
+  let body: z.infer<typeof BodySchema>;
+  try {
+    body = BodySchema.parse(await req.json());
+  } catch (e) {
+    const message = e instanceof z.ZodError ? e.issues[0]?.message : undefined;
+    return fail("INVALID_INPUT", message);
+  }
+
+  // 3. Quota / Trial
+  const quota = await checkChatQuota(userId);
+  if (!quota.decision.allowed) {
+    return fail("RATE_LIMITED", quota.decision.reason);
+  }
+
+  // 4. Conversation
+  let conversationId: string;
+  try {
+    const conv = await resolveConversation(userId, body.conversationId ?? null);
+    conversationId = conv.id;
+  } catch (e) {
+    if (e instanceof ConversationNotFoundError) return fail("NOT_FOUND");
+    if (e instanceof ConversationForbiddenError) return fail("FORBIDDEN");
+    throw e;
+  }
+
+  // 5. Open the SSE stream.
+  const message = body.message;
+  const locale = body.locale;
+  const period = quota.period;
+  const countAgainstQuota = quota.decision.reason === "free_quota";
+
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const send = (event: object) => controller.enqueue(sse(event));
+
+      send({ type: "meta", conversationId, period });
+
+      try {
+        const result = await processChatStream(
+          { message, locale },
+          (e: StreamEvent) => send(e),
+        );
+
+        // Persist the result + bump chat_usage when applicable. The
+        // persistence layer chooses what to write per kind.
+        let messageIds: { userMessageId?: string; replyMessageId?: string } = {};
+        try {
+          messageIds = await persistResult({
+            result,
+            conversationId,
+            userId,
+            userMessage: message,
+            period,
+            countAgainstQuota,
+          });
+        } catch (persistErr) {
+          // Persistence failure shouldn't blow up the response; the
+          // user already got their answer in-stream. Log and continue.
+          console.error(
+            `[chat/send] persist failed: ${persistErr instanceof Error ? persistErr.message : String(persistErr)}`,
+          );
+        }
+
+        // Emit the final event matching the discriminated result kind.
+        if (result.kind === "answer") {
+          send({
+            type: "done",
+            kind: "answer",
+            text: result.text,
+            disclaimer: result.disclaimer,
+            citations: result.citations,
+            meta: result.meta,
+            ...messageIds,
+          });
+        } else if (result.kind === "escalate") {
+          send({
+            type: "done",
+            kind: "escalate",
+            reason: result.reason,
+            text: result.text,
+            ...messageIds,
+          });
+        } else {
+          // blocked
+          send({
+            type: "done",
+            kind: "blocked",
+            reason: result.reason,
+            text: result.text,
+            piiTypes: result.piiTypes ?? [],
+          });
+        }
+      } catch (err) {
+        console.error(
+          `[chat/send] stream error: ${err instanceof Error ? err.message : String(err)}`,
+        );
+        send({
+          type: "done",
+          kind: "error",
+          code: "INTERNAL_ERROR",
+        });
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream; charset=utf-8",
+      "Cache-Control": "no-cache, no-transform",
+      Connection: "keep-alive",
+      "X-Accel-Buffering": "no",
+    },
+  });
+}
