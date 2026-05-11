@@ -211,17 +211,12 @@ export async function retrieveContext(
   // 2. Call the RPC.
   const matchStart = Date.now();
   const admin = getAdminClient();
-  // The RPC isn't typed in our Database<T> yet; we narrow the result
-  // shape at the JS layer.
-  const { data, error } = await admin.rpc(
-    "match_content" as never,
-    {
-      query_embedding: embedded.vector as never,
-      match_language: locale,
-      match_threshold: threshold,
-      match_count: limit,
-    } as never,
-  );
+  const { data, error } = await admin.rpc("match_content", {
+    query_embedding: embedded.vector,
+    match_language: locale,
+    match_threshold: threshold,
+    match_count: limit,
+  });
   const matchLatencyMs = Date.now() - matchStart;
   if (error) {
     throw new Error(`rag match_content failed: ${error.message}`);

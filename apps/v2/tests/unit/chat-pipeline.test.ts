@@ -6,15 +6,44 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // share the gemini wrapper.
 vi.mock("@/lib/ai/gemini", () => ({
   generate: vi.fn(),
+  generateStream: vi.fn(),
+}));
+// Mock the RAG pipeline so retrieval doesn't try to hit the embedding
+// API or Supabase during these unit tests. Tests that care about RAG
+// behaviour override this on a per-test basis.
+vi.mock("@/lib/ai/rag", () => ({
+  retrieveContext: vi.fn(async () => ({
+    contextText: "",
+    citations: [],
+    embedLatencyMs: 0,
+    matchLatencyMs: 0,
+    joinLatencyMs: 0,
+  })),
 }));
 
-import { processChat } from "@/lib/ai/chat-pipeline";
-import { generate } from "@/lib/ai/gemini";
+import {
+  processChat,
+  processChatStream,
+  type StreamEvent,
+} from "@/lib/ai/chat-pipeline";
+import { generate, generateStream } from "@/lib/ai/gemini";
+import { retrieveContext } from "@/lib/ai/rag";
 
 const mockGenerate = vi.mocked(generate);
+const mockGenerateStream = vi.mocked(generateStream);
+const mockRetrieveContext = vi.mocked(retrieveContext);
 
 beforeEach(() => {
   vi.resetAllMocks();
+  // Default retrieveContext: empty (no citations, no context). Tests
+  // that exercise RAG paths override this.
+  mockRetrieveContext.mockResolvedValue({
+    contextText: "",
+    citations: [],
+    embedLatencyMs: 0,
+    matchLatencyMs: 0,
+    joinLatencyMs: 0,
+  });
 });
 
 function classifierResponse(isIndividual: boolean, reason = "test") {
@@ -248,5 +277,173 @@ describe("processChat — system prompt + input wrapping (anti-injection)", () =
       locale: "tl",
     });
     expect(mockGenerate.mock.calls[1][1]?.systemInstruction).toMatch(/Tagalog/);
+  });
+});
+
+describe("processChat — RAG integration", () => {
+  it("forwards retrieved citations onto ChatAnswered.citations", async () => {
+    mockRetrieveContext.mockResolvedValueOnce({
+      contextText:
+        "REFERENCE_BEGIN\n[#1 src=article slug=visa-renewal-basics lang=ja]\n...\nREFERENCE_END",
+      citations: [
+        {
+          source_type: "article",
+          source_id: "art-1",
+          language: "ja",
+          similarity: 0.82,
+          slug: "visa-renewal-basics",
+          title: "在留資格更新の基本手続き",
+          snippet: "...",
+        },
+      ],
+      embedLatencyMs: 420,
+      matchLatencyMs: 80,
+      joinLatencyMs: 20,
+    });
+    mockGenerate
+      .mockResolvedValueOnce(classifierResponse(false))
+      .mockResolvedValueOnce(answerResponse("Visa renewal is processed at..."));
+    const r = await processChat({
+      message: "How long is a working visa valid?",
+      locale: "en",
+    });
+    expect(r.kind).toBe("answer");
+    if (r.kind === "answer") {
+      expect(r.citations).toHaveLength(1);
+      expect(r.citations[0].slug).toBe("visa-renewal-basics");
+      expect(r.meta.ragEmbedMs).toBe(420);
+      expect(r.meta.ragMatchMs).toBe(80);
+      expect(r.meta.ragFailed).toBe(false);
+    }
+  });
+
+  it("prefixes the REFERENCE block before the wrapped user input", async () => {
+    mockRetrieveContext.mockResolvedValueOnce({
+      contextText: "REFERENCE_BEGIN\n[#1 ...]\n...\nREFERENCE_END",
+      citations: [],
+      embedLatencyMs: 100,
+      matchLatencyMs: 50,
+      joinLatencyMs: 10,
+    });
+    mockGenerate
+      .mockResolvedValueOnce(classifierResponse(false))
+      .mockResolvedValueOnce(answerResponse("ok"));
+    await processChat({
+      message: "How long is a working visa valid?",
+      locale: "en",
+    });
+    const answerContents = mockGenerate.mock.calls[1][0] as string;
+    expect(answerContents).toMatch(/REFERENCE_BEGIN/);
+    expect(answerContents.indexOf("REFERENCE_BEGIN")).toBeLessThan(
+      answerContents.indexOf("USER_INPUT_BEGIN"),
+    );
+  });
+
+  it("falls back to context-less generation when RAG throws (does not escalate)", async () => {
+    mockRetrieveContext.mockRejectedValueOnce(new Error("rag match_content failed: ..."));
+    mockGenerate
+      .mockResolvedValueOnce(classifierResponse(false))
+      .mockResolvedValueOnce(answerResponse("Working visas are typically..."));
+    const r = await processChat({
+      message: "How long is a working visa valid?",
+      locale: "en",
+    });
+    expect(r.kind).toBe("answer");
+    if (r.kind === "answer") {
+      expect(r.citations).toEqual([]);
+      expect(r.meta.ragFailed).toBe(true);
+    }
+  });
+
+  it("skips RAG retrieval when the LLM classifier flags the message as individual", async () => {
+    mockGenerate.mockResolvedValueOnce(classifierResponse(true, "personal visa"));
+    const r = await processChat({
+      message: "If a visa expired and the holder did not renew, what happens?",
+      locale: "en",
+    });
+    expect(r.kind).toBe("escalate");
+    // retrieveContext must not have been invoked — gates short-circuit
+    // before the RAG step.
+    expect(mockRetrieveContext).not.toHaveBeenCalled();
+  });
+});
+
+describe("processChatStream", () => {
+  function streamAnswer(
+    text: string,
+    opts: Partial<{ finishReason: string }> = {},
+  ) {
+    // Mock generateStream: pretend the SDK yields the whole text in
+    // one go (the test inspects what onToken receives).
+    mockGenerateStream.mockImplementationOnce(async (_prompt, opts2) => {
+      if (opts2.onToken) opts2.onToken(text);
+      return {
+        text,
+        model: "gemini-2.5-flash",
+        tokensIn: 250,
+        tokensOut: 120,
+        latencyMs: 1800,
+        finishReason: opts.finishReason ?? "STOP",
+      };
+    });
+  }
+
+  it("emits tokens via onEvent and returns the accumulated answer", async () => {
+    mockGenerate.mockResolvedValueOnce(classifierResponse(false));
+    streamAnswer("Working visas are typically 1, 3, or 5 years.");
+    const events: StreamEvent[] = [];
+    const r = await processChatStream(
+      { message: "How long is a working visa?", locale: "en" },
+      (e) => events.push(e),
+    );
+    expect(r.kind).toBe("answer");
+    if (r.kind === "answer") {
+      expect(r.text).toMatch(/Working visas/);
+    }
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe("token");
+    expect(events[0].text).toMatch(/Working visas/);
+  });
+
+  it("does not emit any tokens for an escalate path", async () => {
+    const events: StreamEvent[] = [];
+    const r = await processChatStream(
+      {
+        message: "私のビザは技術ビザですが、転職できますか？",
+        locale: "ja",
+      },
+      (e) => events.push(e),
+    );
+    expect(r.kind).toBe("escalate");
+    expect(events).toEqual([]);
+    expect(mockGenerateStream).not.toHaveBeenCalled();
+  });
+
+  it("escalates when generateStream throws (no tokens emitted)", async () => {
+    mockGenerate.mockResolvedValueOnce(classifierResponse(false));
+    mockGenerateStream.mockRejectedValueOnce(new Error("upstream 503"));
+    const events: StreamEvent[] = [];
+    const r = await processChatStream(
+      { message: "How long is a working visa?", locale: "en" },
+      (e) => events.push(e),
+    );
+    expect(r.kind).toBe("escalate");
+    if (r.kind === "escalate") {
+      expect(r.reason).toBe("llm_failsafe");
+      expect(r.detail).toMatch(/generate_stream_error/);
+    }
+    expect(events).toEqual([]);
+  });
+
+  it("escalates on a Safety block detected via finishReason at stream end", async () => {
+    mockGenerate.mockResolvedValueOnce(classifierResponse(false));
+    streamAnswer("partial", { finishReason: "SAFETY" });
+    const events: StreamEvent[] = [];
+    const r = await processChatStream(
+      { message: "How long is a working visa?", locale: "en" },
+      (e) => events.push(e),
+    );
+    expect(r.kind).toBe("escalate");
+    if (r.kind === "escalate") expect(r.reason).toBe("safety_block");
   });
 });

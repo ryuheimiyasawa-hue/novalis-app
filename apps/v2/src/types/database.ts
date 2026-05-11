@@ -183,7 +183,15 @@ export type Database = {
           published_at: string | null;
           updated_at: string;
         }>;
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "articles_category_id_fkey";
+            columns: ["category_id"];
+            isOneToOne: false;
+            referencedRelation: "categories";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       faqs: {
         Row: {
@@ -229,7 +237,15 @@ export type Database = {
           sort_order: number;
           updated_at: string;
         }>;
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "faqs_category_id_fkey";
+            columns: ["category_id"];
+            isOneToOne: false;
+            referencedRelation: "categories";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       experts: {
         Row: {
@@ -285,7 +301,23 @@ export type Database = {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      match_content: {
+        Args: {
+          query_embedding: number[];
+          match_language: string;
+          match_threshold?: number;
+          match_count?: number;
+        };
+        Returns: Array<{
+          source_type: string;
+          source_id: string;
+          language: string;
+          chunk_text: string;
+          similarity: number;
+        }>;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };

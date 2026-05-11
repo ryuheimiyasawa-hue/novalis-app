@@ -108,6 +108,92 @@ function backoffDelayMs(attemptIndex: number): number {
   return Math.min(500 * 3 ** attemptIndex, 10_000);
 }
 
+export interface GenerateStreamOptions extends GenerateOptions {
+  /**
+   * Called once per chunk with the new tokens. The full accumulated
+   * text is also available on the returned GenerateResult.
+   */
+  onToken: (token: string) => void;
+}
+
+/**
+ * Streaming variant of generate(). Pipes Gemini's incremental output
+ * through onToken and returns the accumulated text + usage metadata
+ * once the stream completes.
+ *
+ * Retry policy: streaming is intentionally NOT retried — a half-
+ * delivered response can't be safely re-attempted (onToken would
+ * fire twice for early tokens). On transport failure mid-stream the
+ * caller should fail-safe to an escalation rather than restart.
+ */
+export async function generateStream(
+  prompt: string,
+  opts: GenerateStreamOptions,
+): Promise<GenerateResult> {
+  const client = getClient();
+  const model = opts.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+  const timeoutMs =
+    opts.timeoutMs ?? (Number(process.env.GEMINI_TIMEOUT_MS) || 30_000);
+
+  const config: GenerateContentConfig = {};
+  if (opts.systemInstruction) config.systemInstruction = opts.systemInstruction;
+  if (opts.temperature !== undefined) config.temperature = opts.temperature;
+  if (opts.responseMimeType) config.responseMimeType = opts.responseMimeType;
+  if (opts.responseSchema)
+    config.responseSchema = opts.responseSchema as GenerateContentConfig["responseSchema"];
+  if (opts.maxOutputTokens !== undefined)
+    config.maxOutputTokens = opts.maxOutputTokens;
+
+  const start = Date.now();
+  try {
+    const iterator = await withTimeout(
+      client.models.generateContentStream({ model, contents: prompt, config }),
+      timeoutMs,
+    );
+
+    let accumulated = "";
+    let tokensIn = 0;
+    let tokensOut = 0;
+    let finishReason: string | null = null;
+
+    for await (const chunk of iterator) {
+      const piece = chunk.text ?? "";
+      if (piece) {
+        accumulated += piece;
+        opts.onToken(piece);
+      }
+      // Each chunk may carry partial usage metadata; the final one
+      // generally has the totals.
+      if (chunk.usageMetadata?.promptTokenCount)
+        tokensIn = chunk.usageMetadata.promptTokenCount;
+      if (chunk.usageMetadata?.candidatesTokenCount)
+        tokensOut = chunk.usageMetadata.candidatesTokenCount;
+      const fr = chunk.candidates?.[0]?.finishReason ?? null;
+      if (fr) finishReason = fr;
+    }
+
+    const latencyMs = Date.now() - start;
+    console.log(
+      `[gemini-stream] ok model=${model} tokens=${tokensIn}/${tokensOut} latency=${latencyMs}ms finish=${finishReason}`,
+    );
+    return {
+      text: accumulated,
+      model,
+      tokensIn,
+      tokensOut,
+      latencyMs,
+      finishReason,
+    };
+  } catch (err) {
+    const latencyMs = Date.now() - start;
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(
+      `[gemini-stream] failed model=${model} latency=${latencyMs}ms err=${message}`,
+    );
+    throw err;
+  }
+}
+
 export async function generate(
   prompt: string,
   opts: GenerateOptions = {},

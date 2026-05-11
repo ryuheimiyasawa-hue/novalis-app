@@ -77,6 +77,7 @@ describe("POST /api/chat/preview", () => {
       kind: "answer",
       text: "general info",
       disclaimer: "...",
+      citations: [],
       meta: {
         model: "gemini-2.5-flash",
         tokensIn: 100,
@@ -84,6 +85,9 @@ describe("POST /api/chat/preview", () => {
         latencyMs: 1500,
         finishReason: "STOP",
         piiMasked: false,
+        ragEmbedMs: 0,
+        ragMatchMs: 0,
+        ragFailed: false,
       },
     });
     const res = await POST(
