@@ -122,6 +122,16 @@ BEGIN
     RAISE EXCEPTION 'RLS LEAK: anon SELECTed % chat_usage rows (expected 0)', c;
   END IF;
 
+  -- 1d-bis. content_embeddings has RLS enabled but no policies —
+  -- service_role bypasses, anon/authenticated must see zero rows.
+  -- Critical for W5 RAG: an attacker reading embeddings directly
+  -- could exfiltrate the entire indexed corpus including any draft
+  -- chunks that were re-indexed before being unpublished.
+  SELECT COUNT(*) INTO c FROM content_embeddings;
+  IF c <> 0 THEN
+    RAISE EXCEPTION 'RLS LEAK: anon SELECTed % content_embeddings rows (expected 0; service_role-only table)', c;
+  END IF;
+
   -- 1e. categories are intentionally public — every seed row must
   -- still be visible to anon.
   SELECT COUNT(*) INTO c FROM categories;
@@ -176,6 +186,16 @@ BEGIN
   SELECT COUNT(*) INTO c FROM admin_roles;
   IF c <> 0 THEN
     RAISE EXCEPTION 'RLS LEAK: fake authenticated user SELECTed % admin_role rows (expected 0)', c;
+  END IF;
+  SELECT COUNT(*) INTO c FROM chat_usage;
+  IF c <> 0 THEN
+    RAISE EXCEPTION 'RLS LEAK: fake authenticated user SELECTed % chat_usage rows (expected 0)', c;
+  END IF;
+  -- content_embeddings: RLS enabled, no policies → service_role only.
+  -- Authenticated users must not see indexed chunks either.
+  SELECT COUNT(*) INTO c FROM content_embeddings;
+  IF c <> 0 THEN
+    RAISE EXCEPTION 'RLS LEAK: fake authenticated user SELECTed % content_embeddings rows (expected 0; service_role-only)', c;
   END IF;
 
   -- Public-read tables remain visible to authenticated users.
