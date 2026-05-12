@@ -101,23 +101,49 @@ export default async function globalSetup(): Promise<void> {
   if (signIn.error || !signIn.data.session) {
     throw new Error(`E2E setup: sign-in failed: ${signIn.error?.message}`);
   }
-  const { access_token, refresh_token } = signIn.data.session;
+  const session = signIn.data.session;
 
-  // Build the cookie value that @supabase/ssr expects. The cookie
-  // name is `sb-<project-ref>-auth-token` and the body is a JSON
-  // array of [access_token, refresh_token, provider_token,
-  // provider_refresh_token, user]. The Next.js Supabase SSR helper
-  // accepts either the JSON array or the base64 form; we use the
-  // JSON form for readability.
+  // Build the cookie value that @supabase/ssr 0.10 expects.
+  //   - Cookie name base: sb-<project-ref>-auth-token
+  //   - Value: "base64-" + base64url(JSON.stringify(session))
+  //   - When the resulting value exceeds MAX_CHUNK_SIZE (3180 chars),
+  //     SSR splits it into name.0, name.1, ... cookies. We mirror
+  //     that split here so the SSR client can recombine on read.
+  // The earlier JSON-array shape (used by the legacy auth-helpers
+  // package) is not understood by ssr 0.10 — the middleware then
+  // fails to authenticate and redirects to /login, which is what
+  // broke the first e2e run.
+  // Refs: node_modules/@supabase/ssr/dist/main/cookies.js (decode)
+  //       node_modules/@supabase/ssr/dist/main/utils/chunker.js (split)
   const projectRef = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!).hostname.split(".")[0];
-  const cookieName = `sb-${projectRef}-auth-token`;
-  const cookieValue = JSON.stringify([
-    access_token,
-    refresh_token,
-    null,
-    null,
-    signIn.data.user,
-  ]);
+  const cookieBaseName = `sb-${projectRef}-auth-token`;
+  const sessionPayload = {
+    access_token: session.access_token,
+    refresh_token: session.refresh_token,
+    expires_at: session.expires_at,
+    expires_in: session.expires_in,
+    token_type: session.token_type ?? "bearer",
+    user: signIn.data.user,
+  };
+  const b64 = Buffer.from(JSON.stringify(sessionPayload)).toString("base64url");
+  const cookieValue = `base64-${b64}`;
+
+  // base64url chars (A-Z a-z 0-9 - _) plus the literal "base64-"
+  // dash are all URI-safe, so the wire size equals the literal
+  // string length and we can split on any character boundary.
+  const MAX_CHUNK_SIZE = 3180;
+  const cookies =
+    cookieValue.length <= MAX_CHUNK_SIZE
+      ? [{ name: cookieBaseName, value: cookieValue }]
+      : [];
+  if (cookies.length === 0) {
+    for (let i = 0, idx = 0; i < cookieValue.length; i += MAX_CHUNK_SIZE, idx++) {
+      cookies.push({
+        name: `${cookieBaseName}.${idx}`,
+        value: cookieValue.slice(i, i + MAX_CHUNK_SIZE),
+      });
+    }
+  }
 
   const storageDir = path.join(process.cwd(), "tests", "e2e", ".auth");
   fs.mkdirSync(storageDir, { recursive: true });
@@ -126,18 +152,16 @@ export default async function globalSetup(): Promise<void> {
   fs.writeFileSync(
     storagePath,
     JSON.stringify({
-      cookies: [
-        {
-          name: cookieName,
-          value: cookieValue,
-          domain: "localhost",
-          path: "/",
-          expires: -1,
-          httpOnly: false,
-          secure: false,
-          sameSite: "Lax",
-        },
-      ],
+      cookies: cookies.map((c) => ({
+        name: c.name,
+        value: c.value,
+        domain: "localhost",
+        path: "/",
+        expires: -1,
+        httpOnly: false,
+        secure: false,
+        sameSite: "Lax" as const,
+      })),
       origins: [],
     }),
   );
