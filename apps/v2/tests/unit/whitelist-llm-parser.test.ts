@@ -112,7 +112,11 @@ describe("classifyIndividualLLM (orchestration)", () => {
       expect.objectContaining({
         responseMimeType: "application/json",
         temperature: 0,
-        maxOutputTokens: 200,
+        maxOutputTokens: 500,
+        // thinkingBudget=0 is critical for 2.5 Flash — without it,
+        // thinking tokens drain the output budget and the classifier
+        // returns truncated non-JSON. See whitelist-llm.ts comment.
+        thinkingBudget: 0,
       }),
     );
   });

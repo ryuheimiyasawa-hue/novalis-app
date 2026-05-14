@@ -168,7 +168,16 @@ export async function classifyIndividualLLM(
       temperature: 0,
       responseMimeType: "application/json",
       responseSchema: RESPONSE_SCHEMA,
-      maxOutputTokens: 200,
+      // Disable thinking so the entire output budget is spent on the
+      // structured JSON. Without this, Gemini 2.5 Flash burns the
+      // budget on internal reasoning and stops at MAX_TOKENS with a
+      // truncated "Here is the JSON:" string — observed in dev on
+      // 2026-05-14 (commit 72829f6 follow-up). Classifier wants
+      // determinism, not depth, so budget=0 is the right knob.
+      thinkingBudget: 0,
+      // Headroom: a clean classification needs ~30 output tokens, but
+      // bump the cap so a slightly verbose `reason` field still fits.
+      maxOutputTokens: 500,
     });
     const parsed = parseClassifierResponse(result.text);
     if (!parsed.ok) {

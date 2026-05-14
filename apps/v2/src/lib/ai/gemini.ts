@@ -41,8 +41,17 @@ export interface GenerateOptions {
   responseMimeType?: "application/json" | "text/plain";
   /** JSON schema enforced by Gemini when responseMimeType is JSON. */
   responseSchema?: object;
-  /** Hard ceiling on output tokens; protects against runaway generations. */
+  /** Hard ceiling on output tokens; protects against runaway generations.
+   *  Important: for Gemini 2.5 thinking models, this caps THINKING +
+   *  visible output combined. If thinking eats your budget you will
+   *  get finishReason=MAX_TOKENS with a near-empty `text`. Use
+   *  `thinkingBudget: 0` for classifiers where thinking is unnecessary. */
   maxOutputTokens?: number;
+  /** Gemini 2.5 thinking-budget knob. 0 disables thinking entirely
+   *  (recommended for classifiers / structured-output calls where
+   *  determinism matters more than reasoning depth). -1 lets the
+   *  model decide. Omit to use the model default. */
+  thinkingBudget?: number;
   /** Hard timeout per attempt in ms (default: GEMINI_TIMEOUT_MS env / 30000). */
   timeoutMs?: number;
   /** Max attempts including the first (default 3). 1 disables retry. */
@@ -143,6 +152,8 @@ export async function generateStream(
     config.responseSchema = opts.responseSchema as GenerateContentConfig["responseSchema"];
   if (opts.maxOutputTokens !== undefined)
     config.maxOutputTokens = opts.maxOutputTokens;
+  if (opts.thinkingBudget !== undefined)
+    config.thinkingConfig = { thinkingBudget: opts.thinkingBudget };
 
   const start = Date.now();
   try {
@@ -213,6 +224,8 @@ export async function generate(
     config.responseSchema = opts.responseSchema as GenerateContentConfig["responseSchema"];
   if (opts.maxOutputTokens !== undefined)
     config.maxOutputTokens = opts.maxOutputTokens;
+  if (opts.thinkingBudget !== undefined)
+    config.thinkingConfig = { thinkingBudget: opts.thinkingBudget };
 
   const start = Date.now();
   let lastError: unknown;
