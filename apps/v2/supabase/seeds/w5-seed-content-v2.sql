@@ -775,7 +775,16 @@ WHERE NOT EXISTS (
 -- VERIFY
 -- =============================================================================
 
+-- NOTE: VERIFY queries are intentionally placed AFTER the INSERTs above so the
+-- file can be pasted as-is. They are SELECT-only and idempotent. If a future
+-- VERIFY tweak introduces a syntax error, only the SELECT fails — the INSERTs
+-- have already committed in implicit-autocommit mode (Supabase SQL Editor).
+-- However, the SQL Editor wraps the whole script in a single transaction by
+-- default, so a VERIFY failure WILL roll back the INSERTs. See lessons.md
+-- Lesson 20. Keep VERIFY trivial; if you need richer reporting, run it in a
+-- second editor tab AFTER the INSERTs have committed.
 SELECT slug, title_ja FROM articles ORDER BY created_at;
 SELECT c.slug AS category, COUNT(*) AS faq_count
 FROM faqs f JOIN categories c ON c.id = f.category_id
-GROUP BY c.slug ORDER BY c.sort_order;
+GROUP BY c.slug, c.sort_order
+ORDER BY c.sort_order;
