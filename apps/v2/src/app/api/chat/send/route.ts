@@ -136,6 +136,13 @@ export async function POST(req: NextRequest) {
             text: result.text,
             ...messageIds,
           });
+        } else if (result.kind === "smalltalk") {
+          send({
+            type: "done",
+            kind: "smalltalk",
+            text: result.text,
+            ...messageIds,
+          });
         } else {
           // blocked
           send({

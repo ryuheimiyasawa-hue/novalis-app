@@ -125,7 +125,9 @@ describe("generate()", () => {
   });
 
   it("forwards JSON-mode config to the SDK", async () => {
-    generateContentSpy.mockResolvedValueOnce(ok('{"is_individual": true}'));
+    generateContentSpy.mockResolvedValueOnce(
+      ok('{"category": "individual", "reason": "ok"}'),
+    );
     await generate("classify me", {
       responseMimeType: "application/json",
       responseSchema: { type: "object" },

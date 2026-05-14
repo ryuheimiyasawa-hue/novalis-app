@@ -85,6 +85,7 @@ export function ChatShell({ locale, labels }: Props) {
     let finalDisclaimer = "";
     let finalText = "";
     let escalationText: string | null = null;
+    let smalltalkText: string | null = null;
     let blockedText: string | null = null;
     let errored = false;
 
@@ -109,6 +110,8 @@ export function ChatShell({ locale, labels }: Props) {
               finalText = e.text;
             } else if (e.kind === "escalate") {
               escalationText = e.text;
+            } else if (e.kind === "smalltalk") {
+              smalltalkText = e.text;
             } else if (e.kind === "blocked") {
               blockedText = e.text;
             } else if (e.kind === "error") {
@@ -149,6 +152,15 @@ export function ChatShell({ locale, labels }: Props) {
           role: "system",
           content: "",
           escalation: { text: escalationText },
+        });
+      } else if (smalltalkText !== null) {
+        // Render smalltalk as a normal assistant bubble — no
+        // disclaimer, no citations, no escalation card. The canned
+        // text already explains the service's scope.
+        next.push({
+          id: nextId(),
+          role: "assistant",
+          content: smalltalkText,
         });
       } else if (blockedText !== null) {
         next.push({

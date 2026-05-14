@@ -3,6 +3,7 @@ import {
   getAnswerDisclaimer,
   getEscalationMessage,
   getPiiBlockMessage,
+  getSmalltalkReply,
   getTooLongMessage,
 } from "@/lib/ai/disclaimers";
 
@@ -12,11 +13,21 @@ import {
 // pipeline silently falls through to undefined.
 
 describe("disclaimers i18n source", () => {
-  it.each(["ja", "en", "tl"] as const)("provides all four strings for %s", (locale) => {
+  it.each(["ja", "en", "tl"] as const)("provides all five strings for %s", (locale) => {
     expect(getAnswerDisclaimer(locale)).toMatch(/.+/);
     expect(getEscalationMessage(locale)).toMatch(/.+/);
     expect(getPiiBlockMessage(locale)).toMatch(/.+/);
     expect(getTooLongMessage(locale)).toMatch(/.+/);
+    expect(getSmalltalkReply(locale)).toMatch(/.+/);
+  });
+
+  it("returns the Japanese smalltalk reply verbatim from messages/ja.json", () => {
+    expect(getSmalltalkReply("ja")).toMatch(/AI 相談では/);
+  });
+
+  it("returns distinct smalltalk replies per locale", () => {
+    expect(getSmalltalkReply("ja")).not.toBe(getSmalltalkReply("en"));
+    expect(getSmalltalkReply("en")).not.toBe(getSmalltalkReply("tl"));
   });
 
   it("returns the Japanese escalation copy verbatim from messages/ja.json", () => {

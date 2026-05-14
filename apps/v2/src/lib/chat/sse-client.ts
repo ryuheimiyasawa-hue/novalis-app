@@ -40,6 +40,13 @@ export type ChatStreamEvent =
     }
   | {
       type: "done";
+      kind: "smalltalk";
+      text: string;
+      userMessageId?: string;
+      replyMessageId?: string;
+    }
+  | {
+      type: "done";
       kind: "blocked";
       reason: string;
       text: string;

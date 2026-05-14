@@ -155,6 +155,15 @@ function summariseResult(r: ChatResult): {
       tokensOut: 0,
     };
   }
+  if (r.kind === "smalltalk") {
+    return {
+      kind: r.kind,
+      reason: "smalltalk",
+      latencyMs: 0,
+      tokensIn: 0,
+      tokensOut: 0,
+    };
+  }
   return {
     kind: r.kind,
     reason: r.reason,

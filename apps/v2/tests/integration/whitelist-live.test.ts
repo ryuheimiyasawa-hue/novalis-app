@@ -47,11 +47,13 @@ function loadEnvLocal(): void {
 
 if (SHOULD_RUN) loadEnvLocal();
 
+type Verdict = "answer" | "escalate" | "smalltalk";
+
 interface FixtureCase {
   input: string;
   locale: WhitelistLocale;
-  expected: "answer" | "escalate";
-  category: "individual" | "general" | "gray";
+  expected: Verdict;
+  category: "individual" | "general" | "gray" | "smalltalk";
   notes?: string;
 }
 
@@ -60,9 +62,9 @@ interface RunRow {
   category: string;
   locale: string;
   input: string;
-  expected: "answer" | "escalate";
+  expected: Verdict;
   stage: "keyword" | "llm" | "llm-failsafe";
-  isIndividual: boolean;
+  classifierCategory: "individual" | "general" | "smalltalk";
   reason: string;
   latencyMs: number;
   tokensIn: number;
@@ -102,7 +104,7 @@ describe.skipIf(!SHOULD_RUN)("whitelist live probe (Gemini API)", () => {
       const c = fixture[i];
       const kw = detectIndividualKeywords(c.input, c.locale);
       let stage: RunRow["stage"];
-      let isIndividual: boolean;
+      let classifierCategory: RunRow["classifierCategory"];
       let reason: string;
       let latencyMs = 0;
       let tokensIn = 0;
@@ -110,12 +112,12 @@ describe.skipIf(!SHOULD_RUN)("whitelist live probe (Gemini API)", () => {
 
       if (kw) {
         stage = "keyword";
-        isIndividual = true;
+        classifierCategory = "individual";
         reason = `kw:${kw.keyword}`;
       } else {
         const r = await classifyIndividualLLM(c.input, c.locale);
         stage = r.failsafe ? "llm-failsafe" : "llm";
-        isIndividual = r.isIndividual;
+        classifierCategory = r.category;
         reason = r.reason;
         latencyMs = r.latencyMs;
         tokensIn = r.tokensIn;
@@ -124,9 +126,12 @@ describe.skipIf(!SHOULD_RUN)("whitelist live probe (Gemini API)", () => {
         await sleep(13_000);
       }
 
-      const actualVerdict: "escalate" | "answer" = isIndividual
-        ? "escalate"
-        : "answer";
+      const actualVerdict: Verdict =
+        classifierCategory === "individual"
+          ? "escalate"
+          : classifierCategory === "smalltalk"
+            ? "smalltalk"
+            : "answer";
       rows.push({
         idx: i + 1,
         category: c.category,
@@ -134,7 +139,7 @@ describe.skipIf(!SHOULD_RUN)("whitelist live probe (Gemini API)", () => {
         input: c.input.slice(0, 60),
         expected: c.expected,
         stage,
-        isIndividual,
+        classifierCategory,
         reason: reason.slice(0, 80),
         latencyMs,
         tokensIn,
@@ -151,6 +156,13 @@ describe.skipIf(!SHOULD_RUN)("whitelist live probe (Gemini API)", () => {
 
     // Per-case table.
     console.log("\n=== Whitelist live probe — per case ===");
+    const verdictOf = (r: RunRow): Verdict =>
+      r.classifierCategory === "individual"
+        ? "escalate"
+        : r.classifierCategory === "smalltalk"
+          ? "smalltalk"
+          : "answer";
+
     console.table(
       rows.map((r) => ({
         "#": r.idx,
@@ -158,7 +170,7 @@ describe.skipIf(!SHOULD_RUN)("whitelist live probe (Gemini API)", () => {
         loc: r.locale,
         exp: r.expected,
         stage: r.stage,
-        verdict: r.isIndividual ? "escalate" : "answer",
+        verdict: verdictOf(r),
         ok: r.correct ? "✓" : "✗",
         ms: r.latencyMs || "-",
         tok: r.tokensIn ? `${r.tokensIn}/${r.tokensOut}` : "-",
@@ -176,7 +188,7 @@ describe.skipIf(!SHOULD_RUN)("whitelist live probe (Gemini API)", () => {
           cat: r.category,
           loc: r.locale,
           exp: r.expected,
-          got: r.isIndividual ? "escalate" : "answer",
+          got: verdictOf(r),
           stage: r.stage,
           reason: r.reason,
           input: r.input,

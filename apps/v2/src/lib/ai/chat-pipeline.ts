@@ -10,6 +10,7 @@ import {
   getAnswerDisclaimer,
   getEscalationMessage,
   getPiiBlockMessage,
+  getSmalltalkReply,
   getTooLongMessage,
 } from "./disclaimers";
 
@@ -60,6 +61,15 @@ export type ChatEscalated = {
   detail: string;
 };
 
+/** Canned reply for greetings, acknowledgements, and other off-topic
+ *  smalltalk. No LLM answer call, no RAG, no quota consumed. The
+ *  classifier reason is preserved in `detail` for monthly audit. */
+export type ChatSmalltalk = {
+  kind: "smalltalk";
+  text: string;
+  detail: string;
+};
+
 export type ChatAnswered = {
   kind: "answer";
   text: string;
@@ -85,7 +95,11 @@ export type ChatAnswered = {
   };
 };
 
-export type ChatResult = ChatBlocked | ChatEscalated | ChatAnswered;
+export type ChatResult =
+  | ChatBlocked
+  | ChatEscalated
+  | ChatSmalltalk
+  | ChatAnswered;
 
 /**
  * Mask any PII the LLM might have surfaced in its answer. Master plan
@@ -197,7 +211,7 @@ async function preflight(input: {
       },
     };
   }
-  if (llm.isIndividual) {
+  if (llm.category === "individual") {
     console.log(
       `[chat] llm escalate: reason='${llm.reason}' locale=${input.locale} latency=${llm.latencyMs}ms tokens=${llm.tokensIn}/${llm.tokensOut}`,
     );
@@ -207,6 +221,19 @@ async function preflight(input: {
         kind: "escalate",
         reason: "llm_individual",
         text: getEscalationMessage(input.locale),
+        detail: llm.reason,
+      },
+    };
+  }
+  if (llm.category === "smalltalk") {
+    console.log(
+      `[chat] smalltalk: reason='${llm.reason}' locale=${input.locale} latency=${llm.latencyMs}ms tokens=${llm.tokensIn}/${llm.tokensOut}`,
+    );
+    return {
+      kind: "stop",
+      result: {
+        kind: "smalltalk",
+        text: getSmalltalkReply(input.locale),
         detail: llm.reason,
       },
     };

@@ -200,5 +200,47 @@
     "expected": "escalate",
     "category": "gray",
     "notes": "general procedure but tied to user's own visa"
+  },
+  {
+    "input": "ああ",
+    "locale": "ja",
+    "expected": "smalltalk",
+    "category": "smalltalk",
+    "notes": "single utterance — clearly not a real question"
+  },
+  {
+    "input": "良いお天気ですね",
+    "locale": "ja",
+    "expected": "smalltalk",
+    "category": "smalltalk",
+    "notes": "weather chitchat, off-topic"
+  },
+  {
+    "input": "こんにちは",
+    "locale": "ja",
+    "expected": "smalltalk",
+    "category": "smalltalk",
+    "notes": "greeting"
+  },
+  {
+    "input": "ありがとうございます",
+    "locale": "ja",
+    "expected": "smalltalk",
+    "category": "smalltalk",
+    "notes": "thank-you / acknowledgement"
+  },
+  {
+    "input": "Hi there",
+    "locale": "en",
+    "expected": "smalltalk",
+    "category": "smalltalk",
+    "notes": "English greeting"
+  },
+  {
+    "input": "Salamat po",
+    "locale": "tl",
+    "expected": "smalltalk",
+    "category": "smalltalk",
+    "notes": "Tagalog thank-you"
   }
 ]

@@ -18,6 +18,7 @@ interface ChatCopy {
   escalation: string;
   piiBlock: string;
   tooLong: string;
+  smalltalkReply: string;
 }
 
 const COPY: Record<WhitelistLocale, ChatCopy> = {
@@ -40,4 +41,8 @@ export function getPiiBlockMessage(locale: WhitelistLocale): string {
 
 export function getTooLongMessage(locale: WhitelistLocale): string {
   return COPY[locale].tooLong;
+}
+
+export function getSmalltalkReply(locale: WhitelistLocale): string {
+  return COPY[locale].smalltalkReply;
 }

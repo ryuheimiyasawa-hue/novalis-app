@@ -228,6 +228,23 @@ describe("POST /api/chat/send — SSE happy path", () => {
     });
   });
 
+  it("emits meta → done(smalltalk) with no tokens for a smalltalk result", async () => {
+    mockProcessChatStream.mockImplementationOnce(async () => ({
+      kind: "smalltalk",
+      text: "I can help with general questions about life in Japan...",
+      detail: "greeting",
+    }));
+    const res = await POST(makeReq({ message: "hi" }) as never);
+    const events = await readSSE(res);
+    expect(events[0].type).toBe("meta");
+    expect(events[events.length - 1]).toMatchObject({
+      type: "done",
+      kind: "smalltalk",
+      text: expect.stringMatching(/general questions/i),
+    });
+    expect(events.some((e) => e.type === "token")).toBe(false);
+  });
+
   it("emits done(error) when the pipeline throws unexpectedly", async () => {
     mockProcessChatStream.mockRejectedValueOnce(new Error("upstream crash"));
     const res = await POST(makeReq({ message: "hi" }) as never);

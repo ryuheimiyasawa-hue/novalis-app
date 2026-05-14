@@ -140,6 +140,35 @@ export async function persistAssistantMessage(args: {
 }
 
 /**
+ * Insert the smalltalk canned reply. Stored as `assistant` role so
+ * the chat UI renders it inline like any other reply, but the
+ * whitelist_decision JSONB carries `category: "smalltalk"` so audit
+ * sampling can tell it apart from real AI answers. Smalltalk has no
+ * disclaimer (the canned copy already explains scope) and no
+ * citations — it never triggers the answer LLM.
+ */
+export async function persistSmalltalkMessage(args: {
+  conversationId: string;
+  text: string;
+  whitelistDecision?: object;
+}): Promise<{ id: string }> {
+  const admin = getAdminClient();
+  const { data, error } = await admin
+    .from("messages")
+    .insert({
+      conversation_id: args.conversationId,
+      role: "assistant",
+      content: args.text,
+      is_escalated: false,
+      whitelist_decision: args.whitelistDecision ?? null,
+    })
+    .select("id")
+    .single<InsertedRow>();
+  if (error) throw new Error(`persistSmalltalkMessage: ${error.message}`);
+  return { id: data.id };
+}
+
+/**
  * Insert a system-authored message for escalate / blocked / takeover
  * notifications. `isEscalated=true` flags rows that resulted from a
  * Whitelist trigger so the monthly review can sample them
@@ -200,6 +229,9 @@ export async function incrementChatUsage(
  *   UI shows the block message.
  * - escalate: persist user + system message (escalation body), no
  *   chat_usage increment (master plan §2-4).
+ * - smalltalk: persist user + assistant (canned reply), no
+ *   chat_usage increment (matches escalate — neither path consumed
+ *   a real AI answer call so charging the user is wrong).
  * - answer: persist user + assistant message + chat_usage +1.
  */
 export async function persistResult(args: {
@@ -230,6 +262,17 @@ export async function persistResult(args: {
       whitelistDecision: args.whitelistDecision,
     });
     return { userMessageId: userRow.id, replyMessageId: sys.id };
+  }
+
+  if (args.result.kind === "smalltalk") {
+    const asst = await persistSmalltalkMessage({
+      conversationId: args.conversationId,
+      text: args.result.text,
+      whitelistDecision: args.whitelistDecision,
+    });
+    // Smalltalk never consumes the monthly free quota (no answer LLM
+    // call was made; charging would be wrong by §2-4).
+    return { userMessageId: userRow.id, replyMessageId: asst.id };
   }
 
   // answer path: persist + increment usage when applicable.

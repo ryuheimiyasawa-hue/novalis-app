@@ -18,23 +18,31 @@ beforeEach(() => {
 });
 
 describe("parseClassifierResponse", () => {
-  it("returns isIndividual=true for valid {is_individual:true,...} JSON", () => {
+  it("returns category=individual for valid individual JSON", () => {
     const r = parseClassifierResponse(
-      '{"is_individual": true, "reason": "user owns the visa"}',
+      '{"category": "individual", "reason": "user owns the visa"}',
     );
     expect(r.ok).toBe(true);
     if (r.ok) {
-      expect(r.isIndividual).toBe(true);
+      expect(r.category).toBe("individual");
       expect(r.reason).toBe("user owns the visa");
     }
   });
 
-  it("returns isIndividual=false for valid general-info JSON", () => {
+  it("returns category=general for valid general-info JSON", () => {
     const r = parseClassifierResponse(
-      '{"is_individual": false, "reason": "asks about general visa rules"}',
+      '{"category": "general", "reason": "asks about general visa rules"}',
     );
     expect(r.ok).toBe(true);
-    if (r.ok) expect(r.isIndividual).toBe(false);
+    if (r.ok) expect(r.category).toBe("general");
+  });
+
+  it("returns category=smalltalk for greeting / off-topic JSON", () => {
+    const r = parseClassifierResponse(
+      '{"category": "smalltalk", "reason": "greeting"}',
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.category).toBe("smalltalk");
   });
 
   it("failsafes on completely invalid JSON", () => {
@@ -46,29 +54,37 @@ describe("parseClassifierResponse", () => {
     }
   });
 
-  it("failsafes when is_individual is missing", () => {
+  it("failsafes when category is missing", () => {
     const r = parseClassifierResponse('{"reason": "missing field"}');
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toMatch(/^schema_violation/);
   });
 
-  it("failsafes when is_individual is the wrong type", () => {
+  it("failsafes when category is an unknown enum value", () => {
     const r = parseClassifierResponse(
-      '{"is_individual": "yes", "reason": "wrong type"}',
+      '{"category": "maybe", "reason": "unknown class"}',
+    );
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toMatch(/^schema_violation/);
+  });
+
+  it("failsafes when category is the wrong type", () => {
+    const r = parseClassifierResponse(
+      '{"category": 1, "reason": "wrong type"}',
     );
     expect(r.ok).toBe(false);
   });
 
   it("failsafes when reason is empty", () => {
     const r = parseClassifierResponse(
-      '{"is_individual": true, "reason": ""}',
+      '{"category": "individual", "reason": ""}',
     );
     expect(r.ok).toBe(false);
   });
 
   it("failsafes when reason exceeds 500 chars", () => {
     const r = parseClassifierResponse(
-      `{"is_individual": false, "reason": "${"x".repeat(501)}"}`,
+      `{"category": "general", "reason": "${"x".repeat(501)}"}`,
     );
     expect(r.ok).toBe(false);
   });
@@ -88,7 +104,7 @@ describe("classifyIndividualLLM (orchestration)", () => {
 
   it("forwards the message and a JSON-mode config to generate()", async () => {
     vi.mocked(generate).mockResolvedValueOnce(
-      geminiResult('{"is_individual": false, "reason": "general"}'),
+      geminiResult('{"category": "general", "reason": "general"}'),
     );
     await classifyIndividualLLM("ビザの種類は？", "ja");
     expect(generate).toHaveBeenCalledWith(
@@ -101,52 +117,71 @@ describe("classifyIndividualLLM (orchestration)", () => {
     );
   });
 
-  it("returns isIndividual=true on a clean true response", async () => {
+  it("returns category=individual on a clean individual response", async () => {
     vi.mocked(generate).mockResolvedValueOnce(
-      geminiResult('{"is_individual": true, "reason": "personal visa"}'),
+      geminiResult('{"category": "individual", "reason": "personal visa"}'),
     );
     const r = await classifyIndividualLLM("My visa expires soon", "en");
-    expect(r.isIndividual).toBe(true);
+    expect(r.category).toBe("individual");
     expect(r.failsafe).toBe(false);
     expect(r.reason).toBe("personal visa");
     expect(r.tokensIn).toBeGreaterThan(0);
   });
 
-  it("returns isIndividual=false on a clean false response", async () => {
+  it("returns category=general on a clean general response", async () => {
     vi.mocked(generate).mockResolvedValueOnce(
       geminiResult(
-        '{"is_individual": false, "reason": "asks about general rule"}',
+        '{"category": "general", "reason": "asks about general rule"}',
       ),
     );
     const r = await classifyIndividualLLM("How long is a working visa?", "en");
-    expect(r.isIndividual).toBe(false);
+    expect(r.category).toBe("general");
     expect(r.failsafe).toBe(false);
   });
 
-  it("FAILSAFES (escalates) when Gemini returns malformed JSON", async () => {
+  it("returns category=smalltalk on a clean smalltalk response", async () => {
+    vi.mocked(generate).mockResolvedValueOnce(
+      geminiResult('{"category": "smalltalk", "reason": "greeting"}'),
+    );
+    const r = await classifyIndividualLLM("こんにちは", "ja");
+    expect(r.category).toBe("smalltalk");
+    expect(r.failsafe).toBe(false);
+  });
+
+  it("FAILSAFES (→ individual) when Gemini returns malformed JSON", async () => {
     vi.mocked(generate).mockResolvedValueOnce(geminiResult("not json"));
     const r = await classifyIndividualLLM("ambiguous", "en");
-    expect(r.isIndividual).toBe(true);
+    expect(r.category).toBe("individual");
     expect(r.failsafe).toBe(true);
     expect(r.failsafeError).toBe("invalid_json");
   });
 
-  it("FAILSAFES (escalates) when Gemini returns valid JSON missing fields", async () => {
+  it("FAILSAFES (→ individual) when Gemini returns valid JSON missing fields", async () => {
     vi.mocked(generate).mockResolvedValueOnce(
       geminiResult('{"reason": "lone field"}'),
     );
     const r = await classifyIndividualLLM("ambiguous", "en");
-    expect(r.isIndividual).toBe(true);
+    expect(r.category).toBe("individual");
     expect(r.failsafe).toBe(true);
     expect(r.failsafeError).toMatch(/^schema_violation/);
   });
 
-  it("FAILSAFES (escalates) when generate() throws (timeout, 5xx, network)", async () => {
+  it("FAILSAFES (→ individual) when category is an unknown enum value", async () => {
+    vi.mocked(generate).mockResolvedValueOnce(
+      geminiResult('{"category": "maybe", "reason": "unknown"}'),
+    );
+    const r = await classifyIndividualLLM("ambiguous", "en");
+    expect(r.category).toBe("individual");
+    expect(r.failsafe).toBe(true);
+    expect(r.failsafeError).toMatch(/^schema_violation/);
+  });
+
+  it("FAILSAFES (→ individual) when generate() throws (timeout, 5xx, network)", async () => {
     vi.mocked(generate).mockRejectedValueOnce(
       new Error("upstream 503"),
     );
     const r = await classifyIndividualLLM("ambiguous", "en");
-    expect(r.isIndividual).toBe(true);
+    expect(r.category).toBe("individual");
     expect(r.failsafe).toBe(true);
     expect(r.failsafeError).toMatch(/503/);
     expect(r.tokensIn).toBe(0); // no tokens billed because the call never landed
