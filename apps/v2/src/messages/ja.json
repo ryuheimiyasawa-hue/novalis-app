@@ -51,8 +51,9 @@
     "headerLogo": "Novalis",
     "greeting": "ようこそ {name} さん",
     "freeBadge": "現在無料開放中",
-    "comingSoon": "準備中",
-    "comingSoonBody": "記事閲覧やAIチャット相談の機能を順次公開予定です。",
+    "chatCtaTitle": "AI に相談する",
+    "chatCtaBody": "在留資格・健康保険・お子さんの学校・行政手続きなど、日本での暮らしに関する一般的なご質問にお気軽にどうぞ。",
+    "chatCtaButton": "相談を始める",
     "footerTerms": "利用規約",
     "footerPrivacy": "プライバシーポリシー",
     "footerLanguage": "言語"

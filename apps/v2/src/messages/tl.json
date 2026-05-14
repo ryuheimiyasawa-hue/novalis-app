@@ -51,8 +51,9 @@
     "headerLogo": "Novalis",
     "greeting": "Maligayang pagdating, {name}",
     "freeBadge": "Libre sa launch period",
-    "comingSoon": "Malapit nang dumating",
-    "comingSoonBody": "Ilalabas sa mga yugto ang mga artikulo at konsultasyon sa AI chat.",
+    "chatCtaTitle": "Magtanong sa AI assistant",
+    "chatCtaBody": "Magtanong tungkol sa visa, health insurance, paaralan ng inyong anak, o mga pamamaraan ng gobyerno — anumang bagay tungkol sa pamumuhay sa Japan.",
+    "chatCtaButton": "Simulan ang konsultasyon",
     "footerTerms": "Tuntunin",
     "footerPrivacy": "Privacy",
     "footerLanguage": "Wika"

@@ -19,11 +19,18 @@ export function CitationLink({ citation, index, locale }: Props) {
     </span>
   );
   if (citation.source_type === "article" && citation.slug) {
+    // Open in a new tab so the in-progress chat conversation
+    // (held in ChatShell useState) is not unmounted when the
+    // user follows a citation. Phase 2 will add server-side
+    // conversation restore; until then, target=_blank is the
+    // minimal fix for the demo path.
     return (
       <Link
         href={`/${locale}/articles/${citation.slug}`}
         className="no-underline"
         title={citation.snippet}
+        target="_blank"
+        rel="noopener noreferrer"
       >
         {inner}
       </Link>

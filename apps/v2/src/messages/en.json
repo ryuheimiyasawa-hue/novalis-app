@@ -51,8 +51,9 @@
     "headerLogo": "Novalis",
     "greeting": "Welcome, {name}",
     "freeBadge": "Free during launch",
-    "comingSoon": "Coming soon",
-    "comingSoonBody": "Articles and AI chat consultations will be released in stages.",
+    "chatCtaTitle": "Ask the AI assistant",
+    "chatCtaBody": "Ask general questions about residence status, health insurance, your child's school, or government procedures — anything about life in Japan.",
+    "chatCtaButton": "Start a consultation",
     "footerTerms": "Terms",
     "footerPrivacy": "Privacy",
     "footerLanguage": "Language"
