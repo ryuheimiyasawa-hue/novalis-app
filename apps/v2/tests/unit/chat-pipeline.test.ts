@@ -183,25 +183,48 @@ describe("processChat — LLM Whitelist path", () => {
 });
 
 describe("processChat — smalltalk path", () => {
-  it("returns a canned smalltalk reply when classifier picks smalltalk (no answer call, no RAG)", async () => {
-    mockGenerate.mockResolvedValueOnce(classifierResponse("smalltalk", "greeting"));
+  it("invokes the conversational smalltalk responder when classifier picks smalltalk (no RAG)", async () => {
+    mockGenerate
+      .mockResolvedValueOnce(classifierResponse("smalltalk", "greeting"))
+      .mockResolvedValueOnce(answerResponse("こんにちは！何かお手伝いできることはありますか？"));
+    const r = await processChat({ message: "ああ", locale: "ja" });
+    expect(r.kind).toBe("smalltalk");
+    if (r.kind === "smalltalk") {
+      // Text comes from the smalltalk LLM call, not a canned string.
+      expect(r.text).toMatch(/こんにちは/);
+      expect(r.detail).toBe("greeting");
+    }
+    // Two LLM calls: classifier + smalltalk responder. No answer-path call.
+    expect(mockGenerate).toHaveBeenCalledTimes(2);
+    // Smalltalk short-circuits before RAG.
+    expect(mockRetrieveContext).not.toHaveBeenCalled();
+    // The second call must use the smalltalk system prompt, not the
+    // answer one.
+    const smalltalkCallArgs = mockGenerate.mock.calls[1];
+    expect(smalltalkCallArgs[1]?.systemInstruction).toMatch(/pleasantries/i);
+    expect(smalltalkCallArgs[1]?.systemInstruction).toMatch(/Japanese/);
+  });
+
+  it("falls back to the canned reply when the smalltalk LLM call throws (does NOT escalate)", async () => {
+    mockGenerate
+      .mockResolvedValueOnce(classifierResponse("smalltalk", "greeting"))
+      .mockRejectedValueOnce(new Error("upstream 503"));
     const r = await processChat({ message: "ああ", locale: "ja" });
     expect(r.kind).toBe("smalltalk");
     if (r.kind === "smalltalk") {
       expect(r.text).toMatch(/AI 相談では/);
-      expect(r.detail).toBe("greeting");
+      expect(r.detail).toMatch(/greeting;fallback:/);
     }
-    // Classifier ran (1 call); no second answer call.
-    expect(mockGenerate).toHaveBeenCalledTimes(1);
-    // Smalltalk short-circuits before RAG.
-    expect(mockRetrieveContext).not.toHaveBeenCalled();
   });
 
-  it("returns the locale-appropriate smalltalk copy (English)", async () => {
-    mockGenerate.mockResolvedValueOnce(classifierResponse("smalltalk", "greeting"));
+  it("uses the locale-appropriate system prompt for the smalltalk call (English)", async () => {
+    mockGenerate
+      .mockResolvedValueOnce(classifierResponse("smalltalk", "greeting"))
+      .mockResolvedValueOnce(answerResponse("Hi! How can I help?"));
     const r = await processChat({ message: "Hi there", locale: "en" });
     expect(r.kind).toBe("smalltalk");
-    if (r.kind === "smalltalk") expect(r.text).toMatch(/general questions/i);
+    if (r.kind === "smalltalk") expect(r.text).toMatch(/Hi/i);
+    expect(mockGenerate.mock.calls[1][1]?.systemInstruction).toMatch(/English/);
   });
 
   it("does NOT collapse to smalltalk when the classifier picks individual (failsafe bias preserved)", async () => {

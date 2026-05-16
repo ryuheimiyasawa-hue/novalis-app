@@ -7,6 +7,10 @@ import {
 import { classifyIndividualLLM } from "./whitelist-llm";
 import { retrieveContext, type Citation } from "./rag";
 import {
+  respondSmalltalk,
+  respondSmalltalkStream,
+} from "./conversational";
+import {
   getAnswerDisclaimer,
   getEscalationMessage,
   getPiiBlockMessage,
@@ -118,9 +122,20 @@ function maskOutputPii(text: string): { text: string; masked: boolean } {
 }
 
 /** Result of the gates that both processChat and processChatStream
- *  run before invoking the LLM for an answer. */
+ *  run before invoking the LLM for an answer.
+ *
+ *  - "stop" — gates produced a terminal ChatResult (block / escalate);
+ *    no further work needed.
+ *  - "smalltalk" — the classifier marked the message as chit-chat;
+ *    the caller should hand it to the conversational responder so the
+ *    reply can be generated (and streamed) like any other LLM call.
+ *    detail carries the classifier's reason for audit.
+ *  - "continue" — message is a substantive question; RAG context is
+ *    ready and the caller should run the answer LLM.
+ */
 type Preflight =
   | { kind: "stop"; result: ChatResult }
+  | { kind: "smalltalk"; detail: string }
   | {
       kind: "continue";
       contextText: string;
@@ -235,14 +250,7 @@ async function preflight(input: {
     console.log(
       `[chat] smalltalk: reason='${llm.reason}' locale=${input.locale} latency=${llm.latencyMs}ms tokens=${llm.tokensIn}/${llm.tokensOut}`,
     );
-    return {
-      kind: "stop",
-      result: {
-        kind: "smalltalk",
-        text: getSmalltalkReply(input.locale),
-        detail: llm.reason,
-      },
-    };
+    return { kind: "smalltalk", detail: llm.reason };
   }
 
   // RAG retrieval. Failures here are non-fatal: the chat answer can
@@ -331,6 +339,24 @@ export async function processChat(input: {
   const pre = await preflight(input);
   if (pre.kind === "stop") return pre.result;
 
+  if (pre.kind === "smalltalk") {
+    try {
+      const r = await respondSmalltalk(input.message.trim(), input.locale);
+      console.log(
+        `[chat] smalltalk-llm ok: locale=${input.locale} latency=${r.latencyMs}ms tokens=${r.tokensIn}/${r.tokensOut}`,
+      );
+      return { kind: "smalltalk", text: r.text.trim(), detail: pre.detail };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`[chat] smalltalk-llm fallback to canned: ${msg}`);
+      return {
+        kind: "smalltalk",
+        text: getSmalltalkReply(input.locale),
+        detail: `${pre.detail};fallback:${msg.slice(0, 100)}`,
+      };
+    }
+  }
+
   let answer;
   try {
     answer = await generate(buildContents(input.message.trim(), pre.contextText), {
@@ -399,6 +425,38 @@ export async function processChatStream(
 ): Promise<ChatResult> {
   const pre = await preflight(input);
   if (pre.kind === "stop") return pre.result;
+
+  if (pre.kind === "smalltalk") {
+    try {
+      const r = await respondSmalltalkStream(
+        input.message.trim(),
+        input.locale,
+        (text) => onEvent({ type: "token", text }),
+      );
+      console.log(
+        `[chat] smalltalk-llm-stream ok: locale=${input.locale} latency=${r.latencyMs}ms tokens=${r.tokensIn}/${r.tokensOut} finish=${r.finishReason}`,
+      );
+      // Trim outer whitespace only — preserve any internal newlines the
+      // model produced. The accumulated text is what gets persisted +
+      // returned in the SSE `done` event.
+      return { kind: "smalltalk", text: r.text.trim(), detail: pre.detail };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(
+        `[chat] smalltalk-llm-stream fallback to canned: ${msg}`,
+      );
+      // Fallback: emit the canned reply as a single token so the
+      // client's incremental rendering still sees text — the SSE
+      // contract stays identical.
+      const canned = getSmalltalkReply(input.locale);
+      onEvent({ type: "token", text: canned });
+      return {
+        kind: "smalltalk",
+        text: canned,
+        detail: `${pre.detail};fallback:${msg.slice(0, 100)}`,
+      };
+    }
+  }
 
   let answer;
   try {
