@@ -30,11 +30,25 @@ export function _resetGeminiClient(): void {
   cached = null;
 }
 
+/** A single past turn in a multi-turn conversation. Maps DB roles:
+ *  user → "user", assistant → "model". System messages (escalations /
+ *  blocks) are NOT history; the caller filters them out. */
+export interface HistoryTurn {
+  role: "user" | "model";
+  text: string;
+}
+
 export interface GenerateOptions {
   /** Override the configured model (default: GEMINI_MODEL env / gemini-2.5-flash). */
   model?: string;
   /** System instruction prepended by the SDK (does not count toward user input length). */
   systemInstruction?: string;
+  /** Prior conversation turns to feed to Gemini before the current
+   *  prompt. When provided, the SDK is called with the multi-turn
+   *  contents shape; when omitted, the legacy single-string shape is
+   *  used (preserves all existing callers / unit tests untouched).
+   *  The current prompt is appended as the final `role:"user"` turn. */
+  history?: HistoryTurn[];
   /** 0.0-1.0. Use 0 for classifiers, 0.7-ish for creative answers. */
   temperature?: number;
   /** When set to "application/json" plus a schema, Gemini returns valid JSON. */
@@ -56,6 +70,22 @@ export interface GenerateOptions {
   timeoutMs?: number;
   /** Max attempts including the first (default 3). 1 disables retry. */
   maxAttempts?: number;
+}
+
+/** Build the SDK `contents` argument. With no history: pass through
+ *  the prompt string unchanged (back-compat). With history: build a
+ *  Content[] array of {role, parts:[{text}]} turns and append the
+ *  current prompt as the final user turn. The SDK accepts both
+ *  shapes; the array shape is required for multi-turn context. */
+function buildContents(
+  prompt: string,
+  history: HistoryTurn[] | undefined,
+): string | Array<{ role: "user" | "model"; parts: Array<{ text: string }> }> {
+  if (!history || history.length === 0) return prompt;
+  return [
+    ...history.map((t) => ({ role: t.role, parts: [{ text: t.text }] })),
+    { role: "user" as const, parts: [{ text: prompt }] },
+  ];
 }
 
 export interface GenerateResult {
@@ -158,7 +188,11 @@ export async function generateStream(
   const start = Date.now();
   try {
     const iterator = await withTimeout(
-      client.models.generateContentStream({ model, contents: prompt, config }),
+      client.models.generateContentStream({
+        model,
+        contents: buildContents(prompt, opts.history),
+        config,
+      }),
       timeoutMs,
     );
 
@@ -233,7 +267,11 @@ export async function generate(
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       const response = await withTimeout(
-        client.models.generateContent({ model, contents: prompt, config }),
+        client.models.generateContent({
+          model,
+          contents: buildContents(prompt, opts.history),
+          config,
+        }),
         timeoutMs,
       );
       const latencyMs = Date.now() - start;

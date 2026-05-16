@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { generate } from "./gemini";
+import { generate, type HistoryTurn } from "./gemini";
 import type { WhitelistLocale } from "./whitelist-keywords";
 
 // Stage 2 of the two-stage Whitelist (master plan §2-2): when the
@@ -267,22 +267,23 @@ export interface ClassifierResult {
  */
 export async function classifyIndividualLLM(
   message: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _locale: WhitelistLocale,
+  history?: HistoryTurn[],
 ): Promise<ClassifierResult> {
   const start = Date.now();
-  // Diagnostic: log the input + which prompt revision is being used.
-  // Pair this with the per-request "raw response" + "parsed" logs below
-  // so dev-time mis-classifications can be traced end-to-end without
-  // adding any client-visible state. Keep messages truncated so PII-
-  // bearing inputs (already gated upstream, but defence in depth)
-  // don't get spilled into logs at full length.
+  // Diagnostic: log the input + history depth + which prompt revision
+  // is being used. Pair this with the per-request "raw response" +
+  // "parsed" logs below so dev-time mis-classifications can be traced
+  // end-to-end without adding any client-visible state. Keep messages
+  // truncated so PII-bearing inputs (already gated upstream, but
+  // defence in depth) don't get spilled into logs at full length.
   console.log(
-    `[whitelist-llm] classify start: msg='${message.slice(0, 120).replace(/\n/g, " ")}' promptFp=${SYSTEM_PROMPT_FINGERPRINT}`,
+    `[whitelist-llm] classify start: msg='${message.slice(0, 120).replace(/\n/g, " ")}' history=${history?.length ?? 0} promptFp=${SYSTEM_PROMPT_FINGERPRINT}`,
   );
   try {
     const result = await generate(message, {
       systemInstruction: SYSTEM_PROMPT,
+      history,
       temperature: 0,
       responseMimeType: "application/json",
       responseSchema: RESPONSE_SCHEMA,

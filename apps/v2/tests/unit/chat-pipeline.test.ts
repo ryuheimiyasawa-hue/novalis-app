@@ -20,6 +20,12 @@ vi.mock("@/lib/ai/rag", () => ({
     joinLatencyMs: 0,
   })),
 }));
+// Mock the persistence history loader so tests don't reach for the
+// admin Supabase client. Tests that exercise multi-turn behaviour
+// override this on a per-test basis.
+vi.mock("@/lib/chat/persistence", () => ({
+  loadConversationHistory: vi.fn(async () => []),
+}));
 
 import {
   processChat,
@@ -28,10 +34,12 @@ import {
 } from "@/lib/ai/chat-pipeline";
 import { generate, generateStream } from "@/lib/ai/gemini";
 import { retrieveContext } from "@/lib/ai/rag";
+import { loadConversationHistory } from "@/lib/chat/persistence";
 
 const mockGenerate = vi.mocked(generate);
 const mockGenerateStream = vi.mocked(generateStream);
 const mockRetrieveContext = vi.mocked(retrieveContext);
+const mockLoadHistory = vi.mocked(loadConversationHistory);
 
 beforeEach(() => {
   vi.resetAllMocks();
@@ -44,6 +52,8 @@ beforeEach(() => {
     matchLatencyMs: 0,
     joinLatencyMs: 0,
   });
+  // Default: no prior history. Multi-turn tests override.
+  mockLoadHistory.mockResolvedValue([]);
 });
 
 function classifierResponse(
@@ -504,5 +514,73 @@ describe("processChatStream", () => {
     );
     expect(r.kind).toBe("escalate");
     if (r.kind === "escalate") expect(r.reason).toBe("safety_block");
+  });
+});
+
+describe("processChat — conversation context (multi-turn)", () => {
+  it("loads history and threads it to BOTH the classifier and the answer call when conversationId is provided", async () => {
+    mockLoadHistory.mockResolvedValueOnce([
+      { role: "user", text: "ビザの相談がしたいんです" },
+      { role: "model", text: "どのビザについて知りたいですか？" },
+    ]);
+    mockGenerate
+      .mockResolvedValueOnce(classifierResponse("general", "continuation"))
+      .mockResolvedValueOnce(answerResponse("更新には ... が必要です。"));
+
+    const r = await processChat({
+      message: "更新です",
+      locale: "ja",
+      conversationId: "11111111-1111-1111-1111-111111111111",
+    });
+
+    expect(r.kind).toBe("answer");
+    expect(mockLoadHistory).toHaveBeenCalledWith(
+      "11111111-1111-1111-1111-111111111111",
+    );
+
+    // Both LLM calls (classifier + answer) must receive the same
+    // 2-turn history. The shape is what gemini.ts forwards to the SDK
+    // as multi-turn `contents`; the wrapper takes it via the `history`
+    // option, not by mutating the prompt string.
+    const expectedHistory = [
+      { role: "user", text: "ビザの相談がしたいんです" },
+      { role: "model", text: "どのビザについて知りたいですか？" },
+    ];
+    expect(mockGenerate.mock.calls[0][1]?.history).toEqual(expectedHistory);
+    expect(mockGenerate.mock.calls[1][1]?.history).toEqual(expectedHistory);
+  });
+
+  it("calls loadConversationHistory with null when no conversationId is given (single-turn back-compat)", async () => {
+    mockGenerate
+      .mockResolvedValueOnce(classifierResponse("general"))
+      .mockResolvedValueOnce(answerResponse("Working visas are 1, 3, or 5 years."));
+    await processChat({
+      message: "How long is a working visa?",
+      locale: "en",
+    });
+    expect(mockLoadHistory).toHaveBeenCalledWith(null);
+    // history defaults to [] from the mock; the wrapper should still
+    // be called with history:[] (or undefined-equivalent) — both
+    // collapse to single-turn shape in gemini.ts buildContents.
+    expect(mockGenerate.mock.calls[0][1]?.history).toEqual([]);
+    expect(mockGenerate.mock.calls[1][1]?.history).toEqual([]);
+  });
+
+  it("threads history to the smalltalk responder too (per Phase 1 history-aware design)", async () => {
+    mockLoadHistory.mockResolvedValueOnce([
+      { role: "user", text: "ありがとうございました" },
+    ]);
+    mockGenerate
+      .mockResolvedValueOnce(classifierResponse("smalltalk", "acknowledgement"))
+      .mockResolvedValueOnce(answerResponse("どういたしまして！"));
+    const r = await processChat({
+      message: "またよろしくお願いします",
+      locale: "ja",
+      conversationId: "22222222-2222-2222-2222-222222222222",
+    });
+    expect(r.kind).toBe("smalltalk");
+    expect(mockGenerate.mock.calls[1][1]?.history).toEqual([
+      { role: "user", text: "ありがとうございました" },
+    ]);
   });
 });

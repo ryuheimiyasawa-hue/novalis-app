@@ -10,7 +10,7 @@
 // reply (getSmalltalkReply) — escalating a "hello" would be a worse
 // UX than serving the polite canned line.
 
-import { generateStream, generate } from "./gemini";
+import { generateStream, generate, type HistoryTurn } from "./gemini";
 import type { WhitelistLocale } from "./whitelist-keywords";
 
 const SYSTEM_PROMPT = `You are a warm, polite assistant for foreigners (mostly Filipino) living in Japan.
@@ -67,9 +67,11 @@ export async function respondSmalltalkStream(
   message: string,
   locale: WhitelistLocale,
   onToken: (token: string) => void,
+  history?: HistoryTurn[],
 ): Promise<SmalltalkResult> {
   const result = await generateStream(wrapUserInput(message), {
     systemInstruction: systemPromptForLocale(locale),
+    history,
     onToken,
     ...COMMON_OPTS,
   });
@@ -83,9 +85,11 @@ export async function respondSmalltalkStream(
 export async function respondSmalltalk(
   message: string,
   locale: WhitelistLocale,
+  history?: HistoryTurn[],
 ): Promise<SmalltalkResult> {
   const result = await generate(wrapUserInput(message), {
     systemInstruction: systemPromptForLocale(locale),
+    history,
     ...COMMON_OPTS,
   });
   return result;

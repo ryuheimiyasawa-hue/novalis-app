@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
 
       try {
         const result = await processChatStream(
-          { message, locale },
+          { message, locale, conversationId },
           (e: StreamEvent) => send(e),
         );
 

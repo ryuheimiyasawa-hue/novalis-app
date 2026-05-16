@@ -1,5 +1,6 @@
 import { getAdminClient } from "@/lib/supabase/admin";
 import type { ChatAnswered, ChatResult } from "@/lib/ai/chat-pipeline";
+import type { HistoryTurn } from "@/lib/ai/gemini";
 
 // Persistence helpers for the W5 chat send endpoint. All writes go
 // through the service-role admin client because:
@@ -285,4 +286,55 @@ export async function persistResult(args: {
     await incrementChatUsage(args.userId, args.period);
   }
   return { userMessageId: userRow.id, replyMessageId: asst.id };
+}
+
+/**
+ * Fetch the most recent N user/assistant turns from a conversation,
+ * ordered chronologically (oldest first), ready to feed to Gemini as
+ * the `history` option of generate / generateStream.
+ *
+ * - role mapping: DB `user` → `user`, DB `assistant` → `model`.
+ *   `system` rows are escalation / block notifications that were never
+ *   actual AI conversation, so they are filtered out (including them
+ *   would prime the model to escalate again and confuse the dialogue
+ *   shape).
+ * - limit defaults to 10 turns (≈5 user + 5 assistant). Calibrated so
+ *   classifier + RAG context + history together stay well under
+ *   Gemini 2.5 Flash's 1M-token window with budget headroom.
+ * - returns [] when conversationId is null, when the conversation has
+ *   no prior turns, or when the fetch fails (we never want a history
+ *   error to break the chat reply — degrade gracefully to single-turn).
+ *
+ * NOTE: no ownership check. The route handler MUST call
+ * resolveConversation() first to validate the user owns the
+ * conversation; this loader trusts that gate.
+ */
+export async function loadConversationHistory(
+  conversationId: string | null,
+  limit = 10,
+): Promise<HistoryTurn[]> {
+  if (!conversationId) return [];
+  const admin = getAdminClient();
+  // Pull the most-recent `limit` rows in DESC order to bound the
+  // result set, then flip back to chronological for the model.
+  const { data, error } = await admin
+    .from("messages")
+    .select("role, content")
+    .eq("conversation_id", conversationId)
+    .in("role", ["user", "assistant"])
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) {
+    console.warn(
+      `[chat] loadConversationHistory failed (degrading to single-turn): ${error.message}`,
+    );
+    return [];
+  }
+  if (!data || data.length === 0) return [];
+  return data
+    .reverse()
+    .map<HistoryTurn>((row) => ({
+      role: row.role === "assistant" ? "model" : "user",
+      text: row.content,
+    }));
 }

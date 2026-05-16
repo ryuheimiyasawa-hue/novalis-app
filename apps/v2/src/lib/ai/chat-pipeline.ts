@@ -1,5 +1,5 @@
 import { detectPii, summarisePiiHits, type PiiType } from "@/lib/pii/detect";
-import { generate, generateStream } from "./gemini";
+import { generate, generateStream, type HistoryTurn } from "./gemini";
 import {
   detectIndividualKeywords,
   type WhitelistLocale,
@@ -10,6 +10,7 @@ import {
   respondSmalltalk,
   respondSmalltalkStream,
 } from "./conversational";
+import { loadConversationHistory } from "@/lib/chat/persistence";
 import {
   getAnswerDisclaimer,
   getEscalationMessage,
@@ -148,10 +149,15 @@ type Preflight =
 
 /** Run input validation, PII / KW / LLM gates, and RAG retrieval.
  *  Returns either an early-exit ChatResult (when the gates refuse
- *  the message) or the context payload to feed into generation. */
+ *  the message) or the context payload to feed into generation.
+ *  When `history` is provided, it is passed to the Stage2 classifier
+ *  so multi-turn context informs routing decisions (e.g. "更新です"
+ *  by itself is vague, but with prior "ビザの相談がしたい" it becomes
+ *  a clear continuation that the classifier can recognise). */
 async function preflight(input: {
   message: string;
   locale: WhitelistLocale;
+  history?: HistoryTurn[];
 }): Promise<Preflight> {
   const trimmed = input.message.trim();
 
@@ -218,7 +224,7 @@ async function preflight(input: {
     `[chat] keyword pass: locale=${input.locale} msg='${trimmed.slice(0, 80).replace(/\n/g, " ")}'`,
   );
 
-  const llm = await classifyIndividualLLM(trimmed, input.locale);
+  const llm = await classifyIndividualLLM(trimmed, input.locale, input.history);
   if (llm.failsafe) {
     console.log(
       `[chat] llm-failsafe escalate: error='${llm.failsafeError ?? "?"}' locale=${input.locale} latency=${llm.latencyMs}ms`,
@@ -332,19 +338,30 @@ function buildAnswered(args: {
  * batch / non-streaming caller. The streaming variant
  * processChatStream is structurally identical except for the
  * generate-vs-stream call.
+ *
+ * When `conversationId` is supplied, prior turns are fetched from the
+ * DB and threaded through the classifier + smalltalk + answer LLM
+ * calls so the model sees the dialogue context. With no conversationId
+ * (smoke endpoint, batch caller) the call stays single-turn.
  */
 export async function processChat(input: {
   message: string;
   locale: WhitelistLocale;
+  conversationId?: string;
 }): Promise<ChatResult> {
-  const pre = await preflight(input);
+  const history = await loadConversationHistory(input.conversationId ?? null);
+  const pre = await preflight({ ...input, history });
   if (pre.kind === "stop") return pre.result;
 
   if (pre.kind === "smalltalk") {
     try {
-      const r = await respondSmalltalk(input.message.trim(), input.locale);
+      const r = await respondSmalltalk(
+        input.message.trim(),
+        input.locale,
+        history,
+      );
       console.log(
-        `[chat] smalltalk-llm ok: locale=${input.locale} latency=${r.latencyMs}ms tokens=${r.tokensIn}/${r.tokensOut}`,
+        `[chat] smalltalk-llm ok: locale=${input.locale} history=${history.length} latency=${r.latencyMs}ms tokens=${r.tokensIn}/${r.tokensOut}`,
       );
       return { kind: "smalltalk", text: r.text.trim(), detail: pre.detail };
     } catch (err) {
@@ -362,6 +379,7 @@ export async function processChat(input: {
   try {
     answer = await generate(buildContents(input.message.trim(), pre.contextText), {
       systemInstruction: systemPromptForLocale(input.locale),
+      history,
       temperature: 0.7,
       maxOutputTokens: 800,
     });
@@ -421,10 +439,15 @@ export interface StreamEvent {
  * handler should still emit the corresponding final event.
  */
 export async function processChatStream(
-  input: { message: string; locale: WhitelistLocale },
+  input: {
+    message: string;
+    locale: WhitelistLocale;
+    conversationId?: string;
+  },
   onEvent: (event: StreamEvent) => void,
 ): Promise<ChatResult> {
-  const pre = await preflight(input);
+  const history = await loadConversationHistory(input.conversationId ?? null);
+  const pre = await preflight({ ...input, history });
   if (pre.kind === "stop") return pre.result;
 
   if (pre.kind === "smalltalk") {
@@ -433,9 +456,10 @@ export async function processChatStream(
         input.message.trim(),
         input.locale,
         (text) => onEvent({ type: "token", text }),
+        history,
       );
       console.log(
-        `[chat] smalltalk-llm-stream ok: locale=${input.locale} latency=${r.latencyMs}ms tokens=${r.tokensIn}/${r.tokensOut} finish=${r.finishReason}`,
+        `[chat] smalltalk-llm-stream ok: locale=${input.locale} history=${history.length} latency=${r.latencyMs}ms tokens=${r.tokensIn}/${r.tokensOut} finish=${r.finishReason}`,
       );
       // Trim outer whitespace only — preserve any internal newlines the
       // model produced. The accumulated text is what gets persisted +
@@ -465,6 +489,7 @@ export async function processChatStream(
       buildContents(input.message.trim(), pre.contextText),
       {
         systemInstruction: systemPromptForLocale(input.locale),
+        history,
         temperature: 0.7,
         maxOutputTokens: 800,
         onToken: (text) => onEvent({ type: "token", text }),
