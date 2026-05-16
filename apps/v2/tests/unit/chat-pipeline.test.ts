@@ -115,8 +115,10 @@ describe("processChat — input gates (no Gemini call)", () => {
 
 describe("processChat — Whitelist keyword path (no Gemini call)", () => {
   it("escalates when a Japanese first-person keyword fires", async () => {
+    // Stage1 keyword test must use one of the high-precision triggers
+    // that survived the bare-pronoun trim (see whitelist-keywords.ts).
     const r = await processChat({
-      message: "私のビザは技術ビザです、転職できますか？",
+      message: "在留期限が来月切れます、どうすればいいですか？",
       locale: "ja",
     });
     expect(r.kind).toBe("escalate");

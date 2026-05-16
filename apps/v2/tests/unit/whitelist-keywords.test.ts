@@ -7,9 +7,6 @@ describe("detectIndividualKeywords — ja", () => {
   // these tests. The keyword shape is exercised separately in the
   // "specific match" cases below.
   it.each([
-    "私のビザはいつ更新ですか？",
-    "私は永住権の申請を考えています",
-    "うちの子の就学手続きについて",
     "先月、解雇されました",
     "訴えたいのですが可能ですか",
     "離婚したいです",
@@ -24,35 +21,40 @@ describe("detectIndividualKeywords — ja", () => {
   });
 
   it.each([
-    ["私のビザの種類は？", "私の"],
     ["離婚したいです", "離婚したい"],
     ["DV を受けています", "DV"],
+    ["在留期限が今月で切れます", "在留期限が"],
   ])("matches the specific keyword: %s -> %s", (input, expected) => {
     const hit = detectIndividualKeywords(input, "ja");
     expect(hit?.keyword).toBe(expected);
   });
 
   it.each([
+    // General-information questions — keyword stage must not fire.
     "在留資格の更新には何が必要ですか？",
     "ビザの種類を教えてください",
     "日本年金機構の受付時間はいつですか？",
     "離婚制度の概要を教えてください",
     "解雇予告の一般的な期間は？",
-    "DV相談ナビとは何ですか？", // Mentions DV but as a public resource lookup.
+    // Soft personal narrative — handed to LLM stage, not auto-escalated.
+    // Stage1 used to fire on bare 私は / 私の / 先月 / 来月; we removed
+    // those patterns so vague "I'm worried" inputs reach the conversational
+    // path instead of being short-circuited to escalation.
+    "私のビザはいつ更新ですか？",
+    "私は最近少し困っています",
+    "うちの子の就学手続きについて知りたい",
+    "来月、引っ越しを考えています",
   ])("does NOT escalate: %s", (input) => {
     const hit = detectIndividualKeywords(input, "ja");
-    // 「離婚制度の概要」 contains "離婚" but our keyword is "離婚したい" /
-    // "離婚する" so this should pass. Same with "DV相談ナビ" — we'd
-    // accept the false positive on DV alone since safety > UX, but...
-    // we accept this miss; the next stage (LLM) catches genuinely
-    // borderline cases.
-    if (input.includes("DV相談ナビ")) {
-      // Our DV keyword fires here as a known false positive — accepted
-      // since LLM stage will not get to see it (we already escalated).
-      expect(hit?.keyword).toBe("DV");
-    } else {
-      expect(hit).toBeNull();
-    }
+    // Known accepted false positive: "DV相談ナビ" still fires the DV
+    // keyword. We left that miss in place — safety > UX, and LLM stage
+    // never sees it because keyword stage already escalated.
+    expect(hit).toBeNull();
+  });
+
+  it("DV substring still escalates as a known accepted false positive", () => {
+    const hit = detectIndividualKeywords("DV相談ナビとは何ですか？", "ja");
+    expect(hit?.keyword).toBe("DV");
   });
 });
 
@@ -128,8 +130,9 @@ describe("detectIndividualKeywords — locale isolation", () => {
   });
 
   it("first hit wins (early exit)", () => {
-    // "私の" should match before "離婚したい" given the order in the list.
+    // After dropping the bare 私の pattern, the same input now hits
+    // 離婚したい — same escalation outcome, different keyword label.
     const hit = detectIndividualKeywords("私の妻と離婚したいです", "ja");
-    expect(hit?.keyword).toBe("私の");
+    expect(hit?.keyword).toBe("離婚したい");
   });
 });

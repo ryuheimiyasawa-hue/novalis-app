@@ -35,42 +35,34 @@ interface Pattern {
   re: RegExp;
 }
 
+// Stage1 carries ONLY high-precision triggers — phrases that, when they
+// appear, almost certainly require a licensed professional. Bare
+// first-person pronouns (私は / うちの / etc.) and bare time markers
+// (先月 / 今月) used to live here, but they fired on every harmless
+// "I'm a bit worried lately" and pushed the user to escalation before
+// they had a chance to clarify. Those judgments now belong to the LLM
+// classifier in stage 2, which can read intent, not just surface form.
+// Conservative bias is preserved at stage 2 via prompt design.
 const JA_PATTERNS: Pattern[] = [
-  // First-person pronouns that show up in personal-situation questions.
-  { keyword: "私の", re: /私の/ },
-  { keyword: "私は", re: /私は/ },
-  { keyword: "私が", re: /私が/ },
-  { keyword: "うちの", re: /うちの/ },
-  { keyword: "うちは", re: /うちは/ },
-  { keyword: "自分の", re: /自分の/ },
-  { keyword: "自分は", re: /自分は/ },
-  // Personal time markers — "my situation last month / next month".
-  { keyword: "先月", re: /先月/ },
-  { keyword: "今月", re: /今月/ },
-  { keyword: "来月", re: /来月/ },
-  // Direct asks for individualised numerical / case-specific judgement.
-  { keyword: "いくら", re: /いくら/ },
-  { keyword: "何ヶ月", re: /何[ヶか]月/ },
-  { keyword: "何年", re: /何年/ },
-  { keyword: "具体的に", re: /具体的に/ },
-  { keyword: "私の場合", re: /私の場合/ },
   // Charged words that signal the user is *in* a situation, not asking
   // about the law in the abstract.
-  { keyword: "不当な", re: /不当[なに]/ },
   { keyword: "請求できますか", re: /請求できますか/ },
   { keyword: "訴えたい", re: /訴えたい/ },
   { keyword: "訴えられ", re: /訴えられ/ },
   { keyword: "離婚したい", re: /離婚したい/ },
   { keyword: "離婚する", re: /離婚する/ },
-  { keyword: "解雇された", re: /解雇された/ },
-  { keyword: "クビ", re: /クビ/ },
+  // Stem-only match so polite (解雇されました), continuous (解雇されて),
+  // and plain (解雇された) all hit. The bare noun 解雇 alone would
+  // false-trigger on general questions ("解雇予告とは"), so we anchor
+  // on the passive auxiliary され.
+  { keyword: "解雇され", re: /解雇され/ },
+  { keyword: "クビになっ", re: /クビにな/ },
   { keyword: "パワハラ", re: /パワハラ/ },
   { keyword: "セクハラ", re: /セクハラ/ },
   { keyword: "DV", re: /DV/ },
   // Visa / period expressions tied to the asker's own status.
   { keyword: "在留期限が", re: /在留期限が/ },
   { keyword: "期限が切れ", re: /期限が切れ/ },
-  { keyword: "失効", re: /失効/ },
   { keyword: "オーバーステイ", re: /オーバーステイ/ },
   // Money owed / unpaid — typically a personal claim.
   { keyword: "滞納", re: /滞納/ },

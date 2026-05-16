@@ -183,7 +183,7 @@ async function preflight(input: {
   const kwHit = detectIndividualKeywords(trimmed, input.locale);
   if (kwHit) {
     console.log(
-      `[chat] keyword escalate: kw='${kwHit.keyword}' locale=${input.locale}`,
+      `[chat] keyword escalate: kw='${kwHit.keyword}' locale=${input.locale} msg='${trimmed.slice(0, 80).replace(/\n/g, " ")}'`,
     );
     return {
       kind: "stop",
@@ -195,6 +195,12 @@ async function preflight(input: {
       },
     };
   }
+  // Diagnostic: log KW pass so we can confirm Stage1 was clean for any
+  // message that ends up escalated downstream — pinpoints whether the
+  // mis-classification happened at the regex stage or the LLM stage.
+  console.log(
+    `[chat] keyword pass: locale=${input.locale} msg='${trimmed.slice(0, 80).replace(/\n/g, " ")}'`,
+  );
 
   const llm = await classifyIndividualLLM(trimmed, input.locale);
   if (llm.failsafe) {

@@ -112,11 +112,14 @@ describe("classifyIndividualLLM (orchestration)", () => {
       expect.objectContaining({
         responseMimeType: "application/json",
         temperature: 0,
-        maxOutputTokens: 500,
-        // thinkingBudget=0 is critical for 2.5 Flash — without it,
-        // thinking tokens drain the output budget and the classifier
-        // returns truncated non-JSON. See whitelist-llm.ts comment.
-        thinkingBudget: 0,
+        // thinkingBudget=256 (was 0) lets the classifier reason through
+        // the (1) AND (2) gate instead of pattern-matching surface
+        // words like 「困った」「相談」 to "individual". See
+        // whitelist-llm.ts comment for the failure mode that drove
+        // this knob change. maxOutputTokens bumped accordingly so
+        // thinking + JSON output both fit under the combined cap.
+        thinkingBudget: 256,
+        maxOutputTokens: 1500,
       }),
     );
   });
