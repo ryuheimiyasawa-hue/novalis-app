@@ -6,6 +6,8 @@ import { ChatShell } from "@/components/chat/ChatShell";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { getAdminClient } from "@/lib/supabase/admin";
 import type { Citation } from "@/lib/ai/rag";
+import { ConversationsSidebar } from "./sidebar";
+import { MobileSidebar } from "./mobile-sidebar";
 
 export const dynamic = "force-dynamic";
 
@@ -69,7 +71,9 @@ function hydrate(row: MessageRow): HydratedMessage {
 
 // Web chat page. (authed)/layout.tsx already enforces requireAuth();
 // here we resolve the locale, optionally hydrate a prior conversation
-// from `?conversation_id=`, and hand everything to the client shell.
+// from `?conversation_id=`, render the always-visible past-
+// conversations sidebar (desktop) or hamburger trigger (mobile), and
+// hand the shell its initial messages.
 export default async function ChatPage({ params, searchParams }: Props) {
   const { locale } = await params;
   const { conversation_id } = await searchParams;
@@ -79,6 +83,10 @@ export default async function ChatPage({ params, searchParams }: Props) {
   ) as "ja" | "en" | "tl";
 
   const t = await getTranslations({ locale: safeLocale, namespace: "chat.ui" });
+  const tConv = await getTranslations({
+    locale: safeLocale,
+    namespace: "conversations",
+  });
 
   // Resolve optional conversation_id from the URL. We do the
   // ownership check + message fetch server-side so the client never
@@ -114,31 +122,63 @@ export default async function ChatPage({ params, searchParams }: Props) {
     // have manually edited the URL or arrived from a stale link.
   }
 
-  return (
-    <ChatShell
+  // The sidebar is the SAME server-rendered tree on desktop and mobile;
+  // mobile just wraps it in a drawer trigger. Computing it once keeps
+  // the conversation fetch single-shot.
+  const sidebar = (
+    <ConversationsSidebar
       locale={safeLocale}
-      initialConversationId={initialConversationId}
-      initialMessages={initialMessages}
-      labels={{
-        title: t("title"),
-        subtitle: t("subtitle"),
-        newConversation: t("newConversation"),
-        inputPlaceholder: t("inputPlaceholder"),
-        send: t("send"),
-        thinking: t("thinking"),
-        errorRetry: t("errorRetry"),
-        errorGeneric: t("errorGeneric"),
-        errorQuota: t("errorQuota"),
-        errorAuth: t("errorAuth"),
-        expertHeading: t("expertHeading"),
-        expertSchedule: t("expertSchedule"),
-        noExperts: t("noExperts"),
-        contactCta: t("contactCta"),
-        citationsHeading: t("citationsHeading"),
-        youLabel: t("youLabel"),
-        assistantLabel: t("assistantLabel"),
-        systemLabel: t("systemLabel"),
-      }}
+      activeConversationId={initialConversationId}
     />
+  );
+
+  return (
+    <div className="flex h-[calc(100vh-4rem)]">
+      {/* Desktop sidebar — fixed 260px column, hidden on mobile. */}
+      <div className="hidden w-[260px] shrink-0 md:flex md:flex-col">
+        {sidebar}
+      </div>
+
+      {/* Chat area. The mobile hamburger sits at the top of this column
+          and opens the same sidebar in a drawer. */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex items-center gap-2 border-b border-border px-3 py-2 md:hidden">
+          <MobileSidebar label={tConv("title")}>{sidebar}</MobileSidebar>
+          <span className="text-sm font-semibold">{t("title")}</span>
+        </div>
+        <div className="min-h-0 flex-1">
+          <ChatShell
+            // key forces ChatShell to remount when the URL conversation
+            // switches — without this, switching threads in the sidebar
+            // would leave the previous conversation's messages on screen
+            // because ChatShell only seeds state from props on first mount.
+            key={initialConversationId ?? "new"}
+            locale={safeLocale}
+            initialConversationId={initialConversationId}
+            initialMessages={initialMessages}
+            labels={{
+              title: t("title"),
+              subtitle: t("subtitle"),
+              newConversation: t("newConversation"),
+              inputPlaceholder: t("inputPlaceholder"),
+              send: t("send"),
+              thinking: t("thinking"),
+              errorRetry: t("errorRetry"),
+              errorGeneric: t("errorGeneric"),
+              errorQuota: t("errorQuota"),
+              errorAuth: t("errorAuth"),
+              expertHeading: t("expertHeading"),
+              expertSchedule: t("expertSchedule"),
+              noExperts: t("noExperts"),
+              contactCta: t("contactCta"),
+              citationsHeading: t("citationsHeading"),
+              youLabel: t("youLabel"),
+              assistantLabel: t("assistantLabel"),
+              systemLabel: t("systemLabel"),
+            }}
+          />
+        </div>
+      </div>
+    </div>
   );
 }

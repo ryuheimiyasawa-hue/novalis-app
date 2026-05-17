@@ -94,6 +94,12 @@ export function ChatShell({
     const message = input.trim();
     if (!message || isStreaming) return;
 
+    // Capture the conversation state at the moment of send: when this
+    // is the first message of a fresh thread (no conversationId yet),
+    // we need to refresh the parent server tree after the stream ends
+    // so the new row appears in the past-conversations sidebar.
+    const wasNewConversation = conversationId === null;
+
     setMessages((prev) => [
       ...prev,
       { id: nextId(), role: "user", content: message },
@@ -201,6 +207,14 @@ export function ChatShell({
     });
     setStreamingText("");
     setIsStreaming(false);
+
+    // Sidebar refresh: only when we just started a brand-new thread.
+    // Subsequent turns within the same conversation do not need a
+    // server-tree refresh — the sidebar already shows this row, and
+    // its updated_at only changes if the user re-opens the thread.
+    if (wasNewConversation) {
+      router.refresh();
+    }
   }
 
   function onInputKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -219,8 +233,10 @@ export function ChatShell({
   };
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-4rem)] max-w-3xl flex-col gap-3 p-4">
-      <header className="flex items-end justify-between gap-3 border-b border-border pb-3">
+    <div className="mx-auto flex h-full max-w-3xl flex-col gap-3 p-4">
+      {/* Header — title + subtitle only on desktop; the mobile chat
+          page renders its own header with the hamburger trigger. */}
+      <header className="hidden items-end justify-between gap-3 border-b border-border pb-3 md:flex">
         <div>
           <h1 className="text-xl font-bold">{labels.title}</h1>
           <p className="text-sm text-muted-foreground">{labels.subtitle}</p>
