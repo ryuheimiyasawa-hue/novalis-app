@@ -9,13 +9,23 @@ const baseSchema = z.object({
   GEMINI_API_KEY: z.string().min(1),
   GEMINI_MODEL: z.string().min(1).default("gemini-2.5-flash"),
   GEMINI_TIMEOUT_MS: z.coerce.number().int().min(1000).max(120000).default(30000),
-  SENTRY_DSN: z.string().min(1),
-  NEXT_PUBLIC_SENTRY_DSN: z.string().min(1),
-  SENTRY_ORG: z.string().min(1),
-  SENTRY_PROJECT: z.string().min(1),
+  // Sentry is opt-in: when DSN is set the SDK initialises and reports;
+  // when unset the init guards in sentry.{server,edge}.config.ts /
+  // instrumentation-client.ts no-op. Keeping these optional unblocks
+  // MVP demo deploy without forcing a Sentry project to exist first.
+  // Phase 2 will flip these back to required once monitoring is on the
+  // critical path (per Lesson 25 — silent persistence failure).
+  SENTRY_DSN: z.string().min(1).optional(),
+  NEXT_PUBLIC_SENTRY_DSN: z.string().min(1).optional(),
+  SENTRY_ORG: z.string().min(1).optional(),
+  SENTRY_PROJECT: z.string().min(1).optional(),
   NEXT_PUBLIC_APP_URL: z.string().url(),
   NEXT_PUBLIC_DEFAULT_LOCALE: z.enum(["ja", "en", "tl"]).default("ja"),
   NEXT_PUBLIC_PAYMENT_ENABLED: z.enum(["true", "false"]).default("false"),
+  // MVP-E: Google Form embed URL for the contact page. Optional —
+  // when unset, the /contact page falls back to a "preparing" notice
+  // so demo / preview environments do not 500.
+  NEXT_PUBLIC_CONTACT_FORM_URL: z.string().url().optional(),
 });
 
 const paymentEnabledSchema = baseSchema.extend({
