@@ -69,12 +69,20 @@ export default async function DashboardPage({
                 {t("chatCtaBody")}
               </p>
             </div>
-            <Link
-              href={`/${safeLocale}/chat`}
-              className="inline-flex items-center justify-center rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
-            >
-              {t("chatCtaButton")}
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href={`/${safeLocale}/chat`}
+                className="inline-flex items-center justify-center rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
+              >
+                {t("chatCtaButton")}
+              </Link>
+              <Link
+                href={`/${safeLocale}/conversations`}
+                className="inline-flex items-center justify-center rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              >
+                {t("conversationsCtaButton")}
+              </Link>
+            </div>
           </div>
         </section>
       </main>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -11,6 +12,12 @@ import { EscalationCard } from "./EscalationCard";
 
 interface Props {
   locale: "ja" | "en" | "tl";
+  /** When the user follows a `/chat?conversation_id=...` link from
+   *  the past-conversations page, the chat page resolves the row
+   *  server-side and passes the prior messages here so the shell
+   *  hydrates with them on mount. Omit for a fresh conversation. */
+  initialConversationId?: string;
+  initialMessages?: UiMessage[];
   labels: {
     title: string;
     subtitle: string;
@@ -44,10 +51,20 @@ interface UiMessage {
 let localIdCounter = 0;
 const nextId = () => `local-${++localIdCounter}-${Date.now()}`;
 
-export function ChatShell({ locale, labels }: Props) {
-  const [messages, setMessages] = useState<UiMessage[]>([]);
+export function ChatShell({
+  locale,
+  initialConversationId,
+  initialMessages,
+  labels,
+}: Props) {
+  const router = useRouter();
+  const [messages, setMessages] = useState<UiMessage[]>(
+    () => initialMessages ?? [],
+  );
   const [input, setInput] = useState("");
-  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [conversationId, setConversationId] = useState<string | null>(
+    initialConversationId ?? null,
+  );
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingText, setStreamingText] = useState("");
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
@@ -65,6 +82,10 @@ export function ChatShell({ locale, labels }: Props) {
     setConversationId(null);
     setStreamingText("");
     setIsStreaming(false);
+    // Strip the ?conversation_id=... query so a reload doesn't put us
+    // back into the now-cleared conversation. router.replace keeps the
+    // navigation out of history.
+    router.replace(`/${locale}/chat`);
     inputRef.current?.focus();
   }
 

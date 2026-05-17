@@ -54,9 +54,18 @@
     "chatCtaTitle": "Ask the AI assistant",
     "chatCtaBody": "Ask general questions about residence status, health insurance, your child's school, or government procedures — anything about life in Japan.",
     "chatCtaButton": "Start a consultation",
+    "conversationsCtaButton": "View past consultations",
     "footerTerms": "Terms",
     "footerPrivacy": "Privacy",
     "footerLanguage": "Language"
+  },
+  "conversations": {
+    "title": "Past consultations",
+    "subtitle": "Your prior consultations. Open any to continue where you left off.",
+    "newButton": "Start a new consultation",
+    "empty": "No consultations yet. Tap \"Start a new consultation\" to begin.",
+    "untitled": "(untitled)",
+    "loadError": "Failed to load past consultations. Please try again in a moment."
   },
   "legal": {
     "termsTitle": "Terms of Service",
