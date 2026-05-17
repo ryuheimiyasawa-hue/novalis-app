@@ -50,6 +50,7 @@ export const PrefectureCodeSchema = z
   .regex(/^JP-\d{2}$/, "expected JP-NN (e.g. JP-13)");
 
 const ArticleStatusEnum = z.enum(["draft", "published", "archived"]);
+const VideoProviderEnum = z.enum(["youtube", "vimeo"]);
 
 // ---------- articles ----------
 
@@ -65,6 +66,11 @@ export const ArticleCreateSchema = z.object({
   body_tl: z.string().max(50_000).nullable().optional(),
   prefecture_code: PrefectureCodeSchema.nullable().optional(),
   city_name: z.string().max(100).nullable().optional(),
+  // Optional video embed (MVP-D). DB CHECK constrains
+  // video_provider to youtube/vimeo; we mirror that here so the API
+  // rejects unknown providers before the round-trip.
+  video_url: z.string().url().max(500).nullable().optional(),
+  video_provider: VideoProviderEnum.nullable().optional(),
 });
 export type ArticleCreateInput = z.infer<typeof ArticleCreateSchema>;
 
@@ -80,6 +86,8 @@ export const ArticleUpdateSchema = z.object({
   body_tl: z.string().max(50_000).nullable().optional(),
   prefecture_code: PrefectureCodeSchema.nullable().optional(),
   city_name: z.string().max(100).nullable().optional(),
+  video_url: z.string().url().max(500).nullable().optional(),
+  video_provider: VideoProviderEnum.nullable().optional(),
 });
 export type ArticleUpdateInput = z.infer<typeof ArticleUpdateSchema>;
 

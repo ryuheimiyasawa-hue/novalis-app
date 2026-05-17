@@ -13,7 +13,7 @@ type ArticleUpdate = Database["public"]["Tables"]["articles"]["Update"];
 const UuidSchema = z.string().uuid();
 
 const FULL_SELECT =
-  "id, category_id, slug, status, title_ja, title_en, title_tl, body_ja, body_en, body_tl, prefecture_code, city_name, author_id, published_at, created_at, updated_at";
+  "id, category_id, slug, status, title_ja, title_en, title_tl, body_ja, body_en, body_tl, prefecture_code, city_name, author_id, published_at, video_url, video_provider, created_at, updated_at";
 
 export async function GET(
   _req: NextRequest,

@@ -35,6 +35,9 @@ interface FormState {
   body_tl: string;
   prefecture_code: string;
   city_name: string;
+  // MVP-D: optional single video embed (provider + URL).
+  video_provider: "" | "youtube" | "vimeo";
+  video_url: string;
 }
 
 const NULL_PREFECTURE = "__none__";
@@ -53,6 +56,8 @@ function emptyForm(): FormState {
     body_tl: "",
     prefecture_code: NULL_PREFECTURE,
     city_name: "",
+    video_provider: "",
+    video_url: "",
   };
 }
 
@@ -69,10 +74,13 @@ function fromInitial(a: ArticleFull): FormState {
     body_tl: a.body_tl ?? "",
     prefecture_code: a.prefecture_code ?? NULL_PREFECTURE,
     city_name: a.city_name ?? "",
+    video_provider: a.video_provider ?? "",
+    video_url: a.video_url ?? "",
   };
 }
 
 function buildPayload(form: FormState) {
+  const videoUrlTrimmed = form.video_url.trim();
   return {
     slug: form.slug.trim(),
     category_id: form.category_id === NULL_CATEGORY ? null : form.category_id,
@@ -86,6 +94,12 @@ function buildPayload(form: FormState) {
     prefecture_code:
       form.prefecture_code === NULL_PREFECTURE ? null : form.prefecture_code,
     city_name: form.city_name.trim() || null,
+    // Video pair is all-or-nothing: send both as null when either is
+    // empty, so the API never has to handle "URL without provider".
+    video_url:
+      videoUrlTrimmed && form.video_provider ? videoUrlTrimmed : null,
+    video_provider:
+      videoUrlTrimmed && form.video_provider ? form.video_provider : null,
   };
 }
 
@@ -279,6 +293,46 @@ export function ArticleForm({ mode, categories, initial }: Props) {
             value={form.city_name}
             onChange={(e) => update("city_name", e.target.value)}
           />
+        </div>
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-sm font-semibold">動画埋め込み（任意）</h2>
+        <p className="text-xs text-muted-foreground">
+          YouTube / Vimeo のみ。記事冒頭に1本だけ表示されます。空欄で削除。
+        </p>
+        <div className="grid grid-cols-12 gap-3">
+          <div className="col-span-3 space-y-1.5">
+            <Label htmlFor="video_provider">プロバイダ</Label>
+            <Select
+              value={form.video_provider || NULL_CATEGORY}
+              onValueChange={(v) =>
+                update(
+                  "video_provider",
+                  v === NULL_CATEGORY ? "" : (v as "youtube" | "vimeo"),
+                )
+              }
+            >
+              <SelectTrigger id="video_provider">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NULL_CATEGORY}>未設定</SelectItem>
+                <SelectItem value="youtube">YouTube</SelectItem>
+                <SelectItem value="vimeo">Vimeo</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="col-span-9 space-y-1.5">
+            <Label htmlFor="video_url">URL</Label>
+            <Input
+              id="video_url"
+              value={form.video_url}
+              onChange={(e) => update("video_url", e.target.value)}
+              placeholder="https://www.youtube.com/watch?v=..."
+              className="font-mono text-sm"
+            />
+          </div>
         </div>
       </section>
 

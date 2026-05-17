@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { routing } from "@/lib/i18n/routing";
+import { parseVideo, buildEmbedUrl } from "@/lib/articles/video";
 
 // Minimum-viable article detail page. Renders the markdown body of a
 // published article so chat citations like /[locale]/articles/<slug>
@@ -30,6 +31,8 @@ interface ArticleRow {
   body_en: string | null;
   body_tl: string | null;
   published_at: string | null;
+  video_url: string | null;
+  video_provider: string | null;
   category:
     | { slug: string; name_ja: string; name_en: string; name_tl: string }
     | null;
@@ -72,7 +75,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
   const { data, error } = await admin
     .from("articles")
     .select(
-      "slug, status, title_ja, title_en, title_tl, body_ja, body_en, body_tl, published_at, category:categories(slug, name_ja, name_en, name_tl)",
+      "slug, status, title_ja, title_en, title_tl, body_ja, body_en, body_tl, published_at, video_url, video_provider, category:categories(slug, name_ja, name_en, name_tl)",
     )
     .eq("slug", slug)
     .eq("status", "published")
@@ -88,6 +91,10 @@ export default async function ArticleDetailPage({ params }: PageProps) {
   const title = pickTitle(article, safeLocale);
   const body = pickBody(article, safeLocale);
   const categoryName = pickCategoryName(article, safeLocale);
+  // Optional video embed: only render when both the provider and URL
+  // parse to a known shape. Editors might paste a broken URL — better
+  // to silently drop than to surface a broken iframe.
+  const video = parseVideo(article.video_provider, article.video_url);
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
@@ -114,6 +121,19 @@ export default async function ArticleDetailPage({ params }: PageProps) {
           </p>
         )}
       </header>
+      {video && (
+        <div className="mb-6 aspect-video w-full overflow-hidden rounded-md border border-border bg-black">
+          <iframe
+            src={buildEmbedUrl(video)}
+            title={title}
+            loading="lazy"
+            allow="accelerometer; encrypted-media; picture-in-picture; fullscreen"
+            allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin"
+            className="h-full w-full"
+          />
+        </div>
+      )}
       {/*
         prose styles: rely on shadcn's default typography here — the
         body has Heading 2 / lists / bold runs that Tailwind handles

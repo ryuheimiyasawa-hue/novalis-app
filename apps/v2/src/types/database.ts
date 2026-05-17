@@ -259,6 +259,8 @@ export type Database = {
           city_name: string | null;
           author_id: string | null;
           published_at: string | null;
+          video_url: string | null;
+          video_provider: "youtube" | "vimeo" | null;
           created_at: string;
           updated_at: string;
         };
@@ -277,6 +279,8 @@ export type Database = {
           city_name?: string | null;
           author_id?: string | null;
           published_at?: string | null;
+          video_url?: string | null;
+          video_provider?: "youtube" | "vimeo" | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -294,6 +298,8 @@ export type Database = {
           city_name: string | null;
           author_id: string | null;
           published_at: string | null;
+          video_url: string | null;
+          video_provider: "youtube" | "vimeo" | null;
           updated_at: string;
         }>;
         Relationships: [
