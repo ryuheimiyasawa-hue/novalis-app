@@ -31,7 +31,6 @@ interface Props {
     errorAuth: string;
     expertHeading: string;
     expertSchedule: string;
-    noExperts: string;
     contactCta: string;
     citationsHeading: string;
     youLabel: string;
@@ -259,7 +258,6 @@ export function ChatShell({
               labels={{
                 heading: labels.expertHeading,
                 book: labels.expertSchedule,
-                none: labels.noExperts,
                 contactCta: labels.contactCta,
               }}
             />

@@ -169,7 +169,6 @@ export default async function ChatPage({ params, searchParams }: Props) {
               errorAuth: t("errorAuth"),
               expertHeading: t("expertHeading"),
               expertSchedule: t("expertSchedule"),
-              noExperts: t("noExperts"),
               contactCta: t("contactCta"),
               citationsHeading: t("citationsHeading"),
               youLabel: t("youLabel"),

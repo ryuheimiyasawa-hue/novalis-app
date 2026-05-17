@@ -32,7 +32,7 @@ describe("disclaimers i18n source", () => {
 
   it("returns the Japanese escalation copy verbatim from messages/ja.json", () => {
     expect(getEscalationMessage("ja")).toBe(
-      "ご質問の内容は個別の状況に応じた専門的な判断が必要なため、専門家にご相談されることをお勧めします。Novalis 提携の士業窓口を以下にご紹介します。",
+      "ご質問の内容は個別の状況に応じた専門的な判断が必要なため、専門家へのご相談をお勧めします。下記の窓口よりお気軽にご相談ください。",
     );
   });
 

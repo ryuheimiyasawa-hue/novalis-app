@@ -17,11 +17,20 @@ interface Expert {
 interface Props {
   body: string;
   locale: "ja" | "en" | "tl";
-  labels: { heading: string; book: string; none: string; contactCta: string };
+  labels: { heading: string; book: string; contactCta: string };
 }
 
 // Renders the escalation message + a list of active experts pulled
 // from /api/experts. Public endpoint, no auth required.
+//
+// Layout decisions (Phase 1 polish):
+//   - CardHeader (heading: "おすすめの専門家") is rendered ONLY when
+//     experts.length > 0. With zero experts the heading would dangle
+//     above empty content, and the body + Contact button below already
+//     carry the action.
+//   - Empty-state filler ("現在ご紹介できる専門家がいません") was
+//     removed; the always-visible Contact button is the real action,
+//     and the previous text was redundant with it.
 export function EscalationCard({ body, locale, labels }: Props) {
   const [experts, setExperts] = useState<Expert[] | null>(null);
 
@@ -52,20 +61,23 @@ export function EscalationCard({ body, locale, labels }: Props) {
     return e.specialty_ja ?? "";
   }
 
+  const hasExperts = Array.isArray(experts) && experts.length > 0;
+
   return (
     <Card className="border-amber-300 bg-amber-50/40">
-      <CardHeader>
-        <CardTitle className="text-base">{labels.heading}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
+      {hasExperts && (
+        <CardHeader>
+          <CardTitle className="text-base">{labels.heading}</CardTitle>
+        </CardHeader>
+      )}
+      <CardContent className="space-y-3 pt-6">
         <p className="whitespace-pre-line text-sm">{body}</p>
-        {experts === null ? (
+        {experts === null && (
           <p className="text-xs text-muted-foreground">…</p>
-        ) : experts.length === 0 ? (
-          <p className="text-xs text-muted-foreground">{labels.none}</p>
-        ) : (
+        )}
+        {hasExperts && (
           <ul className="space-y-2">
-            {experts.map((e) => (
+            {experts!.map((e) => (
               <li
                 key={e.id}
                 className="flex items-center justify-between rounded border border-border bg-background px-3 py-2"
