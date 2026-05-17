@@ -79,6 +79,13 @@
     "next": "次へ",
     "pageOf": "{page} / {total} ページ"
   },
+  "contact": {
+    "title": "Novalis お問い合わせ",
+    "subtitle": "ご相談・ご質問・サービスへのフィードバックなど、お気軽にお寄せください。担当者からご連絡いたします。",
+    "backToDashboard": "ダッシュボードへ戻る",
+    "loading": "フォーム読み込み中...",
+    "notConfigured": "現在お問い合わせフォームを準備中です。お手数ですが少々お待ちください。"
+  },
   "legal": {
     "termsTitle": "利用規約",
     "privacyTitle": "プライバシーポリシー"
@@ -108,6 +115,7 @@
       "expertHeading": "おすすめの専門家",
       "expertSchedule": "予約する",
       "noExperts": "現在ご紹介できる専門家がいません。後ほどお試しください。",
+      "contactCta": "Novalis サポートに問い合わせる",
       "citationsHeading": "参考",
       "youLabel": "あなた",
       "assistantLabel": "AI アシスタント",

@@ -79,6 +79,13 @@
     "next": "Next",
     "pageOf": "Page {page} of {total}"
   },
+  "contact": {
+    "title": "Contact Novalis",
+    "subtitle": "Send us a question, request, or feedback. A team member will get back to you.",
+    "backToDashboard": "Back to dashboard",
+    "loading": "Loading form...",
+    "notConfigured": "The contact form is being prepared. Please check back shortly."
+  },
   "legal": {
     "termsTitle": "Terms of Service",
     "privacyTitle": "Privacy Policy"
@@ -108,6 +115,7 @@
       "expertHeading": "Recommended experts",
       "expertSchedule": "Book",
       "noExperts": "No experts available right now. Please try again later.",
+      "contactCta": "Contact Novalis support",
       "citationsHeading": "References",
       "youLabel": "You",
       "assistantLabel": "AI Assistant",

@@ -32,6 +32,7 @@ interface Props {
     expertHeading: string;
     expertSchedule: string;
     noExperts: string;
+    contactCta: string;
     citationsHeading: string;
     youLabel: string;
     assistantLabel: string;
@@ -243,6 +244,7 @@ export function ChatShell({
                 heading: labels.expertHeading,
                 book: labels.expertSchedule,
                 none: labels.noExperts,
+                contactCta: labels.contactCta,
               }}
             />
           ) : (

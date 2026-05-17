@@ -17,7 +17,7 @@ interface Expert {
 interface Props {
   body: string;
   locale: "ja" | "en" | "tl";
-  labels: { heading: string; book: string; none: string };
+  labels: { heading: string; book: string; none: string; contactCta: string };
 }
 
 // Renders the escalation message + a list of active experts pulled
@@ -96,6 +96,22 @@ export function EscalationCard({ body, locale, labels }: Props) {
             ))}
           </ul>
         )}
+        {/*
+          Standing fallback: even when an expert is shown, the user may
+          prefer to write to Novalis support directly. New tab so they
+          don't lose the chat context behind them.
+        */}
+        <div className="pt-1">
+          <Button asChild size="sm" variant="secondary">
+            <a
+              href={`/${locale}/contact`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {labels.contactCta}
+            </a>
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
