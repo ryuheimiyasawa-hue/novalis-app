@@ -84,6 +84,21 @@ export default async function DashboardPage({
               </Link>
             </div>
           </div>
+
+          <div className="rounded-md border border-neutral-200 dark:border-neutral-800 p-6 space-y-4">
+            <div className="space-y-2">
+              <h2 className="text-lg font-semibold">{t("articlesCtaTitle")}</h2>
+              <p className="text-sm text-neutral-600 dark:text-neutral-300">
+                {t("articlesCtaBody")}
+              </p>
+            </div>
+            <Link
+              href={`/${safeLocale}/articles`}
+              className="inline-flex items-center justify-center rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            >
+              {t("articlesCtaButton")}
+            </Link>
+          </div>
         </section>
       </main>
 

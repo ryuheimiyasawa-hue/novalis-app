@@ -55,6 +55,9 @@
     "chatCtaBody": "在留資格・健康保険・お子さんの学校・行政手続きなど、日本での暮らしに関する一般的なご質問にお気軽にどうぞ。",
     "chatCtaButton": "相談を始める",
     "conversationsCtaButton": "過去の相談を見る",
+    "articlesCtaTitle": "記事を読む",
+    "articlesCtaBody": "日本での暮らしに役立つ情報をまとめた記事一覧です。在留資格・保険・教育・税金などのテーマで掲載しています。",
+    "articlesCtaButton": "記事一覧を見る",
     "footerTerms": "利用規約",
     "footerPrivacy": "プライバシーポリシー",
     "footerLanguage": "言語"
@@ -66,6 +69,15 @@
     "empty": "まだ相談はありません。「新しい相談を始める」から始めましょう。",
     "untitled": "(無題)",
     "loadError": "相談一覧の取得に失敗しました。時間を置いて再度お試しください。"
+  },
+  "articlesList": {
+    "title": "記事一覧",
+    "subtitle": "日本での暮らしに役立つ情報。在留資格・保険・教育・税金などのテーマで掲載しています。",
+    "empty": "現在公開されている記事はありません。",
+    "loadError": "記事一覧の取得に失敗しました。時間を置いて再度お試しください。",
+    "prev": "前へ",
+    "next": "次へ",
+    "pageOf": "{page} / {total} ページ"
   },
   "legal": {
     "termsTitle": "利用規約",

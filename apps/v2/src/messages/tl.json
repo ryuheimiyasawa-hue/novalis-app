@@ -55,6 +55,9 @@
     "chatCtaBody": "Magtanong tungkol sa visa, health insurance, paaralan ng inyong anak, o mga pamamaraan ng gobyerno — anumang bagay tungkol sa pamumuhay sa Japan.",
     "chatCtaButton": "Simulan ang konsultasyon",
     "conversationsCtaButton": "Tingnan ang mga nakaraang konsultasyon",
+    "articlesCtaTitle": "Magbasa ng mga artikulo",
+    "articlesCtaBody": "Mga artikulong tumutulong sa buhay sa Japan — visa, insurance, paaralan, buwis, at iba pa.",
+    "articlesCtaButton": "Tingnan ang mga artikulo",
     "footerTerms": "Tuntunin",
     "footerPrivacy": "Privacy",
     "footerLanguage": "Wika"
@@ -66,6 +69,15 @@
     "empty": "Wala pang konsultasyon. Pindutin ang \"Magsimula ng bagong konsultasyon\" upang magsimula.",
     "untitled": "(walang pamagat)",
     "loadError": "Hindi nakuha ang mga nakaraang konsultasyon. Paki-ulit pagkalipas ng ilang sandali."
+  },
+  "articlesList": {
+    "title": "Mga artikulo",
+    "subtitle": "Mga artikulong tumutulong sa buhay sa Japan — visa, insurance, paaralan, buwis, at iba pa.",
+    "empty": "Wala pang nai-publish na artikulo.",
+    "loadError": "Hindi nakuha ang mga artikulo. Paki-ulit pagkalipas ng ilang sandali.",
+    "prev": "Nakaraan",
+    "next": "Susunod",
+    "pageOf": "Pahina {page} ng {total}"
   },
   "legal": {
     "termsTitle": "Mga Tuntunin ng Serbisyo",

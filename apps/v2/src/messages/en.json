@@ -55,6 +55,9 @@
     "chatCtaBody": "Ask general questions about residence status, health insurance, your child's school, or government procedures — anything about life in Japan.",
     "chatCtaButton": "Start a consultation",
     "conversationsCtaButton": "View past consultations",
+    "articlesCtaTitle": "Read articles",
+    "articlesCtaBody": "Curated articles about life in Japan — visas, insurance, schooling, taxes, and more.",
+    "articlesCtaButton": "Browse articles",
     "footerTerms": "Terms",
     "footerPrivacy": "Privacy",
     "footerLanguage": "Language"
@@ -66,6 +69,15 @@
     "empty": "No consultations yet. Tap \"Start a new consultation\" to begin.",
     "untitled": "(untitled)",
     "loadError": "Failed to load past consultations. Please try again in a moment."
+  },
+  "articlesList": {
+    "title": "Articles",
+    "subtitle": "Curated articles about life in Japan — visas, insurance, schooling, taxes, and more.",
+    "empty": "No published articles yet.",
+    "loadError": "Failed to load articles. Please try again in a moment.",
+    "prev": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page} of {total}"
   },
   "legal": {
     "termsTitle": "Terms of Service",
