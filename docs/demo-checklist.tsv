@@ -1,0 +1,76 @@
+カテゴリ	項目No.	確認内容	期待結果	URL/操作	担当	確認日	結果(OK/NG)	備考
+認証	1.1	新規ユーザーが Facebook ログインから onboarding 完了まで到達できる	ダッシュボードに遷移、profiles 行が作成される	/ja → 「Facebookでログイン」→ FB 認可 → onboarding form 入力
+認証	1.2	既存ユーザーが Facebook ログイン後、直接ダッシュボードに遷移	onboarding をスキップしてダッシュボード表示	2回目以降のログイン
+認証	1.3	ログアウトボタンが機能する	ログイン画面にリダイレクト、セッション破棄	ダッシュボード右上 → ログアウト
+認証	1.4	Facebook 認可拒否時のエラー表示	「Facebookログインがキャンセルされました」トースト	FB 認可画面で「キャンセル」
+認証	1.5	未認証で /chat 直接アクセス時にログイン画面リダイレクト	ログイン画面に飛ぶ	未ログイン状態で /ja/chat 直接 URL アクセス
+認証	1.6	未 onboarded で /chat アクセス時に onboarding 画面リダイレクト	onboarding 画面に飛ぶ	onboarding 未完了のまま /chat アクセス
+AI相談 基本	2.1	新規会話で1ターン目の質問が送れる	user メッセージ表示 + AI 応答ストリーミング	/chat → 「ビザ更新には何が必要?」送信
+AI相談 基本	2.2	AI 応答に citation [#1] [#2] が表示される	citation バッジ表示、クリックで別タブで記事詳細遷移	general 質問送信
+AI相談 基本	2.3	disclaimer が AI 応答の末尾に表示される	「これは一般的な情報であり…」が応答下に表示	answer 系応答
+AI相談 基本	2.4	曖昧質問で AI が聞き返しを行う	1〜2文で具体的な選択肢を提示する聞き返し	「ビザの相談がしたい」「困った」等送信
+AI相談 基本	2.5	smalltalk が自然な応答になる	「こんにちは」等で AI が自然な挨拶を返す	「こんにちは」「ありがとう」送信
+AI相談 基本	2.6	具体個別質問で escalate される	EscalationCard 表示、専門家リスト + Contact ボタン	「特定技能で転職したい、会社が非協力」送信
+AI相談 基本	2.7	keyword escalate が動作する	即 escalate（LLM 呼び出しなし）	「離婚したい」「在留期限が来月切れる」送信
+AI相談 基本	2.8	PII 入力ブロックが動作する	「個人情報は送信できません」表示	「私の在留カードは AB12345678CD です」送信
+AI相談 基本	2.9	2000文字超過でブロック	「質問が長すぎます」表示	2001文字の質問送信
+AI相談 文脈継承	3.1	2ターン目で前ターン文脈が classifier に渡る	history=2 がログに出る、応答が前文脈を踏まえる	1: 「ビザ相談」 → 2: 「更新です」
+AI相談 文脈継承	3.2	3ターン目で具体性累積により individual 判定	classifier reason に「specific status + deadline」等含む	1: 「ビザ相談」 → 2: 「特定技能です」 → 3: 「期限来月、会社非協力」
+AI相談 文脈継承	3.3	会話切替時 ChatShell が remount される	前会話のメッセージが残らず、新会話のみ表示	サイドバーで別会話クリック
+AI相談 文脈継承	3.4	既存会話を再開時、過去メッセージが復元される	全 user/assistant メッセージが時系列で表示	サイドバーから過去会話クリック
+AI相談 文脈継承	3.5	「新しい相談を始める」で URL クエリ消去 + 空の chat	?conversation_id= 消える、メッセージ空	サイドバー上部 or chat 内ボタン押下
+サイドバー	4.1	デスクトップで左 260px サイドバー常時表示	画面左に固定幅のサイドバー、上部に「+ 新しい相談を始める」	/ja/chat を md+ viewport で開く
+サイドバー	4.2	会話リストが時系列降順（updated_at desc）	最新が上、各行に最初のユーザー発話冒頭50字 + 相対日付	既存会話 3+ ある状態でサイドバー目視
+サイドバー	4.3	アクティブ会話に hint highlight	URL の conversation_id と一致する行が薄い primary 色	サイドバーから会話クリック → 該当行強調確認
+サイドバー	4.4	新規送信完了時、新会話行が即サイドバーに反映	router.refresh により新行追加	空の /chat で1ターン送信 → サイドバー目視
+サイドバー	4.5	モバイルでハンバーガー（☰）から drawer 開閉	左から slide-in、背景に黒オーバーレイ	375px viewport でハンバーガー押下
+サイドバー	4.6	モバイル drawer で会話クリックすると drawer 閉じる + 会話ロード	drawer 閉じ、新会話表示	モバイル drawer 内で会話タップ
+サイドバー	4.7	モバイル drawer の Escape / backdrop / × 全部で閉じる	全 3 method で閉じる	モバイル drawer 開状態で各操作試行
+サイドバー	4.8	モバイル drawer 開いている間、背景ページがスクロールしない	body の overflow が hidden	モバイル drawer 開状態で背景スクロール試行
+記事	5.1	/articles 一覧ページが表示	最新記事から20件、各行にカテゴリバッジ + 日付 + preview	/ja/articles 直接 or dashboard CTA
+記事	5.2	記事詳細ページが表示	タイトル、カテゴリ、本文 markdown 描画	記事一覧からクリック
+記事	5.3	記事詳細から chat 戻りリンクが機能	/ja/chat に遷移	「← チャットに戻る」クリック
+記事	5.4	動画埋め込み付き記事で YouTube iframe 表示	タイトル直下に 16:9 の iframe	動画設定済みの記事を表示
+記事	5.5	動画埋め込み付き記事で Vimeo iframe 表示	タイトル直下に 16:9 の iframe	Vimeo URL 設定 → 公開ページ確認
+記事	5.6	動画 fullscreen ボタンが動作	全画面表示に切替	iframe 内 fullscreen ボタン押下
+記事	5.7	chat citation リンクから記事詳細に到達	別タブで記事詳細開く	AI 応答の citation バッジクリック
+記事	5.8	記事一覧ページネーション動作	「次へ」「前へ」で page 遷移、URL に ?page=2 反映	公開記事が 21件以上ある場合
+問い合わせ	6.1	EscalationCard の Contact ボタンから /contact 遷移	別タブで /tl/contact 開く	escalate 発生 → カード末尾の Contact ボタン押下
+問い合わせ	6.2	/contact で Google Form iframe 表示	Google Form が embed 表示される	NEXT_PUBLIC_CONTACT_FORM_URL 設定済の環境で /contact
+問い合わせ	6.3	env 未設定時に placeholder 表示	「現在お問い合わせフォームを準備中です」表示	env 未設定の preview env で /contact
+問い合わせ	6.4	form 送信が Google Sheet に反映	テスト送信 → Google Sheet に行追加 + 通知メール受信	form テスト送信
+多言語	7.1	ja で全機能動作	dashboard, chat, articles, contact 全て日本語表示	/ja/* 全ページ
+多言語	7.2	en で全機能動作	dashboard, chat, articles, contact 全て英語表示	/en/* 全ページ
+多言語	7.3	tl で全機能動作	dashboard, chat, articles, contact 全てタガログ語表示	/tl/* 全ページ
+多言語	7.4	言語切替が AI 応答にも反映	tl に切替後の AI 応答がタガログ語	tl で chat 送信 → 応答言語確認
+多言語	7.5	言語切替で URL の locale prefix が変わる	/ja/chat → /en/chat へ URL 遷移	dashboard の language switcher 操作
+レスポンシブ	8.1	PC (1920px) で正常表示	全ページレイアウト崩れなし	1920x1080 viewport で全ページ巡回
+レスポンシブ	8.2	タブレット (768px) で正常表示	chat サイドバーがまだ表示される or drawer に切替	768px viewport
+レスポンシブ	8.3	スマホ (375px) で正常表示	chat サイドバー drawer 化、記事1カラム、レイアウト崩れなし	375px viewport で全ページ巡回
+レスポンシブ	8.4	iOS Safari で正常表示	実機 iPhone で全機能動作	実機テスト
+レスポンシブ	8.5	Android Chrome で正常表示	実機 Android で全機能動作	実機テスト
+パフォーマンス	9.1	ダッシュボード初回ロード 3秒以内	Network panel で LCP < 3s	DevTools Network → throttle なしで /dashboard
+パフォーマンス	9.2	chat 応答ストリーミング開始 5秒以内	送信から1トークン目表示まで < 5s	dev console 観察
+パフォーマンス	9.3	記事一覧 ISR キャッシュ動作	2回目以降のロードが ms オーダー	/articles を連続リロード
+パフォーマンス	9.4	画像最適化（next/image）動作	画像が WebP/AVIF 配信される	DevTools Network で Content-Type 確認
+エラー対応	10.1	Gemini 429 / timeout 時に escalate に倒れる	llm_failsafe escalate 表示	（dev で意図的に再現 困難、log 確認のみ）
+エラー対応	10.2	不正 URL でのアクセスが 404 or リダイレクト	適切なエラー画面表示	/ja/chat?conversation_id=invalid-uuid
+エラー対応	10.3	ネットワーク切断時の挙動	エラートースト or リトライ可能状態	DevTools Network → Offline mode で送信
+エラー対応	10.4	ログイン失敗時の cookie + リトライ	tooManyAttempts エラー表示	FB 認可を3回連続キャンセル
+セキュリティ	11.1	他ユーザーの conversation 直接 URL アクセス不可	silently fall through to 空 chat (404 ではない)	別ユーザーの conversation_id を URL に手打ち
+セキュリティ	11.2	未認証で /api/chat/send 叩くと 401	JSON エラー UNAUTHORIZED 返却	curl で未認証 POST
+セキュリティ	11.3	未認証で /api/admin/articles 叩くと 401	JSON エラー UNAUTHORIZED 返却	curl で未認証 GET
+セキュリティ	11.4	editor でない user が admin route アクセス時 403	FORBIDDEN 返却	editor 権限なしの user で /api/admin/articles
+セキュリティ	11.5	SUPABASE_SERVICE_ROLE_KEY が browser に露出しない	DevTools → Sources で grep しても出ない	任意のページで View Source / Sources tab
+セキュリティ	11.6	RLS テスト pass	rls.test.sql を SQL Editor で実行 → PASSED notice	Supabase SQL Editor
+セキュリティ	11.7	PII （residence card / passport / 電話番号 / email）が AI 応答に漏れない	masked または応答に含まれない	テスト送信で PII を含む文脈で質問
+ブラウザ互換	12.1	Chrome (latest)	全機能動作	Chrome 最新版で巡回
+ブラウザ互換	12.2	Safari (macOS, latest)	全機能動作	Safari 最新版で巡回
+ブラウザ互換	12.3	Firefox (latest)	全機能動作	Firefox 最新版で巡回
+ブラウザ互換	12.4	iOS Safari	全機能動作 + 動画再生 + drawer 操作	iPhone 実機
+ブラウザ互換	12.5	Android Chrome	全機能動作 + 動画再生 + drawer 操作	Android 実機
+i18n用語	13.1	tl 用語が messages/tl.json と整合	manual-tl.md と app UI の用語一致	manual-tl.md + app 画面照合
+i18n用語	13.2	ja 専門用語の表記揺れなし	「在留資格」「在留カード」等の表記統一	全ページ目視
+i18n用語	13.3	en 専門用語の表記揺れなし	"visa" "residence status" 等の表記統一	全ページ目視
+ドキュメント	14.1	manual-tl.md スクショプレースホルダが全て差替済	`[SCREENSHOT: ...]` が残っていない	docs/manual-tl.md 全体 grep
+ドキュメント	14.2	利用規約・プラポリ暫定文言が footer リンクから到達	/legal/terms /legal/privacy 表示	footer リンククリック
