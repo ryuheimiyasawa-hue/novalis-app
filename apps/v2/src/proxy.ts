@@ -26,6 +26,12 @@ const PUBLIC_UI_PATTERNS: RegExp[] = [
   new RegExp(`^/${LOCALE_RE}/legal(/.*)?$`),
   new RegExp(`^/${LOCALE_RE}/articles(/.*)?$`),
   new RegExp(`^/${LOCALE_RE}/restaurants(/.*)?$`),
+  // /contact embeds a Google Form for general inquiries. It needs to
+  // be reachable by anonymous visitors (partner outreach links,
+  // shared support URL, etc.) — gating it behind login would mean
+  // only existing users can contact us, which defeats the purpose.
+  // No app data leaks; the page is a thin iframe wrapper.
+  new RegExp(`^/${LOCALE_RE}/contact(/.*)?$`),
 ];
 
 // Authenticated paths that must remain reachable while onboarded_at IS NULL.
