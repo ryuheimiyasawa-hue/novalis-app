@@ -6,6 +6,19 @@ _Bersyon: Beta (Mayo 2026) — Ang mga tampok at hitsura ng app ay maaaring magb
 
 > Tandaan: Ang gabay na ito ay isinulat sa Tagalog para sa madaling pag-unawa. Kung mas komportable kayo sa Ingles o Hapon, maaaring baguhin ang wika ng app anumang oras (tingnan ang **3.5 Pagbabago ng wika**).
 
+> **URL ng app**: `https://novalis-app.vercel.app`
+
+<!--
+Screenshot priority guide (para sa Novalis team — hindi makikita ng user):
+  priority-1 = unang i-shoot (madaling kunan, kritikal para sa user flow)
+              landing page, dashboard, chat initial, escalation, chat sidebar
+  priority-2 = pangalawang i-shoot (madaling kunan, sumusuporta sa user flow)
+              FB auth, onboarding form, language switcher, articles list
+  priority-3 = pang-huli (mobile o external, may setup cost)
+              mobile drawer, video embed, contact form (external Google Form)
+-->
+
+
 ---
 
 ## Talaan ng Nilalaman
@@ -30,17 +43,23 @@ Ang **Novalis** ay isang serbisyong sumusuporta sa mga Pilipino na naninirahan s
 
 ### 2.1 Pag-sign in gamit ang Facebook
 
-Ang Novalis ay gumagamit ng Facebook account para sa pag-sign in. Kailangan ninyo ng aktibong Facebook account upang magamit ang serbisyo.
+Ang Novalis ay gumagamit ng Facebook account para sa pag-sign in. Kailangan ninyo ng aktibong Facebook account upang magamit ang serbisyo. Ang pag-sign in ay ginagawa sa pamamagitan ng **Supabase Auth** (ang authentication provider ng Novalis) — ligtas at hindi inilalantad ng Facebook ang inyong password sa Novalis.
 
-1. Buksan ang Novalis sa inyong browser.
+1. Buksan ang `https://novalis-app.vercel.app` sa inyong browser (Chrome, Safari, o Edge).
 2. Pindutin ang **"Mag-login gamit ang Facebook"** na button sa landing page.
 
-   `[SCREENSHOT: Landing page na may Facebook login button]`
+   `[SCREENSHOT-priority-1: Landing page na may Facebook login button]`
 
-3. Awtomatikong tatawagan ng Novalis ang Facebook. Kung naka-login na kayo sa Facebook sa browser, lalabas lamang ang screen ng kumpirmasyon. Kung hindi, mag-sign in muna sa Facebook.
-4. Pindutin ang **"Continue as [pangalan ninyo]"** upang ibahagi ang inyong pangalan, email, at profile photo sa Novalis.
+3. Ire-redirect kayo papunta sa Facebook (lalabas ang Facebook URL sa address bar).
+   - Kung naka-login na kayo sa Facebook sa parehong browser, lalabas agad ang **authorization screen**.
+   - Kung hindi pa kayo naka-login, hihingin muna ng Facebook ang inyong email/phone at password.
+4. Sa authorization screen, pindutin ang **"Continue as [pangalan ninyo]"** upang pahintulutan ang Novalis na makuha ang inyong pangalan, email, at profile photo.
 
-   `[SCREENSHOT: Facebook authorization screen]`
+   `[SCREENSHOT-priority-2: Facebook authorization screen]`
+
+5. Awtomatikong ire-redirect kayo pabalik sa Novalis (`novalis-app.vercel.app`). Kung unang beses na kayong gumagamit ng app, dadalhin kayo sa **onboarding form** (2.2). Kung balikan kayo, dadalhin kayo agad sa dashboard.
+
+> **Tandaan**: Kung lumitaw ang error message na "Authentication failed" o "Redirect mismatch", isara ang browser tab at subukan muli. Kung patuloy ang isyu, makipag-ugnayan sa Novalis support (5).
 
 ### 2.2 Pagkumpleto ng onboarding
 
@@ -55,7 +74,7 @@ Sa unang pag-sign in, kakailanganin ninyong sumang-ayon sa Mga Tuntunin ng Serbi
 4. Opsyonal: Isulat ang inyong **lungsod o ward** (hal. Shibuya).
 5. Pindutin ang **"Sumang-ayon at magpatuloy"**.
 
-   `[SCREENSHOT: Onboarding form na may checkboxes at Prefecture dropdown]`
+   `[SCREENSHOT-priority-2: Onboarding form na may checkboxes at Prefecture dropdown]`
 
 Pagkatapos ng onboarding, dadalhin kayo sa **dashboard**, ang pangunahing screen ng app.
 
@@ -69,7 +88,7 @@ Ang AI Konsultasyon ang pangunahing tampok ng Novalis. Maaari kayong magtanong s
 
 Mula sa dashboard, pindutin ang **"Simulan ang konsultasyon"** na button. Bubuksan ang chat screen.
 
-`[SCREENSHOT: Dashboard na may "Simulan ang konsultasyon" button]`
+`[SCREENSHOT-priority-1: Dashboard na may "Simulan ang konsultasyon" button]`
 
 ### 3.2 Pag-input ng tanong
 
@@ -83,7 +102,7 @@ Sa ilalim ng chat screen, may text box. I-type ang inyong tanong dito, pagkatapo
 
 Sasagutin ng AI ang inyong tanong sa Tagalog (o sa inyong piniling wika). Sa karamihan ng sagot, may mga link sa mga **artikulo na ginamit bilang sanggunian** sa ilalim ng tugon.
 
-`[SCREENSHOT: Chat screen na may halimbawa ng tanong at sagot na may citations]`
+`[SCREENSHOT-priority-1: Chat screen na may halimbawa ng tanong at sagot na may citations]`
 
 ### 3.3 Kapag may sumusunod na tanong ang AI
 
@@ -91,9 +110,9 @@ Kung masyadong pangkalahatan ang inyong tanong, magtatanong muna ang AI ng isang
 
 **Halimbawa**:
 
-- Ikaw: "Gusto kong magtanong tungkol sa visa"
+- Kayo: "Gusto kong magtanong tungkol sa visa"
 - AI: "Tungkol sa kung anong visa? Halimbawa, working visa, spouse visa, o renewal procedure?"
-- Ikaw: "Working visa renewal"
+- Kayo: "Working visa renewal"
 - AI: (detalyadong sagot tungkol sa working visa renewal)
 
 Ito ay normal at inaasahang pag-uugali — para makapagbigay ng tamang sagot, kailangan ng AI ng mas maraming detalye.
@@ -102,7 +121,7 @@ Ito ay normal at inaasahang pag-uugali — para makapagbigay ng tamang sagot, ka
 
 Kung ang inyong tanong ay nangangailangan ng **propesyonal na pagsusuri** (halimbawa, partikular na legal o tax na sitwasyon), magpapakita ang AI ng **Escalation screen** sa halip na sumagot mismo.
 
-`[SCREENSHOT: Escalation screen na may listahan ng mga eksperto at Contact Novalis button]`
+`[SCREENSHOT-priority-1: Escalation screen na may listahan ng mga eksperto at Contact Novalis button]`
 
 Sa screen na ito, makikita ninyo:
 
@@ -115,14 +134,14 @@ Bakit nagiging Escalation? Hindi maaaring magbigay ang AI ng partikular na legal
 
 Sa **kaliwang bahagi** ng chat screen, may sidebar na nagpapakita ng inyong mga nakaraang konsultasyon. Ang mga ito ay nakaayos ayon sa pinakahuling aktibidad.
 
-`[SCREENSHOT: Chat screen na nagpapakita ng kaliwang sidebar]`
+`[SCREENSHOT-priority-1: Chat screen na nagpapakita ng kaliwang sidebar]`
 
 - **I-click ang anumang nakaraang konsultasyon** upang ipagpatuloy ito. Mababasa ninyo ang lahat ng nakaraang mensahe at maaaring magpadala ng bagong tanong.
 - **Pindutin ang "+ Magsimula ng bagong konsultasyon"** sa itaas ng sidebar upang magsimula ng panibago.
 
 Sa cellphone, nakatago ang sidebar bilang default. Pindutin ang **menu icon (☰)** sa kaliwa-itaas upang buksan ito.
 
-`[SCREENSHOT: Mobile view na may menu icon at bukas na drawer]`
+`[SCREENSHOT-priority-3: Mobile view na may menu icon at bukas na drawer]`
 
 ### 3.6 Pagbabago ng wika
 
@@ -132,7 +151,7 @@ Maaari ninyong palitan ang wika ng app sa **Tagalog**, **Ingles**, o **Hapon** a
 2. Piliin ang inyong gustong wika.
 3. Awtomatikong magpapalit ang lahat ng teksto sa app sa napiling wika. Ang sagot ng AI sa mga susunod na tanong ay nasa wikang ito.
 
-`[SCREENSHOT: Dashboard na may language switcher]`
+`[SCREENSHOT-priority-2: Dashboard na may language switcher]`
 
 ---
 
@@ -144,7 +163,7 @@ Bukod sa AI Konsultasyon, may **librarya ng mga artikulo** ang Novalis na may de
 
 Mula sa dashboard, pindutin ang **"Tingnan ang mga artikulo"** na button. Bubuksan ang listahan ng mga artikulo.
 
-`[SCREENSHOT: Articles list page]`
+`[SCREENSHOT-priority-2: Articles list page]`
 
 Ang bawat artikulo ay may kategorya badge, pamagat, petsa ng publikasyon, at maikling preview. Pindutin ang anumang artikulo upang basahin ang buong nilalaman.
 
@@ -152,7 +171,7 @@ Ang bawat artikulo ay may kategorya badge, pamagat, petsa ng publikasyon, at mai
 
 May ilang artikulo na naglalaman ng **embedded video** mula sa YouTube o Vimeo. Ang video ay lumilitaw sa itaas ng artikulo, sa ibaba lamang ng pamagat.
 
-`[SCREENSHOT: Article page na may video embed]`
+`[SCREENSHOT-priority-3: Article page na may video embed]`
 
 - Pindutin ang **play button** upang panoorin ang video.
 - Suportado ang **fullscreen mode** — pindutin ang fullscreen icon sa kanang-ibaba ng video.
@@ -169,9 +188,9 @@ Kung mayroon kayong tanong, pakikipag-usap, o feedback para sa Novalis team, maa
 Dalawang paraan:
 
 1. **Mula sa Escalation screen** (tingnan ang **3.4**): pindutin ang **"Makipag-ugnayan sa Novalis support"** na button sa ilalim ng card.
-2. **Direkta**: pumunta sa URL `/[wika]/contact` (hal. `https://novalis-ph.vercel.app/tl/contact`).
+2. **Direkta**: pumunta sa URL `/[wika]/contact` (hal. `https://novalis-app.vercel.app/tl/contact`).
 
-`[SCREENSHOT: Contact form page]`
+`[SCREENSHOT-priority-3: Contact form page]`
 
 ### 5.2 Paano magpadala ng mensahe
 
@@ -203,7 +222,7 @@ Iniimbak din namin ang **nilalaman ng inyong mga konsultasyon** (mga mensahe sa 
 
 ### 6.2 Sino ang nakakakita ng aking data?
 
-- **Ikaw mismo**: lahat ng inyong sariling data ay accessible sa inyong account.
+- **Kayo mismo**: lahat ng inyong sariling data ay accessible sa inyong account.
 - **Ang Novalis team**: ang mga teknikal na administrator ay may access sa database para sa pagpapanatili at pag-iwas sa pang-aabuso. Hindi nila ginagamit ang inyong data para sa anumang iba pang layunin.
 - **Mga ibang user**: HINDI nila nakikita ang inyong data. Hindi accessible sa anumang ibang user ang inyong mga konsultasyon, pangalan, o anumang personal na impormasyon.
 - **Mga ekstra: AI provider (Google Gemini)** ang nagpoproseso ng inyong mga mensahe upang makagawa ng sagot. Ipinapadala lamang ang teksto ng tanong, hindi ang inyong pangalan o iba pang personal na impormasyon.
@@ -282,12 +301,13 @@ Ang lahat ng 47 prefecture ng Japan ay listed. Kung hindi ninyo makita ang inyon
 
 ## Pakikipag-ugnayan at suporta
 
-- **Form para sa pakikipag-ugnayan**: `https://novalis-ph.vercel.app/tl/contact`
+- **URL ng app**: `https://novalis-app.vercel.app`
+- **Form para sa pakikipag-ugnayan**: `https://novalis-app.vercel.app/tl/contact`
 - **Para sa technical bug reports** o mga emergency: gamitin ang parehong form, piliin ang kategorya na "Bug / Issue".
 
 Salamat sa paggamit ng Novalis. Ang inyong feedback ay mahalaga sa amin sa panahon ng beta period.
 
 ---
 
-_Bersyon ng dokumento: 1.0 (Mayo 2026, Beta)_
-_Mga screenshot na nakapaloob sa gabay na ito ay ipapasok ng Novalis team bago ang opisyal na distribusyon._
+_Bersyon ng dokumento: 1.1 (Mayo 2026, Beta — production URL update)_
+_Mga screenshot na nakapaloob sa gabay na ito ay ipapasok ng Novalis team bago ang opisyal na distribusyon. Tingnan ang priority labels sa HTML comment sa itaas para sa shooting order._
