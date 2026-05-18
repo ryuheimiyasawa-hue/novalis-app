@@ -72,21 +72,74 @@ _最終更新: 2026-05-18 / デモ準備完了直後のスナップショット_
 - **git add 注意**: monorepo + 部分 untracked 構成では `git add -A` / `git add .` 禁止、明示パス指定（Lesson 21）
 - **DDL 承認ゲート**: production DB への ALTER / DELETE は SQL Editor でユーザ実行（Claude が apply_migration MCP を直接実行しない）
 
-## 5. Phase 2 開発候補（優先順は次セッションで一緒に再確定）
+## 5. Phase / W スコープ整理
 
-- **メッセンジャー対応**: Facebook Messenger bot で同じ AI に話せるように
-- **Komoju 課金**: 月額/3ヶ月/6ヶ月/12ヶ月プラン、`NEXT_PUBLIC_PAYMENT_ENABLED` フラグ化済
-- **会話タイトル AI 自動生成**: 初回ユーザ発話を Gemini で 20 字要約して `conversations.title` に保存
-- **長会話の要約**: A は直近 10 turns 固定。トークン制限近づいた会話は古い turn を要約して圧縮
-- **Sentry 本格稼働**: env 設定 + persist 失敗の error 送信 + PII filter in beforeSend + 起動時 schema assertion
-- **Supabase CLI migration 運用**: `supabase db push` + CI で未適用検知 gate（Lesson 24 根本対策）
-- **会話の削除・編集・検索**: sidebar 拡張
-- **動画埋め込み拡張**: 案2（markdown 内カスタム構文）or 案3（iframe sanitize）への移行
-- **問い合わせ first-party 化**: Google Form → inquiries テーブル + admin dashboard
-- **弁護士監修**: 利用規約・プラポリ・AI 応答の非弁境界
-- **協業企業5社打診**: 士業ネットワーク構築、experts テーブルに実 row 追加
-- **マニュアル native review**: フィリピン人ベータ参加者に `docs/manual-tl.md` レビュー依頼
-- **Sentry 系 advisor 残**: function_search_path_mutable × 4 関数の `SET search_path = ''` 追加（Phase 2 polish）
+W ナンバリングは Phase 1 内のスプリント単位として元計画に存在したもの。MVP A-E 拡張で Phase 1 が前倒し完了したため、W6+ は元計画通りには進まず一部 Phase 2 に統合された。**コード内 `W6` / `W7` コメントは下記元定義を指す**ので次セッションで参照する場合は注意。
+
+### 完了済（Phase 1）
+
+- **W2**: 認証 (Facebook OAuth via Supabase Auth) + onboarding + consent log
+- **W3**: admin CMS (articles / faqs / experts / categories) + ISR + `revalidate-content` ヘルパ
+- **W4**: chat-pipeline 基盤 — PII detection + Stage1 keyword + Stage2 LLM classifier + smoke endpoint
+- **W5**: RAG (pgvector + match_content RPC) + 本番チャット SSE + persistence + quota
+- **段階1**: 会話設計 polish（commits `baba4f8` / `42dea3e` / `1587e51`）
+- **MVP A-E + Sidebar**: 文脈継承 / 過去会話 UI / 記事一覧 / 動画埋め込み / 問い合わせ
+- **デプロイ**: Vercel + Supabase production 2026-05-17
+
+### 元 W 計画の W6+ 定義（コード内コメントの参照元）
+
+`apps/v2/tasks/W5-design.md` §1-2 "含まないもの (W6 以降)" と env validator コメント由来:
+
+- **元 W6** — Komoju 課金（プラン購入導線、checkout、webhook）。`NEXT_PUBLIC_PAYMENT_ENABLED` flag 化済
+- **元 W6** — オペレーター介入 UI（chat-pipeline.ts:43 のコメント参照、`conversations.mode='operator'` + `operator_takeover_logs` テーブル既存）。**v3 で Phase 2 送りに変更**
+- **元 W7** — Facebook Messenger Bot 連携（env validator の `MESSENGER_*` 三点リザーブ済）。**v3 で Phase 2 送りに変更**
+- **元 W8** — 飲食店カタログ（`restaurants` テーブル既存 / 行 0）。**v3 で Phase 2 送りに変更**
+- **元 W9-W10** — ベータテスター期間（`whitelist-keywords.ts` の Tagalog パターン拡張コメント参照）
+
+つまりコード上の "W6 operator UI lands later" / "for Bot from W7" 等の表記は元計画基準。実際には Phase 2 backlog に統合済。
+
+### v3 要件定義 §6 Phase 2 (Phase 1 から 3〜6ヶ月後)
+
+- 社労士・税理士の本格運用、機能2の個別対応強化
+- コミュニティ機能（Facebook Group 連携 or 限定的な掲示板）
+- 不動産紹介（広告掲載型）
+- 通訳予約・書類翻訳
+
+### 本セッション累積で追加された Phase 2 候補
+
+- **メッセンジャー対応**（旧 W7）
+- **Komoju 課金**（旧 W6）— 月額 / 3ヶ月 / 6ヶ月 / 12ヶ月プラン
+- **オペレーター介入 UI**（旧 W6）— `operator_takeover_logs` 既存テーブル活用
+- **飲食店カタログ**（旧 W8）
+- **会話タイトル AI 自動生成** — 初回発話を Gemini で 20 字要約して `conversations.title` に保存
+- **長会話の要約** — A は直近 10 turns 固定、トークン上限近で古い turn を要約圧縮
+- **Sentry 本格稼働** — env 設定 + persist 失敗の error 送信 + PII filter in beforeSend + 起動時 schema assertion（Lesson 25 根本対策）
+- **Supabase CLI migration 運用** — `supabase db push` + CI で未適用検知 gate（Lesson 24 根本対策）
+- **会話の削除・編集・検索** — sidebar 拡張
+- **動画埋め込み拡張** — 案2 (markdown 内カスタム構文) or 案3 (iframe sanitize) への移行
+- **問い合わせ first-party 化** — Google Form → inquiries テーブル + admin dashboard
+- **月次サンプリングレビュー UI** — `messages.whitelist_decision` JSONB 保存済、レビュー UI 未実装
+- **AI 出力の audit batch** — 月次で whitelist 判定の precision/recall 計測
+- **function_search_path_mutable × 4 関数** — `SET search_path = ''` 追加（Phase 2 polish）
+
+### 並行で進む人間タスク
+
+- 弁護士監修依頼（利用規約・プラポリ・AI 応答の非弁境界）
+- 協業企業5社打診（士業ネットワーク構築、experts テーブルに実 row 追加）
+- マニュアル native review（フィリピン人ベータ参加者に `docs/manual-tl.md` レビュー依頼）
+- Facebook App 公開モード移行（本番ユーザ獲得前）
+- ベータ参加者からのフィードバック収集
+
+### 推奨着手順（次セッションで再確認）
+
+1. **REVOKE SQL 実行**（Phase 2 着手前の security fix、§6 参照）
+2. Phase 2 から **1〜2件選定** → feature ブランチで着手。候補:
+   - **候補A**: Komoju 課金（旧 W6）— 大規模、課金フロー全体設計が要、`NEXT_PUBLIC_PAYMENT_ENABLED` フラグ flip と一緒
+   - **候補B**: Messenger 対応（旧 W7）— Facebook 公開モード移行とセット、`MESSENGER_*` env 既リザーブ
+   - **候補C**: 会話タイトル AI 自動生成 — 小規模（1 日）、ユーザ体感即効性高
+   - **候補D**: Sentry 本格稼働 + persist 失敗 alert — 運用品質向上、本番稼働直後にやる価値高い
+   - **候補E**: オペレーター介入 UI（旧 W6 の半分）— `operator_takeover_logs` 既存活用、管理画面拡張
+3. C と D は小タスク、A/B/E の大型機能の合間に組み込み可能
 
 ## 6. 既知の保留事項（本セッションで未完了）
 
