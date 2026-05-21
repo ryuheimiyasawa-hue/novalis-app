@@ -3,6 +3,7 @@ import { hasLocale } from "next-intl";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { routing } from "@/lib/i18n/routing";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 
 // Public articles list (C). ISR-cached for 10 min so dashboard CTAs
 // can hammer the route without burning DB requests. Filters by
@@ -95,6 +96,10 @@ export default async function ArticlesListPage({
     locale: safeLocale,
     namespace: "articlesList",
   });
+  const tCommon = await getTranslations({
+    locale: safeLocale,
+    namespace: "common",
+  });
 
   if (error) {
     console.error("[articles list] fetch failed:", error.message);
@@ -114,6 +119,12 @@ export default async function ArticlesListPage({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
+      <div className="mb-3 flex justify-end">
+        <LocaleSwitcher
+          currentLocale={safeLocale}
+          label={tCommon("language")}
+        />
+      </div>
       <header className="mb-6 border-b border-border pb-4">
         <h1 className="text-2xl font-bold">{t("title")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>

@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { HomeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { consumeChatStream, type ChatStreamEvent } from "@/lib/chat/sse-client";
 import type { Citation } from "@/lib/ai/rag";
+import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { MessageBubble, type BubbleRole } from "./MessageBubble";
 import { EscalationCard } from "./EscalationCard";
 
@@ -33,6 +36,8 @@ interface Props {
     expertSchedule: string;
     contactCta: string;
     citationsHeading: string;
+    backToDashboard: string;
+    languageLabel: string;
     youLabel: string;
     assistantLabel: string;
     systemLabel: string;
@@ -240,9 +245,21 @@ export function ChatShell({
           <h1 className="text-xl font-bold">{labels.title}</h1>
           <p className="text-sm text-muted-foreground">{labels.subtitle}</p>
         </div>
-        <Button variant="outline" size="sm" onClick={resetConversation}>
-          {labels.newConversation}
-        </Button>
+        <div className="flex shrink-0 items-center gap-3">
+          <LocaleSwitcher
+            currentLocale={locale}
+            label={labels.languageLabel}
+          />
+          <Button asChild variant="ghost" size="sm">
+            <Link href={`/${locale}/dashboard`}>
+              <HomeIcon className="size-4" aria-hidden />
+              {labels.backToDashboard}
+            </Link>
+          </Button>
+          <Button variant="outline" size="sm" onClick={resetConversation}>
+            {labels.newConversation}
+          </Button>
+        </div>
       </header>
 
       <div

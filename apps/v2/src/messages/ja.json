@@ -11,8 +11,14 @@
   },
   "login": {
     "heading": "ログイン",
-    "subheading": "Facebookアカウントでログインしてください",
+    "subheading": "Facebookアカウントまたはメールアドレスでログインしてください",
     "facebookButton": "Facebookでログイン",
+    "orDivider": "または",
+    "emailPlaceholder": "メールアドレス",
+    "emailButton": "メールでログインリンクを送信",
+    "emailSending": "送信中...",
+    "emailSent": "メールを送信しました。受信箱を確認し、リンクをクリックしてログインしてください。",
+    "emailFailed": "メール送信に失敗しました。アドレスを確認してもう一度お試しください。",
     "switchLanguage": "言語",
     "supportLink": "サポートに連絡",
     "supportText": "ログインできない場合は"
@@ -83,7 +89,8 @@
     "subtitle": "ご相談・ご質問・サービスへのフィードバックなど、お気軽にお寄せください。担当者からご連絡いたします。",
     "backToDashboard": "ダッシュボードへ戻る",
     "loading": "フォーム読み込み中...",
-    "notConfigured": "現在お問い合わせフォームを準備中です。お手数ですが少々お待ちください。"
+    "notConfigured": "現在お問い合わせフォームを準備中です。お手数ですが少々お待ちください。",
+    "emailFallbackLabel": "フォームが使えない場合は、こちらまで直接ご連絡ください:"
   },
   "legal": {
     "termsTitle": "利用規約",
@@ -91,7 +98,8 @@
   },
   "common": {
     "loading": "読み込み中...",
-    "error": "エラーが発生しました"
+    "error": "エラーが発生しました",
+    "language": "言語"
   },
   "chat": {
     "disclaimer": "これは一般的な情報であり、個別の判断は専門家にご相談ください。",
@@ -116,6 +124,7 @@
       "noExperts": "現在ご紹介できる専門家がいません。後ほどお試しください。",
       "contactCta": "Novalis サポートに問い合わせる",
       "citationsHeading": "参考",
+      "backToDashboard": "ダッシュボードへ戻る",
       "youLabel": "あなた",
       "assistantLabel": "AI アシスタント",
       "systemLabel": "システム"

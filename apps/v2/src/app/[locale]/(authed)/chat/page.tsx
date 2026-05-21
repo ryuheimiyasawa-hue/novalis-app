@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
+import { HomeIcon } from "lucide-react";
 import { z } from "zod";
 import { routing } from "@/lib/i18n/routing";
 import { ChatShell } from "@/components/chat/ChatShell";
@@ -87,6 +89,10 @@ export default async function ChatPage({ params, searchParams }: Props) {
     locale: safeLocale,
     namespace: "conversations",
   });
+  const tCommon = await getTranslations({
+    locale: safeLocale,
+    namespace: "common",
+  });
 
   // Resolve optional conversation_id from the URL. We do the
   // ownership check + message fetch server-side so the client never
@@ -145,6 +151,15 @@ export default async function ChatPage({ params, searchParams }: Props) {
         <div className="flex items-center gap-2 border-b border-border px-3 py-2 md:hidden">
           <MobileSidebar label={tConv("title")}>{sidebar}</MobileSidebar>
           <span className="text-sm font-semibold">{t("title")}</span>
+          {/* Mobile back-to-dashboard link on the right of the header. */}
+          <Link
+            href={`/${safeLocale}/dashboard`}
+            className="ml-auto inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent/40 hover:text-foreground"
+            aria-label={t("backToDashboard")}
+            title={t("backToDashboard")}
+          >
+            <HomeIcon className="size-5" aria-hidden />
+          </Link>
         </div>
         <div className="min-h-0 flex-1">
           <ChatShell
@@ -171,6 +186,8 @@ export default async function ChatPage({ params, searchParams }: Props) {
               expertSchedule: t("expertSchedule"),
               contactCta: t("contactCta"),
               citationsHeading: t("citationsHeading"),
+              backToDashboard: t("backToDashboard"),
+              languageLabel: tCommon("language"),
               youLabel: t("youLabel"),
               assistantLabel: t("assistantLabel"),
               systemLabel: t("systemLabel"),

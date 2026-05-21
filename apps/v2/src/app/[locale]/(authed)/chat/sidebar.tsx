@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { PlusIcon } from "lucide-react";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 
 // Past-conversations sidebar (replaces the standalone /conversations
 // page). Rendered server-side from the same chat route so the initial
@@ -76,6 +77,10 @@ export async function ConversationsSidebar({
     locale,
     namespace: "conversations",
   });
+  const tCommon = await getTranslations({
+    locale,
+    namespace: "common",
+  });
 
   const rows = (data ?? []) as ConversationRow[];
 
@@ -89,6 +94,16 @@ export async function ConversationsSidebar({
           <PlusIcon className="size-4" aria-hidden />
           {t("newButton")}
         </Link>
+      </div>
+      {/* Locale switcher at the very top, before "+ new conversation".
+          Always visible on desktop sidebar; reachable on mobile via the
+          hamburger drawer. Tiny so it does not crowd. */}
+      <div className="border-b border-border px-3 py-2 text-xs">
+        <LocaleSwitcher
+          currentLocale={locale}
+          label={tCommon("language")}
+          className="text-xs"
+        />
       </div>
       <div className="flex-1 overflow-y-auto p-2">
         {error ? (

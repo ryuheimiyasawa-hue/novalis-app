@@ -8,6 +8,7 @@ import {
   parseFailureCount,
 } from "@/lib/auth/login-failure-cookie";
 import { LoginForm } from "./login-form";
+import { EmailLoginForm } from "./email-login-form";
 import { ErrorBanner } from "./error-banner";
 import { LanguageSwitcher } from "./language-switcher";
 
@@ -62,11 +63,29 @@ export default async function LoginPage({
           buttonLabel={t("facebookButton")}
         />
 
+        <div className="flex items-center gap-3 text-xs uppercase tracking-wider text-neutral-400">
+          <span className="h-px flex-1 bg-neutral-200 dark:bg-neutral-800" />
+          <span>{t("orDivider")}</span>
+          <span className="h-px flex-1 bg-neutral-200 dark:bg-neutral-800" />
+        </div>
+
+        <EmailLoginForm
+          locale={safeLocale}
+          redirect={safeRedirect}
+          labels={{
+            placeholder: t("emailPlaceholder"),
+            button: t("emailButton"),
+            sending: t("emailSending"),
+            sent: t("emailSent"),
+            failed: t("emailFailed"),
+          }}
+        />
+
         <div className="text-center text-sm text-neutral-500 space-y-2">
           <p>
             {t("supportText")}{" "}
             <a
-              href="mailto:contact@novalis.ph"
+              href="mailto:ryuhei.miyasawa@novalisgroup.biz"
               className="underline hover:text-neutral-700"
             >
               {t("supportLink")}

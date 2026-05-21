@@ -5,6 +5,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { hasLocale } from "next-intl";
 import { routing } from "@/lib/i18n/routing";
 import { CURRENT_TERMS_VERSION } from "@/lib/legal/versions";
+import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 
 export default async function TermsPage({
   params,
@@ -18,6 +19,7 @@ export default async function TermsPage({
   setRequestLocale(safeLocale);
 
   const t = await getTranslations({ locale: safeLocale, namespace: "legal" });
+  const tCommon = await getTranslations({ locale: safeLocale, namespace: "common" });
 
   const filePath = path.join(
     process.cwd(),
@@ -29,6 +31,12 @@ export default async function TermsPage({
 
   return (
     <main className="min-h-screen px-6 py-12">
+      <div className="max-w-3xl mx-auto mb-4 flex justify-end">
+        <LocaleSwitcher
+          currentLocale={safeLocale}
+          label={tCommon("language")}
+        />
+      </div>
       <article className="max-w-3xl mx-auto space-y-4 leading-relaxed [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mt-2 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mt-6 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_a]:underline">
         <h1 className="sr-only">{t("termsTitle")}</h1>
         <ReactMarkdown>{content}</ReactMarkdown>

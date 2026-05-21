@@ -10,6 +10,7 @@ import {
   PREFERRED_LANGUAGE_COOKIE,
   parsePreferredLanguage,
 } from "@/lib/i18n/preferred-language-cookie";
+import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { OnboardingForm } from "./onboarding-form";
 import { WelcomeModal } from "./welcome-modal";
 
@@ -28,6 +29,10 @@ export default async function OnboardingPage({
     locale: safeLocale,
     namespace: "onboarding",
   });
+  const tCommon = await getTranslations({
+    locale: safeLocale,
+    namespace: "common",
+  });
 
   const cookieStore = await cookies();
   const stored = parsePreferredLanguage(
@@ -39,6 +44,12 @@ export default async function OnboardingPage({
     <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
       <WelcomeModal currentLocale={safeLocale} initialShow={showWelcomeModal} />
       <div className="max-w-xl w-full space-y-6">
+        <div className="flex justify-end">
+          <LocaleSwitcher
+            currentLocale={safeLocale}
+            label={tCommon("language")}
+          />
+        </div>
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-bold">{t("heading")}</h1>
           <p className="text-neutral-600 dark:text-neutral-300">

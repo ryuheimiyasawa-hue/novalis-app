@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { routing } from "@/lib/i18n/routing";
 import { parseVideo, buildEmbedUrl } from "@/lib/articles/video";
+import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 
 // Minimum-viable article detail page. Renders the markdown body of a
 // published article so chat citations like /[locale]/articles/<slug>
@@ -95,17 +97,25 @@ export default async function ArticleDetailPage({ params }: PageProps) {
   // parse to a known shape. Editors might paste a broken URL — better
   // to silently drop than to surface a broken iframe.
   const video = parseVideo(article.video_provider, article.video_url);
+  const tCommon = await getTranslations({
+    locale: safeLocale,
+    namespace: "common",
+  });
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <nav className="mb-4 text-sm">
+      <div className="mb-3 flex items-center justify-between gap-3">
         <Link
           href={`/${safeLocale}/chat`}
-          className="text-muted-foreground hover:text-foreground hover:underline"
+          className="text-sm text-muted-foreground hover:text-foreground hover:underline"
         >
           ← {safeLocale === "ja" ? "チャットに戻る" : safeLocale === "tl" ? "Bumalik sa chat" : "Back to chat"}
         </Link>
-      </nav>
+        <LocaleSwitcher
+          currentLocale={safeLocale}
+          label={tCommon("language")}
+        />
+      </div>
       <header className="mb-6 space-y-2 border-b border-border pb-4">
         {categoryName && (
           <p className="text-xs uppercase tracking-wide text-muted-foreground">

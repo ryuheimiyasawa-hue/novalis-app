@@ -11,8 +11,14 @@
   },
   "login": {
     "heading": "Mag-sign in",
-    "subheading": "Mag-sign in gamit ang iyong Facebook account",
+    "subheading": "Mag-sign in gamit ang iyong Facebook account o email address",
     "facebookButton": "Magpatuloy gamit ang Facebook",
+    "orDivider": "o",
+    "emailPlaceholder": "Email address",
+    "emailButton": "Magpadala ng login link sa email",
+    "emailSending": "Nagpapadala...",
+    "emailSent": "Naipadala na ang email. Tingnan ang iyong inbox at i-click ang link upang mag-sign in.",
+    "emailFailed": "Nabigong magpadala ng email. Pakisuri ang iyong address at subukang muli.",
     "switchLanguage": "Wika",
     "supportLink": "Makipag-ugnayan sa suporta",
     "supportText": "May problema sa pag-sign in?"
@@ -83,7 +89,8 @@
     "subtitle": "Magpadala ng tanong, kahilingan, o feedback. May tutugon mula sa aming team.",
     "backToDashboard": "Bumalik sa dashboard",
     "loading": "Naglo-load ng form...",
-    "notConfigured": "Inaayos pa ang contact form. Mangyaring subukan muli mamaya."
+    "notConfigured": "Inaayos pa ang contact form. Mangyaring subukan muli mamaya.",
+    "emailFallbackLabel": "Kung hindi gumagana ang form, mag-email sa amin nang direkta:"
   },
   "legal": {
     "termsTitle": "Mga Tuntunin ng Serbisyo",
@@ -91,7 +98,8 @@
   },
   "common": {
     "loading": "Naglo-load...",
-    "error": "May naganap na error"
+    "error": "May naganap na error",
+    "language": "Wika"
   },
   "chat": {
     "disclaimer": "Ito ay pangkalahatang impormasyon lamang. Mangyaring kumonsulta sa isang propesyonal para sa inyong partikular na sitwasyon.",
@@ -116,6 +124,7 @@
       "noExperts": "Walang available na eksperto sa ngayon. Subukan muli mamaya.",
       "contactCta": "Makipag-ugnayan sa Novalis support",
       "citationsHeading": "Mga Sanggunian",
+      "backToDashboard": "Bumalik sa dashboard",
       "youLabel": "Ikaw",
       "assistantLabel": "AI Assistant",
       "systemLabel": "Sistema"

@@ -11,8 +11,14 @@
   },
   "login": {
     "heading": "Sign in",
-    "subheading": "Sign in with your Facebook account",
+    "subheading": "Sign in with your Facebook account or email address",
     "facebookButton": "Continue with Facebook",
+    "orDivider": "or",
+    "emailPlaceholder": "Email address",
+    "emailButton": "Send login link by email",
+    "emailSending": "Sending...",
+    "emailSent": "Email sent. Check your inbox and click the link to sign in.",
+    "emailFailed": "Failed to send email. Please check your address and try again.",
     "switchLanguage": "Language",
     "supportLink": "Contact support",
     "supportText": "Trouble signing in?"
@@ -83,7 +89,8 @@
     "subtitle": "Send us a question, request, or feedback. A team member will get back to you.",
     "backToDashboard": "Back to dashboard",
     "loading": "Loading form...",
-    "notConfigured": "The contact form is being prepared. Please check back shortly."
+    "notConfigured": "The contact form is being prepared. Please check back shortly.",
+    "emailFallbackLabel": "If the form is not working, please email us directly:"
   },
   "legal": {
     "termsTitle": "Terms of Service",
@@ -91,7 +98,8 @@
   },
   "common": {
     "loading": "Loading...",
-    "error": "An error occurred"
+    "error": "An error occurred",
+    "language": "Language"
   },
   "chat": {
     "disclaimer": "This is general information. Please consult a professional for your specific situation.",
@@ -116,6 +124,7 @@
       "noExperts": "No experts available right now. Please try again later.",
       "contactCta": "Contact Novalis support",
       "citationsHeading": "References",
+      "backToDashboard": "Back to dashboard",
       "youLabel": "You",
       "assistantLabel": "AI Assistant",
       "systemLabel": "System"

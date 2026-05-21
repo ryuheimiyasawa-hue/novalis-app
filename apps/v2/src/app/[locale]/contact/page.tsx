@@ -2,6 +2,7 @@ import Link from "next/link";
 import { hasLocale } from "next-intl";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { routing } from "@/lib/i18n/routing";
+import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 
 // Contact page (MVP-E). Embeds the Novalis Google Form so beta users
 // can reach a human after escalation. Google Form handles notifications
@@ -26,6 +27,7 @@ export default async function ContactPage({ params }: PageProps) {
   setRequestLocale(safeLocale);
 
   const t = await getTranslations({ locale: safeLocale, namespace: "contact" });
+  const tCommon = await getTranslations({ locale: safeLocale, namespace: "common" });
 
   // Optional embed URL. Google Form's /viewform endpoint accepts an
   // ?embedded=true param that removes the outer chrome.
@@ -38,14 +40,18 @@ export default async function ContactPage({ params }: PageProps) {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <nav className="mb-4 text-sm">
+      <div className="mb-4 flex items-center justify-between gap-3">
         <Link
           href={`/${safeLocale}/dashboard`}
-          className="text-muted-foreground hover:text-foreground hover:underline"
+          className="text-sm text-muted-foreground hover:text-foreground hover:underline"
         >
           ← {t("backToDashboard")}
         </Link>
-      </nav>
+        <LocaleSwitcher
+          currentLocale={safeLocale}
+          label={tCommon("language")}
+        />
+      </div>
       <header className="mb-6 border-b border-border pb-4">
         <h1 className="text-2xl font-bold">{t("title")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
@@ -68,6 +74,20 @@ export default async function ContactPage({ params }: PageProps) {
           {t("notConfigured")}
         </div>
       )}
+
+      {/* Fallback contact email shown beneath the form. The Google
+          Form is the primary path, but for users whose browser blocks
+          embedded iframes (some in-app browsers / strict tracking
+          settings) the email is a guaranteed alternative. */}
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        {t("emailFallbackLabel")}{" "}
+        <a
+          href="mailto:ryuhei.miyasawa@novalisgroup.biz"
+          className="font-medium text-primary hover:underline"
+        >
+          ryuhei.miyasawa@novalisgroup.biz
+        </a>
+      </p>
     </main>
   );
 }
