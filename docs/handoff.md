@@ -130,16 +130,30 @@ W ナンバリングは Phase 1 内のスプリント単位として元計画に
 - Facebook App 公開モード移行（本番ユーザ獲得前）
 - ベータ参加者からのフィードバック収集
 
-### 推奨着手順（次セッションで再確認）
+### 推奨着手順（2026-05-21 再評価で大幅変更）
 
-1. **REVOKE SQL 実行**（Phase 2 着手前の security fix、§6 参照）
-2. Phase 2 から **1〜2件選定** → feature ブランチで着手。候補:
-   - **候補A**: Komoju 課金（旧 W6）— 大規模、課金フロー全体設計が要、`NEXT_PUBLIC_PAYMENT_ENABLED` フラグ flip と一緒
-   - **候補B**: Messenger 対応（旧 W7）— Facebook 公開モード移行とセット、`MESSENGER_*` env 既リザーブ
-   - **候補C**: 会話タイトル AI 自動生成 — 小規模（1 日）、ユーザ体感即効性高
-   - **候補D**: Sentry 本格稼働 + persist 失敗 alert — 運用品質向上、本番稼働直後にやる価値高い
-   - **候補E**: オペレーター介入 UI（旧 W6 の半分）— `operator_takeover_logs` 既存活用、管理画面拡張
-3. C と D は小タスク、A/B/E の大型機能の合間に組み込み可能
+**重要な戦略再評価（2026-05-21）**:
+
+Web 側 FB OAuth は元計画では「Messenger Bot 着手時の identity unification を見越して」採用したが、Live 化までに Business Verification + Passkey + ポリシー文書 + Data Use Checkup + App Review の hurdles で **想定の 3 倍の作業量** を消費。さらに in-app browser (LINE/Messenger 内蔵 webview) で OAuth flow が壊れる構造的問題が発覚。一方、本来のコア機能である **Messenger Bot** はフィリピン人ユーザの自然な channel で、FB Page を friend する形式 = OAuth 不要・consent friction 皆無で動く。**Web の OAuth 完成度を磨くより Messenger Bot 着手を早めて元の戦略軌道に戻すべき**との判断。
+
+**新優先順**:
+
+1. **REVOKE SQL 実行**（Phase 2 着手前の security fix、§6 参照）— 据置
+2. **Web に email magic link 追加**（1h、Phase-1.5 quick win）— FB OAuth と併存させ、in-app browser ユーザや FB を持たない / 嫌がるユーザに代替経路を提供。Supabase Auth が natively サポート、追加 schema 不要。デモ当日トラブル耐性が大幅向上
+3. **Messenger Bot 着手**（最優先 Phase 2、旧 W7）— v3 §3 で本来 PWA + Messenger Bot が 2 軸として位置づけられていた。FB Page を friend する形式で OAuth 不要、PSID で識別、Webhook で受信応答。`MESSENGER_*` env 既リザーブ。フィリピン人ユーザの典型行動 (Messenger でやり取り) にマッチ
+4. **Sentry 本格稼働 + persist 失敗 alert**（小規模、運用品質）— Lesson 25 根本対策、本番稼働直後にやる価値高い
+5. **会話タイトル AI 自動生成**（1日、UX 即効性）
+
+**Phase 2 大型機能の優先順（5 を超えた後）**:
+- **Komoju 課金**（旧 W6）— `NEXT_PUBLIC_PAYMENT_ENABLED` フラグ flip と一緒、フリーミアム解禁
+- **オペレーター介入 UI**（旧 W6 の半分）— `operator_takeover_logs` 既存活用
+- **Web と Messenger の identity unification** — 同一ユーザがどちらでも履歴を見られる、Phase 2 後半
+
+**従来の旧 W7 ≒ 候補B の格上げ理由**:
+- フィリピン人ユーザ（target）は FB Messenger 利用率が極めて高い
+- Messenger Bot 経由なら OAuth consent screen 不要 = ベータ参加者の login friction ゼロ
+- Web の App Review / 公開モードのハードルから距離を取れる
+- FB の API も Messenger Platform の方が成熟している
 
 ## 6. 既知の保留事項（本セッションで未完了）
 
