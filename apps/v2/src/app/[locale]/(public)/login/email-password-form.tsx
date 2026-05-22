@@ -38,6 +38,7 @@ interface Props {
     signInFailed: string;
     signUpFailed: string;
     signUpAlreadyRegistered: string;
+    signUpRateLimited: string;
     signUpEmailSent: string;
     signUpInstantSuccess: string;
     passwordTooShort: string;
@@ -114,19 +115,33 @@ export function EmailPasswordForm({ locale, redirect, labels }: Props) {
         options: { emailRedirectTo: buildCallbackUrl() },
       });
       if (result.error) {
-        console.warn("[login-email] signUp:", result.error.message);
+        console.warn(
+          "[login-email] signUp:",
+          result.error.code,
+          result.error.message,
+        );
+        const raw = result.error.message.toLowerCase();
+        // Supabase Free tier limits confirmation emails to ~2-4/hour;
+        // exceeding returns 429 with code over_email_send_rate_limit.
+        // Beta testers will hit this quickly; surface a specific copy
+        // so they know to wait rather than retrying immediately.
+        // Phase 2: configure a custom SMTP (Resend etc.) to remove
+        // this ceiling entirely.
+        if (
+          result.error.code === "over_email_send_rate_limit" ||
+          raw.includes("email rate limit exceeded") ||
+          raw.includes("rate limit")
+        ) {
+          setState({ kind: "error", message: labels.signUpRateLimited });
+          return;
+        }
         // Supabase phrases "already registered" several ways across
         // versions: "User already registered", "Email address ... is
-        // already registered", or error code email_exists. Treat any
-        // of them as the same dedicated message so the user gets a
-        // clear "use sign-in instead" hint rather than the generic
-        // failure copy.
-        const raw = result.error.message.toLowerCase();
+        // already registered", or error code email_exists / user_already_exists.
         const alreadyRegistered =
           raw.includes("already registered") ||
           raw.includes("already exists") ||
           raw.includes("already in use") ||
-          // Newer GoTrue error codes carry email_exists / user_already_exists
           result.error.code === "email_exists" ||
           result.error.code === "user_already_exists";
         setState({
@@ -142,15 +157,19 @@ export function EmailPasswordForm({ locale, redirect, labels }: Props) {
         window.location.assign(buildCallbackUrl());
         return;
       }
-      // Supabase also returns "no error + no session + user with empty
-      // identities[]" when the email is already registered with
-      // Email-confirm ON. This is the silent enumeration-protection
-      // path; detect it and surface the same already-registered hint
-      // rather than the misleading "we sent a confirmation" banner.
+      // Supabase silently returns success when the email is already
+      // registered with Email-confirm ON (anti-enumeration). The
+      // GoTrue server-side flag is exposed via the auth log action
+      // user_repeated_signup, but on the JS SDK side the indicator is:
+      //   - data.session is null
+      //   - data.user is populated (the existing user, not a new one)
+      //   - data.user.identities is null OR an empty array, depending
+      //     on SDK version
+      // We treat both null and [] as the "already registered" signal.
       if (
         result.data.user &&
-        Array.isArray(result.data.user.identities) &&
-        result.data.user.identities.length === 0
+        (!result.data.user.identities ||
+          result.data.user.identities.length === 0)
       ) {
         setState({ kind: "error", message: labels.signUpAlreadyRegistered });
         return;

@@ -82,6 +82,7 @@ export default async function LoginPage({
             signInFailed: t("signInFailed"),
             signUpFailed: t("signUpFailed"),
             signUpAlreadyRegistered: t("signUpAlreadyRegistered"),
+            signUpRateLimited: t("signUpRateLimited"),
             signUpEmailSent: t("signUpEmailSent"),
             signUpInstantSuccess: t("signUpInstantSuccess"),
             passwordTooShort: t("passwordTooShort"),

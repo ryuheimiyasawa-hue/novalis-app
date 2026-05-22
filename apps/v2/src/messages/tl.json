@@ -23,6 +23,7 @@
     "signInFailed": "Maling email address o password.",
     "signUpFailed": "Nabigo ang pag-register. Pakisuri ang email address.",
     "signUpAlreadyRegistered": "Naka-register na ang email address na ito. Mangyaring gamitin ang \"Mag-sign in\", o i-reset ang inyong password kung nakalimutan.",
+    "signUpRateLimited": "Naabot na ang limitasyon ng pagpapadala ng email. Maghintay ng mga isang oras at subukang muli.",
     "signUpEmailSent": "Naipadala ang confirmation email. I-click ang link sa inyong inbox upang kumpletuhin ang pag-register.",
     "signUpInstantSuccess": "Kumpleto na ang pag-register.",
     "passwordTooShort": "Ang password ay dapat na hindi bababa sa 6 na karakter.",

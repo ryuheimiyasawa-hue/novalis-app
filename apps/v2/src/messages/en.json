@@ -23,6 +23,7 @@
     "signInFailed": "Incorrect email or password.",
     "signUpFailed": "Sign-up failed. Please check the email address.",
     "signUpAlreadyRegistered": "This email address is already registered. Please use \"Sign in\", or reset your password if you forgot it.",
+    "signUpRateLimited": "Email send limit reached. Please wait about an hour and try again.",
     "signUpEmailSent": "Confirmation email sent. Click the link in your inbox to complete sign-up.",
     "signUpInstantSuccess": "Sign-up complete.",
     "passwordTooShort": "Password must be at least 6 characters.",
