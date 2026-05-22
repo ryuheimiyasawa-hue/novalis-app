@@ -38,6 +38,11 @@ export async function GET(req: NextRequest) {
   const oauthError = params.get("error");
   const locale = pickLocale(params.get("locale"));
   const requestedRedirect = params.get("redirect");
+  // type=recovery is set on Supabase password-reset email links (we
+  // pass it through resetPasswordForEmail's redirectTo). It tells us
+  // to send the user to /reset-password instead of /dashboard so they
+  // can set a new password before the recovery session expires.
+  const recovery = params.get("type") === "recovery";
 
   // Facebook (or Supabase) returned an explicit error: user cancelled, denied, etc.
   if (oauthError) {
@@ -61,6 +66,13 @@ export async function GET(req: NextRequest) {
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData.user) {
     return loginRedirect(req, locale, "callback_failed");
+  }
+
+  // Recovery path: skip ensureProfile + redirect plumbing and send the
+  // user straight to /reset-password. The recovery session is short-
+  // lived; we want the password form on screen immediately.
+  if (recovery) {
+    return successResponse(new URL(`/${locale}/reset-password`, req.nextUrl.origin));
   }
 
   try {

@@ -8,7 +8,7 @@ import {
   parseFailureCount,
 } from "@/lib/auth/login-failure-cookie";
 import { LoginForm } from "./login-form";
-import { EmailLoginForm } from "./email-login-form";
+import { EmailPasswordForm } from "./email-password-form";
 import { ErrorBanner } from "./error-banner";
 import { LanguageSwitcher } from "./language-switcher";
 
@@ -69,15 +69,27 @@ export default async function LoginPage({
           <span className="h-px flex-1 bg-neutral-200 dark:bg-neutral-800" />
         </div>
 
-        <EmailLoginForm
+        <EmailPasswordForm
           locale={safeLocale}
           redirect={safeRedirect}
           labels={{
-            placeholder: t("emailPlaceholder"),
-            button: t("emailButton"),
-            sending: t("emailSending"),
-            sent: t("emailSent"),
-            failed: t("emailFailed"),
+            emailPlaceholder: t("emailPlaceholder"),
+            passwordPlaceholder: t("passwordPlaceholder"),
+            signIn: t("signIn"),
+            signUp: t("signUp"),
+            signingIn: t("signingIn"),
+            signingUp: t("signingUp"),
+            signInFailed: t("signInFailed"),
+            signUpFailed: t("signUpFailed"),
+            signUpEmailSent: t("signUpEmailSent"),
+            signUpInstantSuccess: t("signUpInstantSuccess"),
+            passwordTooShort: t("passwordTooShort"),
+            forgotPassword: t("forgotPassword"),
+            resetEmailSent: t("resetEmailSent"),
+            resetFailed: t("resetFailed"),
+            resetTitle: t("resetTitle"),
+            resetSubmit: t("resetSubmit"),
+            resetCancel: t("resetCancel"),
           }}
         />
 

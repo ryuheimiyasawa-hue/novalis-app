@@ -32,6 +32,12 @@ const PUBLIC_UI_PATTERNS: RegExp[] = [
   // only existing users can contact us, which defeats the purpose.
   // No app data leaks; the page is a thin iframe wrapper.
   new RegExp(`^/${LOCALE_RE}/contact(/.*)?$`),
+  // /reset-password is reached via a Supabase recovery email link.
+  // The user has a (recovery-scoped) session at that point but they
+  // are not "logged in" in the onboarded-user sense. The page itself
+  // gates on getUser() and redirects to /login when no session, so
+  // it's safe to allow through here.
+  new RegExp(`^/${LOCALE_RE}/reset-password(/.*)?$`),
 ];
 
 // Authenticated paths that must remain reachable while onboarded_at IS NULL.
