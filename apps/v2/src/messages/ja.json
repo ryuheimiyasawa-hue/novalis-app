@@ -22,6 +22,7 @@
     "signingUp": "登録中...",
     "signInFailed": "メールアドレスまたはパスワードが間違っています。",
     "signUpFailed": "登録に失敗しました。メールアドレスを確認してください。",
+    "signUpAlreadyRegistered": "このメールアドレスは既に登録されています。「ログイン」からサインインするか、パスワードをお忘れの場合は再設定してください。",
     "signUpEmailSent": "確認メールを送信しました。受信箱のリンクをクリックして登録を完了してください。",
     "signUpInstantSuccess": "登録が完了しました。",
     "passwordTooShort": "パスワードは6文字以上にしてください。",

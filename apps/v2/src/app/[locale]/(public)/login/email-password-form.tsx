@@ -37,6 +37,7 @@ interface Props {
     signingUp: string;
     signInFailed: string;
     signUpFailed: string;
+    signUpAlreadyRegistered: string;
     signUpEmailSent: string;
     signUpInstantSuccess: string;
     passwordTooShort: string;
@@ -114,7 +115,26 @@ export function EmailPasswordForm({ locale, redirect, labels }: Props) {
       });
       if (result.error) {
         console.warn("[login-email] signUp:", result.error.message);
-        setState({ kind: "error", message: labels.signUpFailed });
+        // Supabase phrases "already registered" several ways across
+        // versions: "User already registered", "Email address ... is
+        // already registered", or error code email_exists. Treat any
+        // of them as the same dedicated message so the user gets a
+        // clear "use sign-in instead" hint rather than the generic
+        // failure copy.
+        const raw = result.error.message.toLowerCase();
+        const alreadyRegistered =
+          raw.includes("already registered") ||
+          raw.includes("already exists") ||
+          raw.includes("already in use") ||
+          // Newer GoTrue error codes carry email_exists / user_already_exists
+          result.error.code === "email_exists" ||
+          result.error.code === "user_already_exists";
+        setState({
+          kind: "error",
+          message: alreadyRegistered
+            ? labels.signUpAlreadyRegistered
+            : labels.signUpFailed,
+        });
         return;
       }
       if (result.data.session) {
@@ -122,7 +142,21 @@ export function EmailPasswordForm({ locale, redirect, labels }: Props) {
         window.location.assign(buildCallbackUrl());
         return;
       }
-      // Email confirmation is ON — wait for the user to click the link.
+      // Supabase also returns "no error + no session + user with empty
+      // identities[]" when the email is already registered with
+      // Email-confirm ON. This is the silent enumeration-protection
+      // path; detect it and surface the same already-registered hint
+      // rather than the misleading "we sent a confirmation" banner.
+      if (
+        result.data.user &&
+        Array.isArray(result.data.user.identities) &&
+        result.data.user.identities.length === 0
+      ) {
+        setState({ kind: "error", message: labels.signUpAlreadyRegistered });
+        return;
+      }
+      // Email confirmation is ON for a genuine new signup — wait for
+      // the user to click the link.
       setState({ kind: "success", message: labels.signUpEmailSent });
     } catch (err) {
       console.error("[login-email] signUp threw:", err);
