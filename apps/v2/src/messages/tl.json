@@ -35,7 +35,10 @@
     "resetFailed": "Nabigong magpadala ng email. Pakisuri ang inyong address.",
     "switchLanguage": "Wika",
     "supportLink": "Makipag-ugnayan sa suporta",
-    "supportText": "May problema sa pag-sign in?"
+    "supportText": "May problema sa pag-sign in?",
+    "tryWithoutLogin": "Subukan nang hindi nagsa-sign in (beta test)",
+    "tryWithoutLoginLoading": "Inihahanda ang iyong session...",
+    "tryWithoutLoginFailed": "Hindi makagawa ng guest session."
   },
   "resetPassword": {
     "title": "Magtakda ng bagong password",
@@ -78,6 +81,10 @@
     "en": "English",
     "tl": "Tagalog",
     "skip": "Laktawan"
+  },
+  "anonBanner": {
+    "label": "Test mode",
+    "body": "Pansamantalang beta session. Hindi tutuloy ang datos kapag nagpalit ka ng browser."
   },
   "dashboard": {
     "headerLogo": "Novalis",

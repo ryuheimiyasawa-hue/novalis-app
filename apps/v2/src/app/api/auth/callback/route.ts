@@ -43,6 +43,11 @@ export async function GET(req: NextRequest) {
   // to send the user to /reset-password instead of /dashboard so they
   // can set a new password before the recovery session expires.
   const recovery = params.get("type") === "recovery";
+  // anon=1 is set by AnonSignInButton after signInAnonymously() has
+  // already established the session client-side. There is no `code`
+  // to exchange — the session cookie is already valid. We skip the
+  // exchangeCodeForSession step and proceed straight to ensureProfile.
+  const anon = params.get("anon") === "1";
 
   // Facebook (or Supabase) returned an explicit error: user cancelled, denied, etc.
   if (oauthError) {
@@ -52,15 +57,17 @@ export async function GET(req: NextRequest) {
     return loginRedirect(req, locale, "fb_denied");
   }
 
-  if (!code) {
+  if (!code && !anon) {
     return loginRedirect(req, locale, "callback_failed");
   }
 
   const supabase = await createClient();
-  const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-  if (exchangeError) {
-    console.warn("[oauth-callback] exchangeCodeForSession failed:", exchangeError.message);
-    return loginRedirect(req, locale, "callback_failed");
+  if (code) {
+    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+    if (exchangeError) {
+      console.warn("[oauth-callback] exchangeCodeForSession failed:", exchangeError.message);
+      return loginRedirect(req, locale, "callback_failed");
+    }
   }
 
   const { data: userData, error: userError } = await supabase.auth.getUser();

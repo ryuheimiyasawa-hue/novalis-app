@@ -35,7 +35,10 @@
     "resetFailed": "メール送信に失敗しました。アドレスを確認してください。",
     "switchLanguage": "言語",
     "supportLink": "サポートに連絡",
-    "supportText": "ログインできない場合は"
+    "supportText": "ログインできない場合は",
+    "tryWithoutLogin": "ログインせずに試す（ベータテスト用）",
+    "tryWithoutLoginLoading": "セッションを準備中...",
+    "tryWithoutLoginFailed": "ゲストセッションの作成に失敗しました。"
   },
   "resetPassword": {
     "title": "新しいパスワードを設定",
@@ -78,6 +81,10 @@
     "en": "English",
     "tl": "Tagalog",
     "skip": "スキップ"
+  },
+  "anonBanner": {
+    "label": "テストモード",
+    "body": "ベータテスト中の一時セッションです。ブラウザを変えるとデータは引き継がれません。"
   },
   "dashboard": {
     "headerLogo": "Novalis",

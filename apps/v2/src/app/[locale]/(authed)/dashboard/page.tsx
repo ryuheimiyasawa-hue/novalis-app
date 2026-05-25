@@ -32,7 +32,12 @@ export default async function DashboardPage({
     locale: safeLocale,
     namespace: "dashboard",
   });
+  const tAnon = await getTranslations({
+    locale: safeLocale,
+    namespace: "anonBanner",
+  });
   const displayName = profile?.display_name ?? "";
+  const isAnon = user.is_anonymous === true;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -51,6 +56,13 @@ export default async function DashboardPage({
 
       <main className="flex-1 px-6 py-12">
         <section className="max-w-3xl mx-auto space-y-6">
+          {isAnon && (
+            <div className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100">
+              <span className="font-semibold">{tAnon("label")}</span>
+              <span className="mx-2">·</span>
+              <span>{tAnon("body")}</span>
+            </div>
+          )}
           <div className="space-y-2">
             <h1 className="text-2xl font-bold">
               {t("greeting", { name: displayName })}

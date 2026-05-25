@@ -35,7 +35,10 @@
     "resetFailed": "Failed to send email. Please check your address.",
     "switchLanguage": "Language",
     "supportLink": "Contact support",
-    "supportText": "Trouble signing in?"
+    "supportText": "Trouble signing in?",
+    "tryWithoutLogin": "Try without signing in (beta test)",
+    "tryWithoutLoginLoading": "Preparing your session...",
+    "tryWithoutLoginFailed": "Could not create a guest session."
   },
   "resetPassword": {
     "title": "Set a new password",
@@ -78,6 +81,10 @@
     "en": "English",
     "tl": "Tagalog",
     "skip": "Skip"
+  },
+  "anonBanner": {
+    "label": "Test mode",
+    "body": "Temporary beta session. Data will not persist if you switch browsers."
   },
   "dashboard": {
     "headerLogo": "Novalis",

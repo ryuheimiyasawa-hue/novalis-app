@@ -93,6 +93,16 @@ export default async function ChatPage({ params, searchParams }: Props) {
     locale: safeLocale,
     namespace: "common",
   });
+  const tAnon = await getTranslations({
+    locale: safeLocale,
+    namespace: "anonBanner",
+  });
+
+  // Detect anonymous (signInAnonymously) users so we can show a
+  // "test mode" banner at the top of the chat. The (authed) layout
+  // already requires a session, so this is purely a UI affordance.
+  const sessionUser = await requireAuth();
+  const isAnon = sessionUser.is_anonymous === true;
 
   // Resolve optional conversation_id from the URL. We do the
   // ownership check + message fetch server-side so the client never
@@ -101,7 +111,6 @@ export default async function ChatPage({ params, searchParams }: Props) {
   let initialMessages: HydratedMessage[] | undefined;
 
   if (conversation_id && UuidSchema.safeParse(conversation_id).success) {
-    const user = await requireAuth();
     const admin = getAdminClient();
     const { data: conv } = await admin
       .from("conversations")
@@ -109,7 +118,7 @@ export default async function ChatPage({ params, searchParams }: Props) {
       .eq("id", conversation_id)
       .maybeSingle();
 
-    if (conv && conv.user_id === user.id) {
+    if (conv && conv.user_id === sessionUser.id) {
       const { data: msgs, error } = await admin
         .from("messages")
         .select("id, role, content, is_escalated, citations, created_at")
@@ -148,6 +157,13 @@ export default async function ChatPage({ params, searchParams }: Props) {
       {/* Chat area. The mobile hamburger sits at the top of this column
           and opens the same sidebar in a drawer. */}
       <div className="flex min-w-0 flex-1 flex-col">
+        {isAnon && (
+          <div className="border-b border-amber-300 bg-amber-50 px-4 py-2 text-xs text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100">
+            <span className="font-semibold">{tAnon("label")}</span>
+            <span className="mx-2">·</span>
+            <span>{tAnon("body")}</span>
+          </div>
+        )}
         <div className="flex items-center gap-2 border-b border-border px-3 py-2 md:hidden">
           <MobileSidebar label={tConv("title")}>{sidebar}</MobileSidebar>
           <span className="text-sm font-semibold">{t("title")}</span>
