@@ -9,7 +9,8 @@ interface Props {
 }
 
 const ITEMS = [
-  { href: "/admin", label: "ダッシュボード" },
+  { href: "/admin", label: "ホーム" },
+  { href: "/admin/metrics", label: "メトリクス" },
   { href: "/admin/categories", label: "カテゴリ" },
   { href: "/admin/articles", label: "記事" },
   { href: "/admin/faqs", label: "FAQ" },
