@@ -106,7 +106,17 @@
     "newButton": "新しい相談を始める",
     "empty": "まだ相談はありません。「新しい相談を始める」から始めましょう。",
     "untitled": "(無題)",
-    "loadError": "相談一覧の取得に失敗しました。時間を置いて再度お試しください。"
+    "loadError": "相談一覧の取得に失敗しました。時間を置いて再度お試しください。",
+    "searchPlaceholder": "相談を検索",
+    "searchNoResults": "一致する相談がありません。",
+    "actionsLabel": "操作",
+    "rename": "名前を変更",
+    "renameSave": "保存",
+    "renameCancel": "キャンセル",
+    "delete": "削除",
+    "deleteConfirm": "この相談を削除しますか？元に戻せません。",
+    "renameFailed": "名前の変更に失敗しました。",
+    "deleteFailed": "削除に失敗しました。"
   },
   "articlesList": {
     "title": "記事一覧",

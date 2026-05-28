@@ -106,7 +106,17 @@
     "newButton": "Start a new consultation",
     "empty": "No consultations yet. Tap \"Start a new consultation\" to begin.",
     "untitled": "(untitled)",
-    "loadError": "Failed to load past consultations. Please try again in a moment."
+    "loadError": "Failed to load past consultations. Please try again in a moment.",
+    "searchPlaceholder": "Search consultations",
+    "searchNoResults": "No matching consultations.",
+    "actionsLabel": "Actions",
+    "rename": "Rename",
+    "renameSave": "Save",
+    "renameCancel": "Cancel",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this consultation? This cannot be undone.",
+    "renameFailed": "Failed to rename.",
+    "deleteFailed": "Failed to delete."
   },
   "articlesList": {
     "title": "Articles",

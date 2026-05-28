@@ -106,7 +106,17 @@
     "newButton": "Magsimula ng bagong konsultasyon",
     "empty": "Wala pang konsultasyon. Pindutin ang \"Magsimula ng bagong konsultasyon\" upang magsimula.",
     "untitled": "(walang pamagat)",
-    "loadError": "Hindi nakuha ang mga nakaraang konsultasyon. Paki-ulit pagkalipas ng ilang sandali."
+    "loadError": "Hindi nakuha ang mga nakaraang konsultasyon. Paki-ulit pagkalipas ng ilang sandali.",
+    "searchPlaceholder": "Maghanap ng konsultasyon",
+    "searchNoResults": "Walang tumugmang konsultasyon.",
+    "actionsLabel": "Mga aksyon",
+    "rename": "Palitan ang pangalan",
+    "renameSave": "I-save",
+    "renameCancel": "Kanselahin",
+    "delete": "Burahin",
+    "deleteConfirm": "Burahin ang konsultasyong ito? Hindi na ito maibabalik.",
+    "renameFailed": "Nabigong palitan ang pangalan.",
+    "deleteFailed": "Nabigong burahin."
   },
   "articlesList": {
     "title": "Mga artikulo",

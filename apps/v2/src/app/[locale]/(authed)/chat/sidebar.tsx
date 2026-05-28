@@ -4,19 +4,20 @@ import { PlusIcon } from "lucide-react";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
+import {
+  ConversationList,
+  type SidebarConversation,
+} from "./conversation-list";
 
 // Past-conversations sidebar (replaces the standalone /conversations
 // page). Rendered server-side from the same chat route so the initial
 // HTML already includes the list — no client fetch, no skeleton flash.
-// Active highlight is derived from props (the chat page passes the
-// current conversation_id from searchParams), so this stays a server
-// component with zero client state.
+// Row shaping (title fallback + relative date) happens here; the
+// interactive list (search / rename / delete + active highlight) is a
+// client child seeded with the shaped rows.
 
 interface Props {
   locale: "ja" | "en" | "tl";
-  /** Active conversation id from the chat page's URL searchParams.
-   *  When present, the matching row gets a highlight. */
-  activeConversationId?: string;
 }
 
 interface ConversationRow {
@@ -53,10 +54,7 @@ function formatRelative(iso: string, locale: "ja" | "en" | "tl"): string {
   return then.toISOString().slice(5, 10); // mm-dd
 }
 
-export async function ConversationsSidebar({
-  locale,
-  activeConversationId,
-}: Props) {
+export async function ConversationsSidebar({ locale }: Props) {
   const user = await requireAuth();
   const admin = getAdminClient();
 
@@ -83,6 +81,16 @@ export async function ConversationsSidebar({
   });
 
   const rows = (data ?? []) as ConversationRow[];
+  const shaped: SidebarConversation[] = rows.map((row) => {
+    const snippet = row.messages?.[0]?.content ?? "";
+    return {
+      id: row.id,
+      displayTitle:
+        row.title?.trim() ||
+        (snippet ? truncate(snippet, SNIPPET_MAX) : t("untitled")),
+      relativeDate: formatRelative(row.updated_at, locale),
+    };
+  });
 
   return (
     <aside className="flex h-full w-full flex-col border-r border-border bg-muted/20">
@@ -108,40 +116,24 @@ export async function ConversationsSidebar({
       <div className="flex-1 overflow-y-auto p-2">
         {error ? (
           <p className="px-2 py-4 text-xs text-destructive">{t("loadError")}</p>
-        ) : rows.length === 0 ? (
-          <p className="px-2 py-4 text-xs text-muted-foreground">
-            {t("empty")}
-          </p>
         ) : (
-          <ul className="space-y-1">
-            {rows.map((row) => {
-              const isActive = row.id === activeConversationId;
-              const snippet = row.messages?.[0]?.content ?? "";
-              const displayTitle =
-                row.title?.trim() ||
-                (snippet ? truncate(snippet, SNIPPET_MAX) : t("untitled"));
-              return (
-                <li key={row.id}>
-                  <Link
-                    href={`/${locale}/chat?conversation_id=${row.id}`}
-                    className={`block rounded-md px-2 py-2 text-xs leading-tight transition-colors ${
-                      isActive
-                        ? "bg-primary/10 text-foreground"
-                        : "text-muted-foreground hover:bg-accent/40 hover:text-foreground"
-                    }`}
-                    aria-current={isActive ? "page" : undefined}
-                  >
-                    <div className="line-clamp-2 font-medium">
-                      {displayTitle}
-                    </div>
-                    <div className="mt-0.5 text-[10px] text-muted-foreground/70">
-                      {formatRelative(row.updated_at, locale)}
-                    </div>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+          <ConversationList
+            locale={locale}
+            initialRows={shaped}
+            labels={{
+              searchPlaceholder: t("searchPlaceholder"),
+              searchNoResults: t("searchNoResults"),
+              empty: t("empty"),
+              actionsLabel: t("actionsLabel"),
+              rename: t("rename"),
+              renameSave: t("renameSave"),
+              renameCancel: t("renameCancel"),
+              delete: t("delete"),
+              deleteConfirm: t("deleteConfirm"),
+              renameFailed: t("renameFailed"),
+              deleteFailed: t("deleteFailed"),
+            }}
+          />
         )}
       </div>
     </aside>
