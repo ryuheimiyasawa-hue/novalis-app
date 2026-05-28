@@ -25,6 +25,12 @@ vi.mock("@/lib/chat/persistence", async () => {
 vi.mock("@/lib/ai/chat-pipeline", () => ({
   processChatStream: vi.fn(),
 }));
+// Auto-title runs after the `done` event for newly created
+// conversations. It is out of scope for these wiring tests, so stub it
+// to a no-op — otherwise the route would invoke the real Gemini client.
+vi.mock("@/lib/chat/title", () => ({
+  generateConversationTitle: vi.fn(async () => null),
+}));
 
 import { POST } from "@/app/api/chat/send/route";
 import { requireAuth } from "@/lib/auth/require-auth";

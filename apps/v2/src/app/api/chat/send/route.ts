@@ -10,7 +10,9 @@ import {
   ConversationNotFoundError,
   persistResult,
   resolveConversation,
+  updateConversationTitle,
 } from "@/lib/chat/persistence";
+import { generateConversationTitle } from "@/lib/chat/title";
 
 // /api/chat/send — W5 production SSE endpoint.
 //
@@ -70,9 +72,11 @@ export async function POST(req: NextRequest) {
 
   // 4. Conversation
   let conversationId: string;
+  let conversationCreated: boolean;
   try {
     const conv = await resolveConversation(userId, body.conversationId ?? null);
     conversationId = conv.id;
+    conversationCreated = conv.created;
   } catch (e) {
     if (e instanceof ConversationNotFoundError) return fail("NOT_FOUND");
     if (e instanceof ConversationForbiddenError) return fail("FORBIDDEN");
@@ -152,6 +156,19 @@ export async function POST(req: NextRequest) {
             text: result.text,
             piiTypes: result.piiTypes ?? [],
           });
+        }
+
+        // Auto-title a freshly created conversation from its first user
+        // message. Runs AFTER the `done` event so it never delays the
+        // user's reply; we still await it before close so the write
+        // completes on serverless (post-response work isn't guaranteed
+        // to run). The new title surfaces in the sidebar / metrics on
+        // next load. Skipped for `blocked` (no user message was stored).
+        if (conversationCreated && result.kind !== "blocked") {
+          const title = await generateConversationTitle(message, locale);
+          if (title) {
+            await updateConversationTitle(conversationId, title);
+          }
         }
       } catch (err) {
         console.error(
