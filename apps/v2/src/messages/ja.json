@@ -15,7 +15,7 @@
     "facebookButton": "Facebookでログイン",
     "orDivider": "または",
     "emailPlaceholder": "メールアドレス",
-    "passwordPlaceholder": "パスワード (6文字以上)",
+    "passwordPlaceholder": "パスワード (8文字以上)",
     "signIn": "サインイン",
     "signUp": "新規登録",
     "signingIn": "サインイン中...",
@@ -26,7 +26,7 @@
     "signUpRateLimited": "メール送信回数の上限に達しました。1時間ほど時間を置いてから再度お試しください。",
     "signUpEmailSent": "確認メールを送信しました。受信箱のリンクをクリックして登録を完了してください。",
     "signUpInstantSuccess": "登録が完了しました。",
-    "passwordTooShort": "パスワードは6文字以上にしてください。",
+    "passwordTooShort": "パスワードは8文字以上にしてください。",
     "forgotPassword": "パスワードをお忘れですか？",
     "resetTitle": "登録済みのメールアドレスを入力してください。パスワードリセットのリンクをお送りします。",
     "resetSubmit": "リセットリンクを送信",
@@ -43,13 +43,13 @@
   "resetPassword": {
     "title": "新しいパスワードを設定",
     "subtitle": "新しいパスワードを入力してください。",
-    "newPasswordPlaceholder": "新しいパスワード (6文字以上)",
+    "newPasswordPlaceholder": "新しいパスワード (8文字以上)",
     "confirmPasswordPlaceholder": "新しいパスワード (確認)",
     "submit": "パスワードを更新",
     "submitting": "更新中...",
     "successMessage": "パスワードを更新しました。ダッシュボードへ移動します。",
     "mismatch": "パスワードが一致しません。",
-    "tooShort": "パスワードは6文字以上にしてください。",
+    "tooShort": "パスワードは8文字以上にしてください。",
     "failed": "パスワード更新に失敗しました。リンクの有効期限が切れている可能性があります。"
   },
   "loginErrors": {

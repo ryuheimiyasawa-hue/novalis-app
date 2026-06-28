@@ -15,7 +15,7 @@
     "facebookButton": "Continue with Facebook",
     "orDivider": "or",
     "emailPlaceholder": "Email address",
-    "passwordPlaceholder": "Password (at least 6 characters)",
+    "passwordPlaceholder": "Password (at least 8 characters)",
     "signIn": "Sign in",
     "signUp": "Sign up",
     "signingIn": "Signing in...",
@@ -26,7 +26,7 @@
     "signUpRateLimited": "Email send limit reached. Please wait about an hour and try again.",
     "signUpEmailSent": "Confirmation email sent. Click the link in your inbox to complete sign-up.",
     "signUpInstantSuccess": "Sign-up complete.",
-    "passwordTooShort": "Password must be at least 6 characters.",
+    "passwordTooShort": "Password must be at least 8 characters.",
     "forgotPassword": "Forgot password?",
     "resetTitle": "Enter your registered email address. We will send a password reset link.",
     "resetSubmit": "Send reset link",
@@ -43,13 +43,13 @@
   "resetPassword": {
     "title": "Set a new password",
     "subtitle": "Enter your new password below.",
-    "newPasswordPlaceholder": "New password (at least 6 characters)",
+    "newPasswordPlaceholder": "New password (at least 8 characters)",
     "confirmPasswordPlaceholder": "Confirm new password",
     "submit": "Update password",
     "submitting": "Updating...",
     "successMessage": "Password updated. Redirecting to dashboard.",
     "mismatch": "Passwords do not match.",
-    "tooShort": "Password must be at least 6 characters.",
+    "tooShort": "Password must be at least 8 characters.",
     "failed": "Failed to update password. The reset link may have expired."
   },
   "loginErrors": {

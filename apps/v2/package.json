@@ -13,7 +13,8 @@
     "test:watch": "vitest",
     "e2e": "playwright test",
     "clean": "rm -rf .next",
-    "reindex": "tsx scripts/reindex.ts"
+    "reindex": "tsx scripts/reindex.ts",
+    "purge:anon": "tsx scripts/purge-anon-users.ts"
   },
   "dependencies": {
     "@google/genai": "^1.52.0",
