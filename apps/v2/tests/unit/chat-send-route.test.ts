@@ -42,6 +42,7 @@ import {
   resolveConversation,
 } from "@/lib/chat/persistence";
 import { processChatStream } from "@/lib/ai/chat-pipeline";
+import { buildDecision } from "@/lib/ai/whitelist-decision";
 
 const mockRequireAuth = vi.mocked(requireAuth);
 const mockCheckChatQuota = vi.mocked(checkChatQuota);
@@ -162,6 +163,12 @@ describe("POST /api/chat/send — SSE happy path", () => {
         kind: "answer",
         text: "Working visas...",
         disclaimer: "general info disclaimer",
+        decision: buildDecision({
+          stage: "llm_general",
+          outcome: "answer",
+          category: "general",
+          reason: "general rule",
+        }),
         citations: [],
         meta: {
           model: "gemini-2.5-flash",
@@ -201,6 +208,11 @@ describe("POST /api/chat/send — SSE happy path", () => {
       reason: "keyword",
       text: "Please consult a professional.",
       detail: "kw:私の",
+      decision: buildDecision({
+        stage: "keyword",
+        outcome: "escalate",
+        reason: "kw:私の",
+      }),
     }));
     const res = await POST(
       makeReq({ message: "私のビザは…" }) as never,
@@ -223,6 +235,11 @@ describe("POST /api/chat/send — SSE happy path", () => {
       reason: "pii",
       text: "PII not allowed",
       piiTypes: ["zairyu_card"],
+      decision: buildDecision({
+        stage: "pii",
+        outcome: "blocked",
+        reason: "pii:zairyu_card",
+      }),
     }));
     const res = await POST(makeReq({ message: "AB12345678CD" }) as never);
     const events = await readSSE(res);
@@ -239,6 +256,12 @@ describe("POST /api/chat/send — SSE happy path", () => {
       kind: "smalltalk",
       text: "I can help with general questions about life in Japan...",
       detail: "greeting",
+      decision: buildDecision({
+        stage: "llm_smalltalk",
+        outcome: "smalltalk",
+        category: "smalltalk",
+        reason: "greeting",
+      }),
     }));
     const res = await POST(makeReq({ message: "hi" }) as never);
     const events = await readSSE(res);

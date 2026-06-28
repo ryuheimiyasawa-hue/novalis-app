@@ -32,9 +32,15 @@ Phase 1 の運用方針 (memory: project_filipino_chat_conversational_policy)。
 
 ### 2.2 データモデル
 
-新規カラム追加なし。既存の `messages.whitelist_decision` JSONB に classifier スコアを格納済 (Phase 1 で先行実装、`messages.whitelist_decision.score` フィールド)。累積判定はクエリで過去 N ターン分を JOIN して計算する。
+**訂正 (2026-06-25 / P1-F 実装時)**: 旧版は「classifier スコアを Phase 1 で先行実装済 (`messages.whitelist_decision.score`)」と記載していたが、これは事実誤認だった。Phase 1 の classifier (`whitelist-llm.ts`) は category enum と reason のみを返し、`whitelist_decision` 自体が route handler から渡されず常に null 保存だった (監査証跡ゼロ)。
 
-スコア未格納の古いメッセージは 0.0 として扱う。
+P1-F で次を実装済み:
+- `messages.whitelist_decision` の保存を実配線 (route.ts → persistResult)。保存形は `{ stage, outcome, category, reason, escalationScore, failsafe }` (`lib/ai/whitelist-decision.ts`)。
+- `escalationScore` は当面 **決定論的な暫定シグナル** (escalation トリガなら 1.0、それ以外 0.0)。LLM が出す graded な 0.0-1.0 信頼度ではない。
+
+本節の累積スコアリングが必要とする graded score は、高度にチューニングされた Stage2 classifier のプロンプト/出力スキーマ変更を伴い、ライブ Gemini での較正検証が必須。よって **graded score 化は P2-L (フラグ `ESCALATION_USE_CUMULATIVE_SCORE` + メトリクス観察とセット) に繰り延べ**。新規カラム追加は不要 (既存 JSONB を使用)。
+
+累積判定は過去 N ターンの `whitelist_decision.escalationScore` を JOIN して計算する。スコア未格納の古いメッセージ (P1-F 以前) は 0.0 として扱う。
 
 ### 2.3 API 契約
 

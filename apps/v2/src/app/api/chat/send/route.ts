@@ -112,6 +112,7 @@ export async function POST(req: NextRequest) {
             userMessage: message,
             period,
             countAgainstQuota,
+            whitelistDecision: result.decision,
           });
         } catch (persistErr) {
           // Persistence failure shouldn't blow up the response; the
