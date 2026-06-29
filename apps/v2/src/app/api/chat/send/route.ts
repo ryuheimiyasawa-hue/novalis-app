@@ -1,4 +1,5 @@
 import { type NextRequest } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { AuthError } from "@/lib/auth/errors";
@@ -115,11 +116,27 @@ export async function POST(req: NextRequest) {
             whitelistDecision: result.decision,
           });
         } catch (persistErr) {
-          // Persistence failure shouldn't blow up the response; the
-          // user already got their answer in-stream. Log and continue.
+          // Persistence failure shouldn't blow up the response; the user
+          // already got their answer in-stream. But it MUST NOT be silent:
+          // Lesson 25 was an 8-day undetected persist outage that only
+          // console.error'd. Report to Sentry + structured log so it alerts.
+          // No message content is logged (PII) — only ids and the result kind.
+          const errMessage =
+            persistErr instanceof Error ? persistErr.message : String(persistErr);
           console.error(
-            `[chat/send] persist failed: ${persistErr instanceof Error ? persistErr.message : String(persistErr)}`,
+            JSON.stringify({
+              event: "chat_persist_failed",
+              conversationId,
+              userId,
+              period,
+              resultKind: result.kind,
+              error: errMessage,
+            }),
           );
+          Sentry.captureException(persistErr, {
+            tags: { area: "chat", op: "persist", resultKind: result.kind },
+            extra: { conversationId, userId, period },
+          });
         }
 
         // Emit the final event matching the discriminated result kind.
