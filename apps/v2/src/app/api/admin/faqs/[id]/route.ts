@@ -6,6 +6,7 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { ok, fail } from "@/lib/api/response";
 import { FaqUpdateSchema } from "@/lib/admin/schemas";
 import { revalidateFaqs } from "@/lib/cache/revalidate-content";
+import { reindexFaqSafe, removeEmbeddingsSafe } from "@/lib/ai/reindex";
 
 const UuidSchema = z.string().uuid();
 
@@ -82,6 +83,8 @@ export async function PATCH(
   // PATCH could flip is_published either way; safest to always invalidate
   // index. (Cheap; the public page does not exist yet.)
   revalidateFaqs();
+  // Keep RAG embeddings in sync (publish inserts, unpublish removes). Non-fatal.
+  await reindexFaqSafe(id);
   return ok(data);
 }
 
@@ -106,5 +109,7 @@ export async function DELETE(
     return fail("INTERNAL_ERROR");
   }
   revalidateFaqs();
+  // content_embeddings has no FK to faqs — remove orphaned embeddings. Non-fatal.
+  await removeEmbeddingsSafe("faq", id);
   return ok({ id });
 }

@@ -31,6 +31,61 @@ interface ReindexCounts {
   embed_calls: number;
 }
 
+// Pure locale-selection helpers (unit-tested in reindex-locales.test.ts).
+// A locale is embeddable only when its content is actually translated; ja is
+// always present, en / tl are nullable. Embedding an untranslated locale would
+// pollute that locale's RAG with Japanese (or empty) snippets.
+
+export interface ArticleLocaleInput {
+  language: Locale;
+  title: string;
+  body: string;
+}
+
+export function articleLocaleInputs(row: {
+  title_ja: string;
+  title_en: string | null;
+  title_tl: string | null;
+  body_ja: string;
+  body_en: string | null;
+  body_tl: string | null;
+}): ArticleLocaleInput[] {
+  return [
+    { language: "ja" as const, title: row.title_ja, body: row.body_ja },
+    { language: "en" as const, title: row.title_en ?? "", body: row.body_en ?? "" },
+    { language: "tl" as const, title: row.title_tl ?? "", body: row.body_tl ?? "" },
+  ].filter((l) => l.body.trim().length > 0);
+}
+
+export interface FaqLocaleInput {
+  language: Locale;
+  question: string;
+  answer: string;
+}
+
+export function faqLocaleInputs(row: {
+  question_ja: string;
+  question_en: string | null;
+  question_tl: string | null;
+  answer_ja: string;
+  answer_en: string | null;
+  answer_tl: string | null;
+}): FaqLocaleInput[] {
+  return [
+    { language: "ja" as const, question: row.question_ja, answer: row.answer_ja },
+    {
+      language: "en" as const,
+      question: row.question_en ?? "",
+      answer: row.answer_en ?? "",
+    },
+    {
+      language: "tl" as const,
+      question: row.question_tl ?? "",
+      answer: row.answer_tl ?? "",
+    },
+  ].filter((l) => l.question.trim().length > 0 && l.answer.trim().length > 0);
+}
+
 async function embedChunks(
   chunks: Chunk[],
   language: Locale,
@@ -89,32 +144,37 @@ async function replaceEmbeddings(
 }
 
 /**
- * Re-embed a single article (ja body only for MVP; en/tl follow when
- * the seed content is translated). Returns the count of chunks
- * inserted.
+ * Re-embed a single article across every translated locale. ja is always
+ * present (NOT NULL); en / tl are embedded only when their body is non-empty,
+ * so untranslated articles simply don't surface in those locales' RAG rather
+ * than falling back to a Japanese snippet. All locales are written under one
+ * DELETE+INSERT so the row set for this source is always internally consistent.
+ *
+ * Drafts and archived rows have their old embeddings removed but none
+ * inserted — they must not surface in RAG.
  */
 export async function reindexArticle(articleId: string): Promise<ReindexCounts> {
   const admin = getAdminClient();
   const { data, error } = await admin
     .from("articles")
-    .select("id, title_ja, body_ja, status")
+    .select(
+      "id, title_ja, title_en, title_tl, body_ja, body_en, body_tl, status",
+    )
     .eq("id", articleId)
     .maybeSingle();
   if (error) throw new Error(`reindex article fetch failed: ${error.message}`);
   if (!data) throw new Error(`article ${articleId} not found`);
 
-  // Drafts and archived rows have their old embeddings removed but no
-  // new ones inserted — they shouldn't surface in RAG.
-  const chunks =
-    data.status === "published"
-      ? chunkArticle(data.body_ja, data.title_ja)
-      : [];
-  const { rows, embed_calls } = await embedChunks(
-    chunks,
-    "ja",
-    "article",
-    articleId,
-  );
+  const rows: Array<Record<string, unknown>> = [];
+  let embed_calls = 0;
+  if (data.status === "published") {
+    for (const loc of articleLocaleInputs(data)) {
+      const chunks = chunkArticle(loc.body, loc.title);
+      const res = await embedChunks(chunks, loc.language, "article", articleId);
+      rows.push(...res.rows);
+      embed_calls += res.embed_calls;
+    }
+  }
   await replaceEmbeddings("article", articleId, rows);
 
   return {
@@ -126,23 +186,32 @@ export async function reindexArticle(articleId: string): Promise<ReindexCounts> 
 }
 
 /**
- * Re-embed a single FAQ. Unpublished FAQs have their embeddings
- * removed.
+ * Re-embed a single FAQ across every translated locale. A locale is embedded
+ * only when BOTH its question and answer are present (en / tl are nullable);
+ * ja is always present. Unpublished FAQs have all embeddings removed.
  */
 export async function reindexFaq(faqId: string): Promise<ReindexCounts> {
   const admin = getAdminClient();
   const { data, error } = await admin
     .from("faqs")
-    .select("id, question_ja, answer_ja, is_published")
+    .select(
+      "id, question_ja, question_en, question_tl, answer_ja, answer_en, answer_tl, is_published",
+    )
     .eq("id", faqId)
     .maybeSingle();
   if (error) throw new Error(`reindex faq fetch failed: ${error.message}`);
   if (!data) throw new Error(`faq ${faqId} not found`);
 
-  const chunks = data.is_published
-    ? chunkFaq(data.question_ja, data.answer_ja)
-    : [];
-  const { rows, embed_calls } = await embedChunks(chunks, "ja", "faq", faqId);
+  const rows: Array<Record<string, unknown>> = [];
+  let embed_calls = 0;
+  if (data.is_published) {
+    for (const loc of faqLocaleInputs(data)) {
+      const chunks = chunkFaq(loc.question, loc.answer);
+      const res = await embedChunks(chunks, loc.language, "faq", faqId);
+      rows.push(...res.rows);
+      embed_calls += res.embed_calls;
+    }
+  }
   await replaceEmbeddings("faq", faqId, rows);
 
   return {
@@ -151,6 +220,62 @@ export async function reindexFaq(faqId: string): Promise<ReindexCounts> {
     chunks_inserted: rows.length,
     embed_calls,
   };
+}
+
+/**
+ * Remove all embeddings for a source. Used by admin DELETE handlers, since
+ * content_embeddings has no FK to articles / faqs and so does not cascade.
+ */
+export async function removeEmbeddings(
+  source_type: "article" | "faq",
+  source_id: string,
+): Promise<void> {
+  await replaceEmbeddings(source_type, source_id, []);
+}
+
+// Non-fatal wrappers for admin route handlers. A reindex failure must NOT
+// fail the mutation the editor already committed — the row is saved and a
+// manual `pnpm reindex` can recover the embeddings. These log and swallow.
+// Awaited (not fire-and-forget) so the write completes on serverless before
+// the function freezes, matching the auto-title pattern in the chat route.
+
+export async function reindexArticleSafe(articleId: string): Promise<void> {
+  try {
+    const r = await reindexArticle(articleId);
+    console.log(
+      `[reindex] article ${articleId}: ${r.chunks_inserted} chunks, ${r.embed_calls} embed calls`,
+    );
+  } catch (err) {
+    console.error(
+      `[reindex] article ${articleId} failed (non-fatal): ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+}
+
+export async function reindexFaqSafe(faqId: string): Promise<void> {
+  try {
+    const r = await reindexFaq(faqId);
+    console.log(
+      `[reindex] faq ${faqId}: ${r.chunks_inserted} chunks, ${r.embed_calls} embed calls`,
+    );
+  } catch (err) {
+    console.error(
+      `[reindex] faq ${faqId} failed (non-fatal): ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+}
+
+export async function removeEmbeddingsSafe(
+  source_type: "article" | "faq",
+  source_id: string,
+): Promise<void> {
+  try {
+    await removeEmbeddings(source_type, source_id);
+  } catch (err) {
+    console.error(
+      `[reindex] remove ${source_type} ${source_id} embeddings failed (non-fatal): ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
 }
 
 /**

@@ -6,6 +6,7 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { ok, fail } from "@/lib/api/response";
 import { ArticleUpdateSchema } from "@/lib/admin/schemas";
 import { revalidateArticles } from "@/lib/cache/revalidate-content";
+import { reindexArticleSafe, removeEmbeddingsSafe } from "@/lib/ai/reindex";
 import type { Database } from "@/types/database";
 
 type ArticleUpdate = Database["public"]["Tables"]["articles"]["Update"];
@@ -107,6 +108,9 @@ export async function PATCH(
   // Always invalidate detail (slug may have changed, status may have
   // toggled draft<->published) plus the index pages.
   revalidateArticles({ slug: data.slug });
+  // Keep RAG embeddings in sync with the new content / status (publish
+  // inserts, unpublish removes). Non-fatal: the row is already saved.
+  await reindexArticleSafe(id);
   return ok(data);
 }
 
@@ -141,5 +145,8 @@ export async function DELETE(
     return fail("INTERNAL_ERROR");
   }
   revalidateArticles(target ? { slug: target.slug } : undefined);
+  // content_embeddings has no FK to articles, so the delete does not
+  // cascade — remove the orphaned embeddings explicitly. Non-fatal.
+  await removeEmbeddingsSafe("article", id);
   return ok({ id });
 }
