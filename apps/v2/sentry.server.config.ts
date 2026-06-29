@@ -1,6 +1,8 @@
-// Server-runtime Sentry init. Minimal setup for B-4 dev verification;
-// PII scrubbing, user_id tagging, and breadcrumb tuning are tracked for B-7.
+// Server-runtime Sentry init. beforeSend redacts PII from every event so chat
+// content (residence card numbers, My Number, phone, email) never reaches
+// Sentry. No-op until SENTRY_DSN is set (production only).
 import * as Sentry from "@sentry/nextjs";
+import { scrubEvent } from "@/lib/sentry/scrub";
 
 const dsn = process.env.SENTRY_DSN;
 
@@ -9,5 +11,6 @@ if (dsn) {
     dsn,
     tracesSampleRate: 0.1,
     debug: false,
+    beforeSend: (event) => scrubEvent(event),
   });
 }
