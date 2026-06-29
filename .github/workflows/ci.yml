@@ -55,7 +55,7 @@ jobs:
         run: pnpm --filter v2 build
 
   audit:
-    name: dependency audit (report-only)
+    name: dependency audit (high+)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -66,9 +66,8 @@ jobs:
           cache: pnpm
       - name: Install
         run: pnpm install --frozen-lockfile
-      # Report-only until P1-E updates Next.js past the known high-severity
-      # middleware/proxy-bypass advisories. The `|| true` keeps the job green
-      # while surfacing advisories in the log; remove it to make audit a
-      # blocking gate once `pnpm audit --prod --audit-level high` is clean.
+      # Blocking as of P1-E: all high-severity advisories are resolved
+      # (Next.js 16.2.9 + pnpm overrides forcing patched ws / protobufjs /
+      # hono under @google/genai). Fails the build on any new high.
       - name: Audit (production deps, high+)
-        run: pnpm audit --prod --audit-level high || true
+        run: pnpm audit --prod --audit-level high
