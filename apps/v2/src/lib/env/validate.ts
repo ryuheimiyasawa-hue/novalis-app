@@ -26,6 +26,14 @@ const baseSchema = z.object({
   // when unset, the /contact page falls back to a "preparing" notice
   // so demo / preview environments do not 500.
   NEXT_PUBLIC_CONTACT_FORM_URL: z.string().url().optional(),
+  // Escalation cumulative-scoring controls (P2-L). Scaffolded now so the
+  // audit trail (P1-F) and the future cumulative model read the same config.
+  // Default OFF: the pipeline keeps the Phase 1 single-message escalation
+  // behaviour until ESCALATION_USE_CUMULATIVE_SCORE is flipped to "true".
+  // See docs/phase2-escalation-design.md §2.
+  ESCALATION_USE_CUMULATIVE_SCORE: z.enum(["true", "false"]).default("false"),
+  ESCALATION_SCORE_THRESHOLD: z.coerce.number().min(0).default(1.5),
+  ESCALATION_SCORE_DECAY: z.coerce.number().min(0).max(1).default(0.6),
 });
 
 const paymentEnabledSchema = baseSchema.extend({

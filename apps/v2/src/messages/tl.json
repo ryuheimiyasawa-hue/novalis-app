@@ -15,7 +15,7 @@
     "facebookButton": "Magpatuloy gamit ang Facebook",
     "orDivider": "o",
     "emailPlaceholder": "Email address",
-    "passwordPlaceholder": "Password (kahit 6 na karakter)",
+    "passwordPlaceholder": "Password (kahit 8 na karakter)",
     "signIn": "Mag-sign in",
     "signUp": "Mag-register",
     "signingIn": "Nag-si-sign in...",
@@ -26,7 +26,7 @@
     "signUpRateLimited": "Naabot na ang limitasyon ng pagpapadala ng email. Maghintay ng mga isang oras at subukang muli.",
     "signUpEmailSent": "Naipadala ang confirmation email. I-click ang link sa inyong inbox upang kumpletuhin ang pag-register.",
     "signUpInstantSuccess": "Kumpleto na ang pag-register.",
-    "passwordTooShort": "Ang password ay dapat na hindi bababa sa 6 na karakter.",
+    "passwordTooShort": "Ang password ay dapat na hindi bababa sa 8 na karakter.",
     "forgotPassword": "Nakalimutan ang password?",
     "resetTitle": "Ilagay ang naka-rehistrong email address. Magpapadala kami ng link upang i-reset ang password.",
     "resetSubmit": "Ipadala ang reset link",
@@ -43,13 +43,13 @@
   "resetPassword": {
     "title": "Magtakda ng bagong password",
     "subtitle": "Ilagay ang inyong bagong password sa ibaba.",
-    "newPasswordPlaceholder": "Bagong password (kahit 6 na karakter)",
+    "newPasswordPlaceholder": "Bagong password (kahit 8 na karakter)",
     "confirmPasswordPlaceholder": "Kumpirmahin ang bagong password",
     "submit": "I-update ang password",
     "submitting": "Ina-update...",
     "successMessage": "Na-update ang password. Ire-redirect papunta sa dashboard.",
     "mismatch": "Hindi tugma ang mga password.",
-    "tooShort": "Ang password ay dapat na hindi bababa sa 6 na karakter.",
+    "tooShort": "Ang password ay dapat na hindi bababa sa 8 na karakter.",
     "failed": "Nabigong i-update ang password. Maaaring expired na ang reset link."
   },
   "loginErrors": {
@@ -106,7 +106,17 @@
     "newButton": "Magsimula ng bagong konsultasyon",
     "empty": "Wala pang konsultasyon. Pindutin ang \"Magsimula ng bagong konsultasyon\" upang magsimula.",
     "untitled": "(walang pamagat)",
-    "loadError": "Hindi nakuha ang mga nakaraang konsultasyon. Paki-ulit pagkalipas ng ilang sandali."
+    "loadError": "Hindi nakuha ang mga nakaraang konsultasyon. Paki-ulit pagkalipas ng ilang sandali.",
+    "searchPlaceholder": "Maghanap ng konsultasyon",
+    "searchNoResults": "Walang tumugmang konsultasyon.",
+    "actionsLabel": "Mga aksyon",
+    "rename": "Palitan ang pangalan",
+    "renameSave": "I-save",
+    "renameCancel": "Kanselahin",
+    "delete": "Burahin",
+    "deleteConfirm": "Burahin ang konsultasyong ito? Hindi na ito maibabalik.",
+    "renameFailed": "Nabigong palitan ang pangalan.",
+    "deleteFailed": "Nabigong burahin."
   },
   "articlesList": {
     "title": "Mga artikulo",

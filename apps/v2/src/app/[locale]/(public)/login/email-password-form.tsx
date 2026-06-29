@@ -57,7 +57,7 @@ type State =
   | { kind: "success"; message: string }
   | { kind: "error"; message: string };
 
-const MIN_PASSWORD_LENGTH = 6;
+const MIN_PASSWORD_LENGTH = 8;
 
 export function EmailPasswordForm({ locale, redirect, labels }: Props) {
   const [email, setEmail] = useState("");

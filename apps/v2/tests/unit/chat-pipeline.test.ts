@@ -584,3 +584,87 @@ describe("processChat — conversation context (multi-turn)", () => {
     ]);
   });
 });
+
+describe("processChat — whitelist_decision audit trail (P1-F)", () => {
+  it("attaches a keyword-stage decision on a Stage1 escalate", async () => {
+    const r = await processChat({
+      message: "在留期限が来月切れます、どうすればいいですか？",
+      locale: "ja",
+    });
+    expect(r.decision).toMatchObject({
+      stage: "keyword",
+      outcome: "escalate",
+      escalationScore: 1,
+    });
+    expect(r.decision.reason).toMatch(/^kw:/);
+  });
+
+  it("attaches an llm_individual decision on a Stage2 escalate", async () => {
+    mockGenerate.mockResolvedValueOnce(
+      classifierResponse("individual", "personal visa"),
+    );
+    const r = await processChat({
+      message: "If a visa expired and the holder did not renew, what happens?",
+      locale: "en",
+    });
+    expect(r.decision).toMatchObject({
+      stage: "llm_individual",
+      outcome: "escalate",
+      category: "individual",
+      reason: "personal visa",
+      escalationScore: 1,
+    });
+  });
+
+  it("attaches a failsafe decision when the classifier is malformed", async () => {
+    mockGenerate.mockResolvedValueOnce(answerResponse("not json"));
+    const r = await processChat({ message: "general pension question", locale: "en" });
+    expect(r.decision).toMatchObject({
+      stage: "llm_failsafe",
+      outcome: "escalate",
+      failsafe: true,
+      escalationScore: 1,
+    });
+  });
+
+  it("attaches a general-answer decision with score 0", async () => {
+    mockGenerate
+      .mockResolvedValueOnce(classifierResponse("general", "asks general rule"))
+      .mockResolvedValueOnce(answerResponse("Working visas are 1, 3, or 5 years."));
+    const r = await processChat({
+      message: "How long is a working visa valid?",
+      locale: "en",
+    });
+    expect(r.decision).toMatchObject({
+      stage: "llm_general",
+      outcome: "answer",
+      category: "general",
+      escalationScore: 0,
+    });
+  });
+
+  it("attaches a smalltalk decision", async () => {
+    mockGenerate
+      .mockResolvedValueOnce(classifierResponse("smalltalk", "greeting"))
+      .mockResolvedValueOnce(answerResponse("こんにちは！"));
+    const r = await processChat({ message: "ああ", locale: "ja" });
+    expect(r.decision).toMatchObject({
+      stage: "llm_smalltalk",
+      outcome: "smalltalk",
+      category: "smalltalk",
+      escalationScore: 0,
+    });
+  });
+
+  it("attaches a pii block decision (blocked, not persisted but auditable in-stream)", async () => {
+    const r = await processChat({
+      message: "私のカードは AB12345678CD です",
+      locale: "ja",
+    });
+    expect(r.decision).toMatchObject({
+      stage: "pii",
+      outcome: "blocked",
+      escalationScore: 0,
+    });
+  });
+});

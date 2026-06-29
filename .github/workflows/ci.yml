@@ -1,0 +1,74 @@
+name: CI
+
+# Quality gate for the Novalis monorepo (apps/v2). Runs on every PR to main
+# and on direct pushes to main. The `quality` job is the blocking gate
+# (lint / typecheck / test / build); `audit` is report-only until P1-E lands
+# the Next.js security patch, at which point it flips to blocking.
+#
+# Branch protection (require the `quality` check before merge) is configured
+# in the GitHub repo settings, not here.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: lint / typecheck / test / build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # pnpm/action-setup reads the version from the root package.json
+      # "packageManager" field (pnpm@10.33.0).
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm --filter v2 lint
+
+      - name: Typecheck
+        run: pnpm --filter v2 typecheck
+
+      # Live Gemini integration tests self-skip unless RUN_LIVE_GEMINI=1, so
+      # the suite is deterministic and secret-free in CI.
+      - name: Test
+        run: pnpm --filter v2 test
+
+      # Build validates the Next production compile. Env is read lazily at
+      # runtime (not build time), so no secrets are required here.
+      - name: Build
+        run: pnpm --filter v2 build
+
+  audit:
+    name: dependency audit (report-only)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      # Report-only until P1-E updates Next.js past the known high-severity
+      # middleware/proxy-bypass advisories. The `|| true` keeps the job green
+      # while surfacing advisories in the log; remove it to make audit a
+      # blocking gate once `pnpm audit --prod --audit-level high` is clean.
+      - name: Audit (production deps, high+)
+        run: pnpm audit --prod --audit-level high || true

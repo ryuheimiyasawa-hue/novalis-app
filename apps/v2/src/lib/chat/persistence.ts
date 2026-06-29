@@ -66,6 +66,26 @@ export async function resolveConversation(
   return { id: data.id, created: true };
 }
 
+/**
+ * Best-effort update of a conversation's title. Used by the auto-title
+ * flow after the first message of a new conversation. Never throws — a
+ * failed title write must not affect the chat reply that already
+ * succeeded; we log and move on.
+ */
+export async function updateConversationTitle(
+  conversationId: string,
+  title: string,
+): Promise<void> {
+  const admin = getAdminClient();
+  const { error } = await admin
+    .from("conversations")
+    .update({ title })
+    .eq("id", conversationId);
+  if (error) {
+    console.warn(`[chat] updateConversationTitle failed: ${error.message}`);
+  }
+}
+
 export class ConversationNotFoundError extends Error {
   readonly code = "CONVERSATION_NOT_FOUND" as const;
   constructor(public conversationId: string) {

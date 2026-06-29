@@ -1,5 +1,8 @@
 # Philippine Community v2 — 実装 ToDo
 
+> **注意(2026-06-25)**: 本ファイルは W1/W2 期の記録で歴史的資料。Phase 1 は本番デプロイ済。
+> 現行の実行計画は `docs/phase2-masterplan.md`(Phase 2 完全版、M0-M3)を正本とすること。
+
 承認済み要件定義: `~/.claude/plans/claude-me-bot-federated-cook.md`
 作業ブランチ: main（v2 は `apps/v2/` 配下に独立 workspace で構築）
 開始日: 2026-05-06

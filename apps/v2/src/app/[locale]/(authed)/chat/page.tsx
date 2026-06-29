@@ -140,12 +140,7 @@ export default async function ChatPage({ params, searchParams }: Props) {
   // The sidebar is the SAME server-rendered tree on desktop and mobile;
   // mobile just wraps it in a drawer trigger. Computing it once keeps
   // the conversation fetch single-shot.
-  const sidebar = (
-    <ConversationsSidebar
-      locale={safeLocale}
-      activeConversationId={initialConversationId}
-    />
-  );
+  const sidebar = <ConversationsSidebar locale={safeLocale} />;
 
   return (
     <div className="flex h-[calc(100vh-4rem)]">

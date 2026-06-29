@@ -5,6 +5,7 @@ import {
   type WhitelistLocale,
 } from "./whitelist-keywords";
 import { classifyIndividualLLM } from "./whitelist-llm";
+import { buildDecision, type WhitelistDecision } from "./whitelist-decision";
 import { retrieveContext, type Citation } from "./rag";
 import {
   respondSmalltalk,
@@ -58,6 +59,9 @@ export type ChatBlocked = {
   reason: "pii" | "too_long" | "empty";
   text: string;
   piiTypes?: PiiType[];
+  /** Audit trail of the routing decision. Persisted to
+   *  messages.whitelist_decision (except blocked, which stores no row). */
+  decision: WhitelistDecision;
 };
 
 export type ChatEscalated = {
@@ -65,6 +69,7 @@ export type ChatEscalated = {
   reason: "keyword" | "llm_individual" | "llm_failsafe" | "safety_block";
   text: string;
   detail: string;
+  decision: WhitelistDecision;
 };
 
 /** Canned reply for greetings, acknowledgements, and other off-topic
@@ -74,12 +79,14 @@ export type ChatSmalltalk = {
   kind: "smalltalk";
   text: string;
   detail: string;
+  decision: WhitelistDecision;
 };
 
 export type ChatAnswered = {
   kind: "answer";
   text: string;
   disclaimer: string;
+  decision: WhitelistDecision;
   /** RAG citations used to ground this answer. May be empty when RAG
    *  retrieval was skipped or returned nothing. */
   citations: Citation[];
@@ -137,7 +144,7 @@ function maskOutputPii(text: string): { text: string; masked: boolean } {
  */
 type Preflight =
   | { kind: "stop"; result: ChatResult }
-  | { kind: "smalltalk"; detail: string }
+  | { kind: "smalltalk"; detail: string; decision: WhitelistDecision }
   | {
       kind: "continue";
       contextText: string;
@@ -145,6 +152,7 @@ type Preflight =
       ragEmbedMs: number;
       ragMatchMs: number;
       ragFailed: boolean;
+      decision: WhitelistDecision;
     };
 
 /** Run input validation, PII / KW / LLM gates, and RAG retrieval.
@@ -168,6 +176,11 @@ async function preflight(input: {
         kind: "blocked",
         reason: "empty",
         text: getTooLongMessage(input.locale),
+        decision: buildDecision({
+          stage: "empty",
+          outcome: "blocked",
+          reason: "empty input",
+        }),
       },
     };
   }
@@ -181,6 +194,11 @@ async function preflight(input: {
         kind: "blocked",
         reason: "too_long",
         text: getTooLongMessage(input.locale),
+        decision: buildDecision({
+          stage: "too_long",
+          outcome: "blocked",
+          reason: `over ${MAX_INPUT_CHARS} chars`,
+        }),
       },
     };
   }
@@ -198,6 +216,11 @@ async function preflight(input: {
         reason: "pii",
         text: getPiiBlockMessage(input.locale),
         piiTypes: summary.types,
+        decision: buildDecision({
+          stage: "pii",
+          outcome: "blocked",
+          reason: `pii:${summary.types.join(",")}`,
+        }),
       },
     };
   }
@@ -214,6 +237,11 @@ async function preflight(input: {
         reason: "keyword",
         text: getEscalationMessage(input.locale),
         detail: `kw:${kwHit.keyword}`,
+        decision: buildDecision({
+          stage: "keyword",
+          outcome: "escalate",
+          reason: `kw:${kwHit.keyword}`,
+        }),
       },
     };
   }
@@ -236,6 +264,13 @@ async function preflight(input: {
         reason: "llm_failsafe",
         text: getEscalationMessage(input.locale),
         detail: `failsafe:${llm.failsafeError ?? "unknown"}`,
+        decision: buildDecision({
+          stage: "llm_failsafe",
+          outcome: "escalate",
+          category: "individual",
+          reason: `failsafe:${llm.failsafeError ?? "unknown"}`,
+          failsafe: true,
+        }),
       },
     };
   }
@@ -250,6 +285,12 @@ async function preflight(input: {
         reason: "llm_individual",
         text: getEscalationMessage(input.locale),
         detail: llm.reason,
+        decision: buildDecision({
+          stage: "llm_individual",
+          outcome: "escalate",
+          category: "individual",
+          reason: llm.reason,
+        }),
       },
     };
   }
@@ -257,7 +298,16 @@ async function preflight(input: {
     console.log(
       `[chat] smalltalk: reason='${llm.reason}' locale=${input.locale} latency=${llm.latencyMs}ms tokens=${llm.tokensIn}/${llm.tokensOut}`,
     );
-    return { kind: "smalltalk", detail: llm.reason };
+    return {
+      kind: "smalltalk",
+      detail: llm.reason,
+      decision: buildDecision({
+        stage: "llm_smalltalk",
+        outcome: "smalltalk",
+        category: "smalltalk",
+        reason: llm.reason,
+      }),
+    };
   }
 
   // RAG retrieval. Failures here are non-fatal: the chat answer can
@@ -286,6 +336,12 @@ async function preflight(input: {
     ragEmbedMs,
     ragMatchMs,
     ragFailed,
+    decision: buildDecision({
+      stage: "llm_general",
+      outcome: "answer",
+      category: "general",
+      reason: llm.reason,
+    }),
   };
 }
 
@@ -304,6 +360,7 @@ function buildAnswered(args: {
   ragMatchMs: number;
   ragFailed: boolean;
   locale: WhitelistLocale;
+  decision: WhitelistDecision;
 }): ChatAnswered {
   const { text: maskedText, masked } = maskOutputPii(args.rawText);
   if (masked) {
@@ -318,6 +375,7 @@ function buildAnswered(args: {
     kind: "answer",
     text: maskedText,
     disclaimer: getAnswerDisclaimer(args.locale),
+    decision: args.decision,
     citations: args.citations,
     meta: {
       model: args.model,
@@ -363,7 +421,12 @@ export async function processChat(input: {
       console.log(
         `[chat] smalltalk-llm ok: locale=${input.locale} history=${history.length} latency=${r.latencyMs}ms tokens=${r.tokensIn}/${r.tokensOut}`,
       );
-      return { kind: "smalltalk", text: r.text.trim(), detail: pre.detail };
+      return {
+        kind: "smalltalk",
+        text: r.text.trim(),
+        detail: pre.detail,
+        decision: pre.decision,
+      };
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       console.warn(`[chat] smalltalk-llm fallback to canned: ${msg}`);
@@ -371,6 +434,7 @@ export async function processChat(input: {
         kind: "smalltalk",
         text: getSmalltalkReply(input.locale),
         detail: `${pre.detail};fallback:${msg.slice(0, 100)}`,
+        decision: pre.decision,
       };
     }
   }
@@ -391,6 +455,13 @@ export async function processChat(input: {
       reason: "llm_failsafe",
       text: getEscalationMessage(input.locale),
       detail: `generate_error:${message.slice(0, 200)}`,
+      decision: buildDecision({
+        stage: "generate_error",
+        outcome: "escalate",
+        category: "general",
+        reason: `generate_error:${message.slice(0, 200)}`,
+        failsafe: true,
+      }),
     };
   }
 
@@ -403,6 +474,12 @@ export async function processChat(input: {
       reason: "safety_block",
       text: getEscalationMessage(input.locale),
       detail: "finishReason=SAFETY",
+      decision: buildDecision({
+        stage: "safety_block",
+        outcome: "escalate",
+        category: "general",
+        reason: "finishReason=SAFETY",
+      }),
     };
   }
 
@@ -418,6 +495,7 @@ export async function processChat(input: {
     ragMatchMs: pre.ragMatchMs,
     ragFailed: pre.ragFailed,
     locale: input.locale,
+    decision: pre.decision,
   });
 }
 
@@ -464,7 +542,12 @@ export async function processChatStream(
       // Trim outer whitespace only — preserve any internal newlines the
       // model produced. The accumulated text is what gets persisted +
       // returned in the SSE `done` event.
-      return { kind: "smalltalk", text: r.text.trim(), detail: pre.detail };
+      return {
+        kind: "smalltalk",
+        text: r.text.trim(),
+        detail: pre.detail,
+        decision: pre.decision,
+      };
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       console.warn(
@@ -479,6 +562,7 @@ export async function processChatStream(
         kind: "smalltalk",
         text: canned,
         detail: `${pre.detail};fallback:${msg.slice(0, 100)}`,
+        decision: pre.decision,
       };
     }
   }
@@ -503,6 +587,13 @@ export async function processChatStream(
       reason: "llm_failsafe",
       text: getEscalationMessage(input.locale),
       detail: `generate_stream_error:${message.slice(0, 200)}`,
+      decision: buildDecision({
+        stage: "generate_error",
+        outcome: "escalate",
+        category: "general",
+        reason: `generate_stream_error:${message.slice(0, 200)}`,
+        failsafe: true,
+      }),
     };
   }
 
@@ -515,6 +606,12 @@ export async function processChatStream(
       reason: "safety_block",
       text: getEscalationMessage(input.locale),
       detail: "finishReason=SAFETY",
+      decision: buildDecision({
+        stage: "safety_block",
+        outcome: "escalate",
+        category: "general",
+        reason: "finishReason=SAFETY",
+      }),
     };
   }
 
@@ -530,5 +627,6 @@ export async function processChatStream(
     ragMatchMs: pre.ragMatchMs,
     ragFailed: pre.ragFailed,
     locale: input.locale,
+    decision: pre.decision,
   });
 }

@@ -13,6 +13,7 @@ import { POST } from "@/app/api/chat/preview/route";
 import { requireEditor } from "@/lib/auth/require-admin";
 import { AuthError } from "@/lib/auth/errors";
 import { processChat } from "@/lib/ai/chat-pipeline";
+import { buildDecision } from "@/lib/ai/whitelist-decision";
 
 const mockRequireEditor = vi.mocked(requireEditor);
 const mockProcessChat = vi.mocked(processChat);
@@ -77,6 +78,12 @@ describe("POST /api/chat/preview", () => {
       kind: "answer",
       text: "general info",
       disclaimer: "...",
+      decision: buildDecision({
+        stage: "llm_general",
+        outcome: "answer",
+        category: "general",
+        reason: "general rule",
+      }),
       citations: [],
       meta: {
         model: "gemini-2.5-flash",
@@ -113,6 +120,11 @@ describe("POST /api/chat/preview", () => {
       reason: "pii",
       text: "block message",
       piiTypes: ["zairyu_card"],
+      decision: buildDecision({
+        stage: "pii",
+        outcome: "blocked",
+        reason: "pii:zairyu_card",
+      }),
     });
     const res = await POST(
       makeReq({ message: "AB12345678CD", locale: "ja" }) as never,
