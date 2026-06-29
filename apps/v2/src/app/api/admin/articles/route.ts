@@ -9,6 +9,7 @@ import {
   ArticleListQuerySchema,
 } from "@/lib/admin/schemas";
 import { revalidateArticles } from "@/lib/cache/revalidate-content";
+import { reindexArticleSafe } from "@/lib/ai/reindex";
 
 const LIST_SELECT =
   "id, category_id, slug, status, title_ja, prefecture_code, published_at, updated_at, created_at, category:categories(id, slug, name_ja)";
@@ -94,5 +95,7 @@ export async function POST(req: NextRequest) {
   revalidateArticles(
     data.status === "published" ? { slug: data.slug } : undefined,
   );
+  // Embed the new article if it was created already-published. Non-fatal.
+  await reindexArticleSafe(data.id);
   return ok(data, { status: 201 });
 }
