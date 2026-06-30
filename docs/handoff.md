@@ -1,8 +1,49 @@
 # Novalis App 開発 — 新セッション引継ぎ
 
-_最終更新: 2026-05-18 / デモ準備完了直後のスナップショット_
+_最終更新: 2026-06-30 / Phase 2 M0+M1 大半を実装・本番反映した直後_
 
 新しい Claude チャットを開始したら、まず本ファイルを読んでから作業に入ること。
+Phase 2 の実行計画と各項目の状態は `docs/phase2-masterplan.md` が正本。
+
+---
+
+## 0. Phase 2 進捗スナップショット（2026-06-30）
+
+ここから下の §1〜§8 は 2026-05 デモ期の記録（依然有効な基本情報）。本セクションが最新の到達点。
+
+### 開発ワークフロー（重要・5月から変更あり）
+
+- **main はブランチ保護下**。直 push 不可。変更は feature ブランチ → PR → CI（`quality` チェック必須）→ merge。merge で Vercel 本番自動デプロイ。
+- CI: `.github/workflows/ci.yml`（lint / typecheck / test / build をブロッキング、`pnpm audit --prod --audit-level high` もブロッキング）。
+- マイグレーションは Supabase MCP の `apply_migration` で適用＝履歴テーブルに記録される（手動 SQL Editor 運用は卒業）。`list_migrations` で確認可。
+- 検証体制: ユニットテスト（DBモック、現在 409 件）＋ RLS は MCP `execute_sql` でロールバック安全に実機検証（`supabase/tests/rls.test.sql` 相当）＋ Vercel プレビュー。**有料テスト DB は不採用**（Pro プランで +$10/月、費用対効果が低い）。ライブ DB の Playwright E2E は保留。
+
+### 本番反映済み（このフェーズで完了、すべて merge 済み PR）
+
+- **P0-A** セキュリティ恒久化（`008_security_hardening.sql`）: 未適用だった 007 anon-hardening を再適用（匿名ユーザの profiles 改ざん・inquiries/consent_logs 汚染を封鎖）、SECURITY DEFINER 3 関数の EXECUTE を PUBLIC/anon/authenticated から REVOKE（service_role 維持）、4 関数に `SET search_path=''`。advisor の該当 WARN 解消。
+- **P0-C** 認証ハードニング: 最小パスワード長 6→8、漏洩パスワード保護 ON（Dashboard）、匿名ユーザ purge CLI（`pnpm purge:anon`、保持 `ANON_RETENTION_HOURS` 既定 72h、dry-run 既定）。
+- **P1-D** PII 安全 Sentry ＋ persist 失敗アラート: `lib/sentry/scrub.ts` の beforeSend で全イベントの PII をマスク、chat/send の persist 失敗を `Sentry.captureException`＋構造化ログ化（Lesson 25 対策）、`app/global-error.tsx`。**SENTRY_DSN 未設定なら no-op**（本番 env に DSN 設定で起動 = ユーザ作業待ち）。
+- **P1-E** Next.js 16.2.2→16.2.9（proxy bypass 等 high 解消）＋ `@google/genai` 配下の間接 high を pnpm overrides で解消（ws/protobufjs/hono）＋ CI audit をブロッキング化。
+- **P1-F** エスカレ判断の監査証跡: `messages.whitelist_decision` を実保存（`lib/ai/whitelist-decision.ts`、route で配線）。escalationScore は決定論的暫定値。escalation 用 env を scaffold（既定 OFF）。
+- **P1-G** CI 品質ゲート ＋ ブランチ保護。
+- **P1-I** admin の記事/FAQ mutation で自動 reindex（silent staleness 解消）＋ 多言語 RAG（en/tl の本文がある時に各ロケールで embed。現状コンテンツは ja のみなので翻訳投入で有効化）。
+- **P2-L 改善2** エスカレ「それでも質問を続ける」ボタン＋再表示 cooldown。`NEXT_PUBLIC_ESCALATION_SHOW_CONTINUE_BUTTON` 既定 OFF（弁護士回答＋対話 UX 検証まで OFF 維持）。
+
+### 保留・繰り延べ（理由付き）
+
+- **P0-B** Supabase CLI 全面移行: MCP で履歴記録が機能しているため優先度低下。001-007 の baseline 登録と連番/タイムスタンプ命名の整合は CI 拡張時に対応。
+- **P1-H** ライブ DB の E2E/統合の CI 化: 無料で組むには CI 内 Supabase スタックが必要で重く、費用対効果が低いため保留。RLS は MCP 実機検証で代替。
+- **P1-D の UX 系**（ローカライズ `[locale]/error|loading|not-found`、構造化ログ全面移行）、**Gemini コスト監視**（Sentry DSN 設定後に組）。
+- escalation graded score の LLM 出力化（P2-L 改善1 の前提、ライブ Gemini 検証要）。
+
+### ユーザ作業待ち（任意・少量）
+
+- **Sentry DSN**: sentry.io で Next.js プロジェクト作成 → Vercel 本番 env に `SENTRY_DSN` ＋ `NEXT_PUBLIC_SENTRY_DSN` 設定で P1-D 起動。
+- **監査証跡の即時確認**: ログイン状態の本番でチャット 1 通送れば `whitelist_decision` 書き込みを MCP で確認可能（デプロイ後まだ新規チャットが無く 0 件）。
+
+### 次セッションの着手候補（M2、多くが外部依存）
+
+飲食店カタログ（掲載店データ待ち）/ 専門家 embedding マッチング（協業企業データ待ち）/ エスカレ改善1・4（弁護士回答待ち）/ Messenger（FB 公開モード移行待ち）/ operator 介入 UI（自律可、UI 検証は手動）/ 問い合わせ first-party 化。
 
 ---
 
