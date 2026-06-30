@@ -34,6 +34,14 @@ const baseSchema = z.object({
   ESCALATION_USE_CUMULATIVE_SCORE: z.enum(["true", "false"]).default("false"),
   ESCALATION_SCORE_THRESHOLD: z.coerce.number().min(0).default(1.5),
   ESCALATION_SCORE_DECAY: z.coerce.number().min(0).max(1).default(0.6),
+  // Escalation improvement 2 (P2-L): show a "continue asking" button on the
+  // EscalationCard and apply a re-show cooldown. NEXT_PUBLIC_ because the chat
+  // UI reads it client-side. Default OFF — keep the Phase 1 behaviour (card
+  // always shown, no continue button) until the wording is lawyer-approved
+  // and the interaction is verified. See phase2-escalation-design.md §3.
+  NEXT_PUBLIC_ESCALATION_SHOW_CONTINUE_BUTTON: z
+    .enum(["true", "false"])
+    .default("false"),
 });
 
 const paymentEnabledSchema = baseSchema.extend({
