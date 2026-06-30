@@ -12,6 +12,13 @@ import type { Citation } from "@/lib/ai/rag";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { MessageBubble, type BubbleRole } from "./MessageBubble";
 import { EscalationCard } from "./EscalationCard";
+import { shouldShowEscalationCard } from "@/lib/chat/escalation-display";
+
+// P2-L improvement 2 flag. NEXT_PUBLIC_ is inlined at build, so the client
+// can read it directly. Default off → Phase 1 behaviour (card always shown,
+// no continue button, no cooldown).
+const CONTINUE_ENABLED =
+  process.env.NEXT_PUBLIC_ESCALATION_SHOW_CONTINUE_BUTTON === "true";
 
 interface Props {
   locale: "ja" | "en" | "tl";
@@ -35,6 +42,8 @@ interface Props {
     expertHeading: string;
     expertSchedule: string;
     contactCta: string;
+    escalationContinue: string;
+    escalationRecommend: string;
     citationsHeading: string;
     backToDashboard: string;
     languageLabel: string;
@@ -74,6 +83,10 @@ export function ChatShell({
   const [streamingText, setStreamingText] = useState("");
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  // Cooldown bookkeeping for escalation improvement 2: count user turns and
+  // remember the turn at which the last full EscalationCard was shown.
+  const userTurnsRef = useRef(0);
+  const lastCardTurnRef = useRef<number | null>(null);
 
   // Auto-scroll on new content.
   useEffect(() => {
@@ -87,6 +100,8 @@ export function ChatShell({
     setConversationId(null);
     setStreamingText("");
     setIsStreaming(false);
+    userTurnsRef.current = 0;
+    lastCardTurnRef.current = null;
     // Strip the ?conversation_id=... query so a reload doesn't put us
     // back into the now-cleared conversation. router.replace keeps the
     // navigation out of history.
@@ -104,6 +119,7 @@ export function ChatShell({
     // so the new row appears in the past-conversations sidebar.
     const wasNewConversation = conversationId === null;
 
+    userTurnsRef.current += 1;
     setMessages((prev) => [
       ...prev,
       { id: nextId(), role: "user", content: message },
@@ -179,12 +195,27 @@ export function ChatShell({
           citations: finalCitations,
         });
       } else if (escalationText !== null) {
-        next.push({
-          id: nextId(),
-          role: "system",
-          content: "",
-          escalation: { text: escalationText },
+        // Cooldown: within the window after a full card, render the
+        // escalation as a compact system note instead of re-showing the card.
+        const turnsSince =
+          lastCardTurnRef.current === null
+            ? null
+            : userTurnsRef.current - lastCardTurnRef.current;
+        const showCard = shouldShowEscalationCard({
+          cooldownEnabled: CONTINUE_ENABLED,
+          turnsSinceLastCard: turnsSince,
         });
+        if (showCard) {
+          lastCardTurnRef.current = userTurnsRef.current;
+          next.push({
+            id: nextId(),
+            role: "system",
+            content: "",
+            escalation: { text: escalationText },
+          });
+        } else {
+          next.push({ id: nextId(), role: "system", content: escalationText });
+        }
       } else if (smalltalkText !== null) {
         // Render smalltalk as a normal assistant bubble — no
         // disclaimer, no citations, no escalation card. The canned
@@ -276,7 +307,11 @@ export function ChatShell({
                 heading: labels.expertHeading,
                 book: labels.expertSchedule,
                 contactCta: labels.contactCta,
+                continue: labels.escalationContinue,
+                recommend: labels.escalationRecommend,
               }}
+              showContinue={CONTINUE_ENABLED}
+              onContinue={() => inputRef.current?.focus()}
             />
           ) : (
             <MessageBubble

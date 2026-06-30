@@ -17,7 +17,20 @@ interface Expert {
 interface Props {
   body: string;
   locale: "ja" | "en" | "tl";
-  labels: { heading: string; book: string; contactCta: string };
+  labels: {
+    heading: string;
+    book: string;
+    contactCta: string;
+    /** "それでも質問を続ける" — only used when showContinue is true. */
+    continue?: string;
+    /** Persistent recommendation label kept after minimizing. */
+    recommend?: string;
+  };
+  /** P2-L improvement 2: render a "continue asking" button that collapses the
+   *  card. Gated by NEXT_PUBLIC_ESCALATION_SHOW_CONTINUE_BUTTON (default off). */
+  showContinue?: boolean;
+  /** Called when the user clicks continue, so the parent can refocus input. */
+  onContinue?: () => void;
 }
 
 // Renders the escalation message + a list of active experts pulled
@@ -31,8 +44,15 @@ interface Props {
 //   - Empty-state filler ("現在ご紹介できる専門家がいません") was
 //     removed; the always-visible Contact button is the real action,
 //     and the previous text was redundant with it.
-export function EscalationCard({ body, locale, labels }: Props) {
+export function EscalationCard({
+  body,
+  locale,
+  labels,
+  showContinue = false,
+  onContinue,
+}: Props) {
   const [experts, setExperts] = useState<Expert[] | null>(null);
+  const [minimized, setMinimized] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,6 +82,21 @@ export function EscalationCard({ body, locale, labels }: Props) {
   }
 
   const hasExperts = Array.isArray(experts) && experts.length > 0;
+
+  // Minimized state (after the user chose to keep asking): collapse to a
+  // single persistent recommendation line so the conversation visibly
+  // continues without losing the "consult an expert" reminder.
+  if (minimized) {
+    return (
+      <Card className="border-amber-300 bg-amber-50/40">
+        <CardContent className="py-3">
+          <p className="text-xs text-muted-foreground">
+            {labels.recommend ?? labels.heading}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-amber-300 bg-amber-50/40">
@@ -113,7 +148,7 @@ export function EscalationCard({ body, locale, labels }: Props) {
           prefer to write to Novalis support directly. New tab so they
           don't lose the chat context behind them.
         */}
-        <div className="pt-1">
+        <div className="flex flex-wrap gap-2 pt-1">
           <Button asChild size="sm" variant="secondary">
             <a
               href={`/${locale}/contact`}
@@ -123,6 +158,18 @@ export function EscalationCard({ body, locale, labels }: Props) {
               {labels.contactCta}
             </a>
           </Button>
+          {showContinue && labels.continue && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setMinimized(true);
+                onContinue?.();
+              }}
+            >
+              {labels.continue}
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

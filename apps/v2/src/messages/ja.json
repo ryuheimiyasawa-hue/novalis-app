@@ -166,6 +166,8 @@
       "expertSchedule": "予約する",
       "noExperts": "現在ご紹介できる専門家がいません。後ほどお試しください。",
       "contactCta": "Novalis サポートに問い合わせる",
+      "escalationContinue": "それでも質問を続ける",
+      "escalationRecommend": "専門家への相談をおすすめします",
       "citationsHeading": "参考",
       "backToDashboard": "ダッシュボードへ戻る",
       "youLabel": "あなた",

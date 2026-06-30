@@ -166,6 +166,8 @@
       "expertSchedule": "Book",
       "noExperts": "No experts available right now. Please try again later.",
       "contactCta": "Contact Novalis support",
+      "escalationContinue": "Keep asking anyway",
+      "escalationRecommend": "We recommend consulting a professional",
       "citationsHeading": "References",
       "backToDashboard": "Back to dashboard",
       "youLabel": "You",

@@ -196,6 +196,8 @@ export default async function ChatPage({ params, searchParams }: Props) {
               expertHeading: t("expertHeading"),
               expertSchedule: t("expertSchedule"),
               contactCta: t("contactCta"),
+              escalationContinue: t("escalationContinue"),
+              escalationRecommend: t("escalationRecommend"),
               citationsHeading: t("citationsHeading"),
               backToDashboard: t("backToDashboard"),
               languageLabel: tCommon("language"),
