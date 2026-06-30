@@ -3,6 +3,22 @@
 _作成: 2026-06-25 / 7サブシステムのコード+本番DB精査(マルチエージェント)を統合した実行計画_
 _前提: M0 セキュリティ恒久化を最優先で先行(ユーザ承認済 2026-06-25)_
 
+## 進捗状況（2026-06-30 更新）
+
+すべて feature ブランチ → PR → CI → merge → 本番デプロイ済み。詳細は `docs/handoff.md` §0。
+
+- ✅ **P0-A** セキュリティ恒久化マイグレーション 008（本番適用・検証済み）
+- 🟡 **P0-B** Supabase CLI 移行 → 保留（MCP `apply_migration` で履歴記録が機能。baseline 整合は CI 拡張時）
+- ✅ **P0-C** 認証ハードニング（パスワード長8・漏洩PW保護・匿名purge CLI）
+- ✅ **P1-D** PII安全Sentry＋persist失敗アラート（コード反映済み。**SENTRY_DSN 設定待ち**で起動）
+- ✅ **P1-E** Next.js 16.2.9＋間接high解消＋audit ブロッキング化
+- ✅ **P1-F** whitelist_decision 監査証跡（escalation graded score は P2-L へ繰り延べ）
+- ✅ **P1-G** CI 品質ゲート＋ブランチ保護
+- 🟡 **P1-H** ライブDB E2E/統合の CI 化 → 保留（有料テストDB不採用。RLS は MCP 実機検証で代替済み）
+- ✅ **P1-I** 自動reindex＋多言語RAG（翻訳投入で多言語有効化）
+- 🟡 **P2-L 改善2** Continueボタン＋cooldown（実装済み、`NEXT_PUBLIC_ESCALATION_SHOW_CONTINUE_BUTTON` 既定OFF）
+- ⬜ **P2-J/K/M/N/O** 未着手（飲食店・Messenger・operator・専門家マッチング・4本柱）。多くが外部依存待ち
+
 本ドキュメントは「Phase 2 を最後まで作り切る」ための実行計画。着手から完了までを M0-M3 の4マイルストーンに分け、各項目の設計要点・依存・成果物・完了基準・工数を定義する。
 
 スコープ制約(ユーザ指示):
