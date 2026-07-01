@@ -127,6 +127,18 @@
     "next": "Next",
     "pageOf": "Page {page} of {total}"
   },
+  "restaurantsList": {
+    "title": "Restaurants",
+    "subtitle": "A hand-picked list of Filipino restaurants and grocery stores in Japan.",
+    "empty": "No restaurants are listed yet.",
+    "loadError": "Failed to load restaurants. Please try again later."
+  },
+  "restaurantDetail": {
+    "back": "Back to list",
+    "address": "Address",
+    "hours": "Hours",
+    "viewOnMap": "View on map"
+  },
   "contact": {
     "title": "Contact Novalis",
     "subtitle": "Send us a question, request, or feedback. A team member will get back to you.",

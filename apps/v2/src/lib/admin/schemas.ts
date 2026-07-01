@@ -186,3 +186,50 @@ export const ExpertListQuerySchema = z.object({
   prefecture_code: PrefectureCodeSchema.optional(),
   is_active: z.enum(["true", "false"]).optional(),
 });
+
+// -----------------------------------------------------------------------------
+// Restaurants (P2-J). Operator-curated catalog, no user submissions. Shape
+// mirrors the DB: name / prefecture / city required, the rest optional. lat/lng
+// are accepted for a future map view but not surfaced in the admin form yet.
+// -----------------------------------------------------------------------------
+const restaurantFields = {
+  name: z.string().min(1).max(100),
+  prefecture_code: PrefectureCodeSchema,
+  city_name: z.string().min(1).max(100),
+  address: z.string().max(200).nullable().optional(),
+  lat: z.number().min(-90).max(90).nullable().optional(),
+  lng: z.number().min(-180).max(180).nullable().optional(),
+  cuisine_type: z.string().max(50).nullable().optional(),
+  hours: z.string().max(200).nullable().optional(),
+  photo_url: HttpsUrlSchema.nullable().optional(),
+  description_ja: z.string().max(2_000).nullable().optional(),
+  description_en: z.string().max(2_000).nullable().optional(),
+  description_tl: z.string().max(2_000).nullable().optional(),
+  is_active: z.boolean().optional(),
+};
+
+export const RestaurantCreateSchema = z.object(restaurantFields);
+export type RestaurantCreateInput = z.infer<typeof RestaurantCreateSchema>;
+
+export const RestaurantUpdateSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  prefecture_code: PrefectureCodeSchema.optional(),
+  city_name: z.string().min(1).max(100).optional(),
+  address: z.string().max(200).nullable().optional(),
+  lat: z.number().min(-90).max(90).nullable().optional(),
+  lng: z.number().min(-180).max(180).nullable().optional(),
+  cuisine_type: z.string().max(50).nullable().optional(),
+  hours: z.string().max(200).nullable().optional(),
+  photo_url: HttpsUrlSchema.nullable().optional(),
+  description_ja: z.string().max(2_000).nullable().optional(),
+  description_en: z.string().max(2_000).nullable().optional(),
+  description_tl: z.string().max(2_000).nullable().optional(),
+  is_active: z.boolean().optional(),
+});
+export type RestaurantUpdateInput = z.infer<typeof RestaurantUpdateSchema>;
+
+export const RestaurantListQuerySchema = z.object({
+  prefecture_code: PrefectureCodeSchema.optional(),
+  cuisine_type: z.string().max(50).optional(),
+  is_active: z.enum(["true", "false"]).optional(),
+});

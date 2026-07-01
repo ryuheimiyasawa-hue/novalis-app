@@ -127,6 +127,18 @@
     "next": "次へ",
     "pageOf": "{page} / {total} ページ"
   },
+  "restaurantsList": {
+    "title": "飲食店",
+    "subtitle": "日本にあるフィリピン料理店・食材店を運営が選んで掲載しています。",
+    "empty": "現在掲載されている飲食店はありません。",
+    "loadError": "飲食店一覧の取得に失敗しました。時間を置いて再度お試しください。"
+  },
+  "restaurantDetail": {
+    "back": "一覧へ戻る",
+    "address": "住所",
+    "hours": "営業時間",
+    "viewOnMap": "地図で見る"
+  },
   "contact": {
     "title": "Novalis お問い合わせ",
     "subtitle": "ご相談・ご質問・サービスへのフィードバックなど、お気軽にお寄せください。担当者からご連絡いたします。",

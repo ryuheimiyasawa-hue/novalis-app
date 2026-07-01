@@ -38,6 +38,13 @@ export function revalidateExperts() {
   }
 }
 
+export function revalidateRestaurants(opts?: { id?: string }) {
+  for (const locale of routing.locales) {
+    revalidatePath(`/${locale}/restaurants`);
+    if (opts?.id) revalidatePath(`/${locale}/restaurants/${opts.id}`);
+  }
+}
+
 // Category mutations affect every list (articles + faqs are filtered by
 // category), so we invalidate both index pages plus the category-scoped
 // page when we know the slug.
