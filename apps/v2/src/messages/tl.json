@@ -127,6 +127,18 @@
     "next": "Susunod",
     "pageOf": "Pahina {page} ng {total}"
   },
+  "restaurantsList": {
+    "title": "Mga Restawran",
+    "subtitle": "Piniling listahan ng mga Filipino na restawran at grocery sa Japan.",
+    "empty": "Wala pang nakalistang restawran.",
+    "loadError": "Nabigong i-load ang mga restawran. Pakisubukan muli mamaya."
+  },
+  "restaurantDetail": {
+    "back": "Bumalik sa listahan",
+    "address": "Address",
+    "hours": "Oras",
+    "viewOnMap": "Tingnan sa mapa"
+  },
   "contact": {
     "title": "Makipag-ugnayan sa Novalis",
     "subtitle": "Magpadala ng tanong, kahilingan, o feedback. May tutugon mula sa aming team.",
