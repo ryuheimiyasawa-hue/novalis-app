@@ -470,6 +470,50 @@ export type Database = {
         }>;
         Relationships: [];
       };
+      messenger_links: {
+        Row: {
+          id: string;
+          user_id: string;
+          messenger_psid: string;
+          linked_at: string;
+          last_active_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          messenger_psid: string;
+          linked_at?: string;
+          last_active_at?: string;
+        };
+        Update: Partial<{
+          user_id: string;
+          messenger_psid: string;
+          last_active_at: string;
+        }>;
+        Relationships: [];
+      };
+      webhook_logs: {
+        Row: {
+          id: string;
+          source: string;
+          external_event_id: string;
+          payload: Record<string, unknown>;
+          processed_at: string;
+        };
+        Insert: {
+          id?: string;
+          source: string;
+          external_event_id: string;
+          payload: Record<string, unknown>;
+          processed_at?: string;
+        };
+        Update: Partial<{
+          source: string;
+          external_event_id: string;
+          payload: Record<string, unknown>;
+        }>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

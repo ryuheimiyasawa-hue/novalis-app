@@ -17,6 +17,9 @@ const PUBLIC_API_PATHS = [
   "/api/articles",
   "/api/faqs",
   "/api/experts",
+  // Facebook calls the Messenger webhook unauthenticated; it does its own
+  // X-Hub-Signature-256 verification instead of relying on a session.
+  "/api/messenger/webhook",
 ];
 
 const LOCALE_RE = "(ja|en|tl)";
