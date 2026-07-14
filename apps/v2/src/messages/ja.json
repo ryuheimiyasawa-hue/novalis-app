@@ -147,7 +147,21 @@
     "backToDashboard": "ダッシュボードへ戻る",
     "loading": "フォーム読み込み中...",
     "notConfigured": "現在お問い合わせフォームを準備中です。お手数ですが少々お待ちください。",
-    "emailFallbackLabel": "フォームが使えない場合は、こちらまで直接ご連絡ください:"
+    "emailFallbackLabel": "フォームが使えない場合は、こちらまで直接ご連絡ください:",
+    "form": {
+      "subjectLabel": "件名",
+      "subjectPlaceholder": "例: 在留資格の更新について",
+      "messageLabel": "お問い合わせ内容",
+      "messagePlaceholder": "ご相談・ご質問の内容をご記入ください。",
+      "emailLabel": "返信先メールアドレス",
+      "emailPlaceholder": "you@example.com",
+      "submit": "送信する",
+      "submitting": "送信中...",
+      "success": "送信しました。担当者からご連絡いたします。",
+      "errorInvalid": "入力内容をご確認ください（件名・内容・メール形式）。",
+      "errorGeneric": "送信に失敗しました。時間を置いて再度お試しください。",
+      "anonNotice": "ベータ試用（ログインなし）ではフォームを送信できません。お手数ですが下記のメールへ直接ご連絡ください。"
+    }
   },
   "legal": {
     "termsTitle": "利用規約",

@@ -22,10 +22,6 @@ const baseSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url(),
   NEXT_PUBLIC_DEFAULT_LOCALE: z.enum(["ja", "en", "tl"]).default("ja"),
   NEXT_PUBLIC_PAYMENT_ENABLED: z.enum(["true", "false"]).default("false"),
-  // MVP-E: Google Form embed URL for the contact page. Optional —
-  // when unset, the /contact page falls back to a "preparing" notice
-  // so demo / preview environments do not 500.
-  NEXT_PUBLIC_CONTACT_FORM_URL: z.string().url().optional(),
   // Escalation cumulative-scoring controls (P2-L). Scaffolded now so the
   // audit trail (P1-F) and the future cumulative model read the same config.
   // Default OFF: the pipeline keeps the Phase 1 single-message escalation

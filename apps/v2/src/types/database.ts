@@ -470,6 +470,44 @@ export type Database = {
         }>;
         Relationships: [];
       };
+      inquiries: {
+        Row: {
+          id: string;
+          user_id: string;
+          expert_id: string | null;
+          category_id: string | null;
+          source_message_id: string | null;
+          subject: string;
+          message: string;
+          contact_email: string | null;
+          status: "pending" | "contacted" | "resolved" | "closed";
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          expert_id?: string | null;
+          category_id?: string | null;
+          source_message_id?: string | null;
+          subject: string;
+          message: string;
+          contact_email?: string | null;
+          status?: "pending" | "contacted" | "resolved" | "closed";
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<{
+          expert_id: string | null;
+          category_id: string | null;
+          source_message_id: string | null;
+          subject: string;
+          message: string;
+          contact_email: string | null;
+          status: "pending" | "contacted" | "resolved" | "closed";
+        }>;
+        Relationships: [];
+      };
       messenger_links: {
         Row: {
           id: string;
