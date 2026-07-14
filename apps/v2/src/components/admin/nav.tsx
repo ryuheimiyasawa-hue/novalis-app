@@ -15,6 +15,7 @@ const ITEMS = [
   { href: "/admin/articles", label: "記事" },
   { href: "/admin/faqs", label: "FAQ" },
   { href: "/admin/experts", label: "士業" },
+  { href: "/admin/restaurants", label: "飲食店" },
 ];
 
 export function AdminNav({ role, displayName }: Props) {
