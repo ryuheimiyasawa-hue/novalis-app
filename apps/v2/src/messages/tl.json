@@ -147,7 +147,21 @@
     "backToDashboard": "Bumalik sa dashboard",
     "loading": "Naglo-load ng form...",
     "notConfigured": "Inaayos pa ang contact form. Mangyaring subukan muli mamaya.",
-    "emailFallbackLabel": "Kung hindi gumagana ang form, mag-email sa amin nang direkta:"
+    "emailFallbackLabel": "Kung hindi gumagana ang form, mag-email sa amin nang direkta:",
+    "form": {
+      "subjectLabel": "Paksa",
+      "subjectPlaceholder": "hal. Tungkol sa pag-renew ng residence status",
+      "messageLabel": "Iyong mensahe",
+      "messagePlaceholder": "Pakisulat ang iyong tanong o kahilingan.",
+      "emailLabel": "Email address para sa sagot",
+      "emailPlaceholder": "you@example.com",
+      "submit": "Ipadala",
+      "submitting": "Ipinapadala...",
+      "success": "Naipadala. May tutugon mula sa aming team.",
+      "errorInvalid": "Pakisuri ang iyong input (paksa, mensahe, at wastong email).",
+      "errorGeneric": "Nabigong ipadala. Subukan muli mamaya.",
+      "anonNotice": "Hindi ka maaaring magsumite ng form habang gumagamit ng beta nang hindi naka-sign in. Mangyaring mag-email sa amin nang direkta sa address sa ibaba."
+    }
   },
   "legal": {
     "termsTitle": "Mga Tuntunin ng Serbisyo",
