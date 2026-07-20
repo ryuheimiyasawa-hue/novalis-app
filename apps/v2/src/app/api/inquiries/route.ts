@@ -4,6 +4,7 @@ import { AuthError } from "@/lib/auth/errors";
 import { createClient } from "@/lib/supabase/server";
 import { ok, fail } from "@/lib/api/response";
 import { InquiryCreateSchema } from "@/lib/inquiries/schema";
+import { notifyNewInquiry } from "@/lib/inquiries/notify";
 
 // First-party contact / support inbox (P2-M, Feature A).
 //
@@ -51,6 +52,10 @@ export async function POST(req: NextRequest) {
     console.error("[inquiries] insert failed:", error.message);
     return fail("INTERNAL_ERROR");
   }
+
+  // Best-effort staff notification. notifyNewInquiry never throws (env-gated,
+  // time-boxed, errors swallowed), so a Slack outage cannot fail the submit.
+  await notifyNewInquiry({ id: data.id, subject: body.subject });
 
   return ok({ id: data.id }, { status: 201 });
 }
