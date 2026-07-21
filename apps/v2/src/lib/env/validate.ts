@@ -22,6 +22,10 @@ const baseSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url(),
   NEXT_PUBLIC_DEFAULT_LOCALE: z.enum(["ja", "en", "tl"]).default("ja"),
   NEXT_PUBLIC_PAYMENT_ENABLED: z.enum(["true", "false"]).default("false"),
+  // Slack Incoming Webhook for new-inquiry alerts (P2-M follow-up).
+  // Optional — when unset, notifyNewInquiry() no-ops and the inbox is the
+  // only surface. Secret: set in Vercel env, never commit the URL.
+  SLACK_INQUIRY_WEBHOOK_URL: z.string().url().optional(),
   // Escalation cumulative-scoring controls (P2-L). Scaffolded now so the
   // audit trail (P1-F) and the future cumulative model read the same config.
   // Default OFF: the pipeline keeps the Phase 1 single-message escalation
