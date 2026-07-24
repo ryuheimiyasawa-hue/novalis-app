@@ -35,6 +35,27 @@ const SECTIONS = [
       "弁護士・行政書士・社労士などのエスカレ先を登録します。AI チャットの誘導先。",
     status: "C-6 実装済",
   },
+  {
+    href: "/admin/restaurants",
+    title: "飲食店",
+    description:
+      "フィリピン料理店・食材店のカタログを管理します。トップページと一覧に掲載。",
+    status: "P2-J 実装済",
+  },
+  {
+    href: "/admin/inquiries",
+    title: "問い合わせ",
+    description:
+      "利用者からの問い合わせ・サポート依頼の受信箱。対応状況を管理します。",
+    status: "P2-M 実装済",
+  },
+  {
+    href: "/admin/metrics",
+    title: "メトリクス",
+    description:
+      "会話数・メッセージ数・エスカレ件数などの運営指標を確認します（直近24時間）。",
+    status: "運営指標",
+  },
 ];
 
 export default function AdminTopPage() {
