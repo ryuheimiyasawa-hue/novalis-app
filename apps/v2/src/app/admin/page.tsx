@@ -50,6 +50,13 @@ const SECTIONS = [
     status: "P2-M 実装済",
   },
   {
+    href: "/admin/conversations",
+    title: "会話",
+    description:
+      "利用者と AI の会話を閲覧します。個別会話の全文・エスカレ証跡を確認（管理者のみ）。",
+    status: "P2-B1 実装済",
+  },
+  {
     href: "/admin/metrics",
     title: "メトリクス",
     description:
