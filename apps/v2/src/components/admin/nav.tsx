@@ -17,6 +17,7 @@ const ITEMS = [
   { href: "/admin/experts", label: "士業" },
   { href: "/admin/restaurants", label: "飲食店" },
   { href: "/admin/inquiries", label: "問い合わせ" },
+  { href: "/admin/conversations", label: "会話" },
 ];
 
 export function AdminNav({ role, displayName }: Props) {
