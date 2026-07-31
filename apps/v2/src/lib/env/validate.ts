@@ -22,6 +22,9 @@ const baseSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url(),
   NEXT_PUBLIC_DEFAULT_LOCALE: z.enum(["ja", "en", "tl"]).default("ja"),
   NEXT_PUBLIC_PAYMENT_ENABLED: z.enum(["true", "false"]).default("false"),
+  // Public Page/m.me URL for the Messenger linking page's "Open Messenger"
+  // button. Optional — the text instructions stand on their own without it.
+  NEXT_PUBLIC_MESSENGER_PAGE_URL: z.string().url().optional(),
   // Slack Incoming Webhook for new-inquiry alerts (P2-M follow-up).
   // Optional — when unset, notifyNewInquiry() no-ops and the inbox is the
   // only surface. Secret: set in Vercel env, never commit the URL.

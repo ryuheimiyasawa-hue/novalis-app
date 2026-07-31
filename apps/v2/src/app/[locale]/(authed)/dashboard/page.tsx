@@ -107,6 +107,28 @@ export default async function DashboardPage({
               {t("articlesCtaButton")}
             </Link>
           </div>
+
+          {/* Messenger linking is unavailable to anonymous beta sessions (the
+              link would be stranded when the session is purged), so the entry
+              point is hidden rather than shown and then refused. */}
+          {!isAnon && (
+            <div className="rounded-md border border-neutral-200 dark:border-neutral-800 p-6 space-y-4">
+              <div className="space-y-2">
+                <h2 className="text-lg font-semibold">
+                  {t("messengerCtaTitle")}
+                </h2>
+                <p className="text-sm text-neutral-600 dark:text-neutral-300">
+                  {t("messengerCtaBody")}
+                </p>
+              </div>
+              <Link
+                href={`/${safeLocale}/messenger`}
+                className="inline-flex items-center justify-center rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              >
+                {t("messengerCtaButton")}
+              </Link>
+            </div>
+          )}
         </section>
       </main>
 

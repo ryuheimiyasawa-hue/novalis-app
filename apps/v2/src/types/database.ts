@@ -508,6 +508,27 @@ export type Database = {
         }>;
         Relationships: [];
       };
+      messenger_link_codes: {
+        Row: {
+          code: string;
+          user_id: string;
+          created_at: string;
+          expires_at: string;
+          used_at: string | null;
+        };
+        Insert: {
+          code: string;
+          user_id: string;
+          created_at?: string;
+          expires_at: string;
+          used_at?: string | null;
+        };
+        Update: Partial<{
+          expires_at: string;
+          used_at: string | null;
+        }>;
+        Relationships: [];
+      };
       messenger_links: {
         Row: {
           id: string;

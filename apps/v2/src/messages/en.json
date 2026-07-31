@@ -98,6 +98,9 @@
     "articlesCtaTitle": "Read articles",
     "articlesCtaBody": "Curated articles about life in Japan — visas, insurance, schooling, taxes, and more.",
     "articlesCtaButton": "Browse articles",
+    "messengerCtaTitle": "Chat on Messenger",
+    "messengerCtaBody": "Ask the AI from Facebook Messenger too. Connecting takes about a minute and is only needed once.",
+    "messengerCtaButton": "Connect Messenger",
     "footerTerms": "Terms",
     "footerPrivacy": "Privacy",
     "footerLanguage": "Language"
@@ -162,6 +165,25 @@
       "errorGeneric": "Failed to send. Please try again in a moment.",
       "anonNotice": "You cannot submit the form while using the beta without signing in. Please email us directly at the address below."
     }
+  },
+  "messengerLink": {
+    "title": "Connect Messenger",
+    "subtitle": "Ask the AI from Facebook Messenger too. You only need to do this once.",
+    "backToDashboard": "Back to dashboard",
+    "step1Title": "1. Get your code",
+    "step1Body": "Tap the button below to show a 6-character code.",
+    "issueButton": "Get connection code",
+    "issuing": "Generating...",
+    "reissueButton": "Get a new code",
+    "step2Title": "2. Send the code on Messenger",
+    "step2Body": "Open the Novalis Facebook Page in Messenger and send this code as a message.",
+    "openMessenger": "Open Messenger",
+    "expiresIn": "Valid for about {minutes} minutes",
+    "expired": "This code has expired. Please get a new one.",
+    "step3Title": "3. Done",
+    "step3Body": "You are connected once the bot replies to confirm. After that you can ask questions directly on Messenger.",
+    "errorGeneric": "Could not generate a code. Please try again in a moment.",
+    "errorAnon": "Messenger linking is not available while using the beta without signing in. Please register an account first."
   },
   "legal": {
     "termsTitle": "Terms of Service",

@@ -7,6 +7,8 @@ import { verifyMessengerSignature } from "@/lib/messenger/signature";
 import { parseMessagingEvents } from "@/lib/messenger/parse";
 import { resolveChallenge } from "@/lib/messenger/challenge";
 import { sendMessengerText } from "@/lib/messenger/graph";
+import { isLinkCodeShape, normalizeLinkCode } from "@/lib/messenger/link-code";
+import { linkMessengerAccount } from "@/lib/messenger/link-account";
 import type { WhitelistLocale } from "@/lib/ai/whitelist-keywords";
 
 // Facebook Messenger webhook (P2-K).
@@ -94,6 +96,47 @@ function replyText(result: ChatResult): string {
   return result.text; // escalate / smalltalk / blocked all carry .text
 }
 
+/**
+ * A sender we have no messenger_links row for. Either they are sending the
+ * link code they got from the web app, or they need to be told how to get one.
+ * Replies are Japanese-only here: locale lives on the profile, which we cannot
+ * read until the account is linked.
+ */
+async function handleUnlinked(
+  ev: { psid: string; text: string },
+  admin: ReturnType<typeof getAdminClient>,
+  send: (text: string) => Promise<{ ok: boolean; error?: string }>,
+  appUrl: string,
+): Promise<void> {
+  const guidance =
+    "アカウントの連携が必要です。\n" +
+    `1. ${appUrl}/ja/messenger をブラウザで開いてログイン\n` +
+    "2. 表示された6桁の連携コードを、このトークにそのまま送信してください。";
+
+  const candidate = normalizeLinkCode(ev.text);
+  if (!isLinkCodeShape(candidate)) {
+    await send(guidance);
+    return;
+  }
+
+  const outcome = await linkMessengerAccount(admin, candidate, ev.psid);
+  if (outcome.status === "linked") {
+    await send(
+      "連携が完了しました。日本での生活に関するご質問をお気軽にどうぞ。",
+    );
+    return;
+  }
+  if (outcome.status === "invalid_code") {
+    await send(
+      "コードが無効か、有効期限が切れています。\n" + guidance,
+    );
+    return;
+  }
+  await send(
+    "連携処理でエラーが発生しました。時間を置いてもう一度お試しください。",
+  );
+}
+
 async function handleEvent(
   ev: { psid: string; text: string; mid: string },
   cfg: { pageToken?: string; appUrl: string },
@@ -127,10 +170,7 @@ async function handleEvent(
     .maybeSingle<{ user_id: string }>();
   if (link.error) throw new Error(`messenger_links: ${link.error.message}`);
   if (!link.data) {
-    // Unlinked sender: prompt them to connect their account on the web.
-    await send(
-      `アカウントの連携が必要です。こちらからログインしてください: ${cfg.appUrl}/login`,
-    );
+    await handleUnlinked(ev, admin, send, cfg.appUrl);
     return;
   }
   const userId = link.data.user_id;
