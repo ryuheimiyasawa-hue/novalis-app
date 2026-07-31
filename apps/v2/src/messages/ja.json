@@ -98,6 +98,9 @@
     "articlesCtaTitle": "記事を読む",
     "articlesCtaBody": "日本での暮らしに役立つ情報をまとめた記事一覧です。在留資格・保険・教育・税金などのテーマで掲載しています。",
     "articlesCtaButton": "記事一覧を見る",
+    "messengerCtaTitle": "Messenger で相談する",
+    "messengerCtaBody": "Facebook Messenger からも AI に質問できます。連携は一度だけ、1分で完了します。",
+    "messengerCtaButton": "Messenger を連携する",
     "footerTerms": "利用規約",
     "footerPrivacy": "プライバシーポリシー",
     "footerLanguage": "言語"
@@ -162,6 +165,25 @@
       "errorGeneric": "送信に失敗しました。時間を置いて再度お試しください。",
       "anonNotice": "ベータ試用（ログインなし）ではフォームを送信できません。お手数ですが下記のメールへ直接ご連絡ください。"
     }
+  },
+  "messengerLink": {
+    "title": "Messenger連携",
+    "subtitle": "Facebook Messenger からも AI に相談できるようになります。連携は一度だけです。",
+    "backToDashboard": "ダッシュボードへ戻る",
+    "step1Title": "1. 連携コードを発行",
+    "step1Body": "下のボタンを押すと6桁のコードが表示されます。",
+    "issueButton": "連携コードを発行",
+    "issuing": "発行中...",
+    "reissueButton": "コードを再発行",
+    "step2Title": "2. Messenger でコードを送信",
+    "step2Body": "Novalis の Facebook ページを Messenger で開き、このコードをそのまま送信してください。",
+    "openMessenger": "Messenger を開く",
+    "expiresIn": "有効期限: 約{minutes}分",
+    "expired": "このコードは期限切れです。再発行してください。",
+    "step3Title": "3. 完了",
+    "step3Body": "「連携が完了しました」と返信が届けば成功です。以後は Messenger から直接ご質問いただけます。",
+    "errorGeneric": "コードの発行に失敗しました。時間を置いてお試しください。",
+    "errorAnon": "ベータ試用（ログインなし）では Messenger 連携をご利用いただけません。アカウント登録後にお試しください。"
   },
   "legal": {
     "termsTitle": "利用規約",

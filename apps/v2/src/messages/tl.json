@@ -98,6 +98,9 @@
     "articlesCtaTitle": "Magbasa ng mga artikulo",
     "articlesCtaBody": "Mga artikulong tumutulong sa buhay sa Japan — visa, insurance, paaralan, buwis, at iba pa.",
     "articlesCtaButton": "Tingnan ang mga artikulo",
+    "messengerCtaTitle": "Mag-chat sa Messenger",
+    "messengerCtaBody": "Magtanong sa AI mula rin sa Facebook Messenger. Isang minuto lang at isang beses lang gagawin.",
+    "messengerCtaButton": "Ikonekta ang Messenger",
     "footerTerms": "Tuntunin",
     "footerPrivacy": "Privacy",
     "footerLanguage": "Wika"
@@ -162,6 +165,25 @@
       "errorGeneric": "Nabigong ipadala. Subukan muli mamaya.",
       "anonNotice": "Hindi ka maaaring magsumite ng form habang gumagamit ng beta nang hindi naka-sign in. Mangyaring mag-email sa amin nang direkta sa address sa ibaba."
     }
+  },
+  "messengerLink": {
+    "title": "Ikonekta ang Messenger",
+    "subtitle": "Magtanong sa AI mula rin sa Facebook Messenger. Isang beses lang ito gagawin.",
+    "backToDashboard": "Bumalik sa dashboard",
+    "step1Title": "1. Kunin ang iyong code",
+    "step1Body": "Pindutin ang button sa ibaba upang ipakita ang 6-character na code.",
+    "issueButton": "Kumuha ng connection code",
+    "issuing": "Ginagawa...",
+    "reissueButton": "Kumuha ng bagong code",
+    "step2Title": "2. Ipadala ang code sa Messenger",
+    "step2Body": "Buksan ang Novalis Facebook Page sa Messenger at ipadala ang code na ito bilang mensahe.",
+    "openMessenger": "Buksan ang Messenger",
+    "expiresIn": "Wasto sa loob ng humigit-kumulang {minutes} minuto",
+    "expired": "Expired na ang code na ito. Kumuha po ng bago.",
+    "step3Title": "3. Tapos na",
+    "step3Body": "Konektado ka na kapag sumagot ang bot upang kumpirmahin. Pagkatapos noon, maaari ka nang magtanong nang direkta sa Messenger.",
+    "errorGeneric": "Hindi makagawa ng code. Pakisubukan muli mamaya.",
+    "errorAnon": "Hindi magagamit ang Messenger linking habang gumagamit ng beta nang hindi naka-sign in. Mangyaring magrehistro muna ng account."
   },
   "legal": {
     "termsTitle": "Mga Tuntunin ng Serbisyo",
