@@ -585,6 +585,46 @@ W5 以降も「まず primitive、次に integrator」の順序を守る。整�
 
 ---
 
+### Lesson 28: httpOnly Cookie 前提のセッションを、ブラウザ側 signOut で消そうとした
+
+**事象**: 2026-08-03、ログアウト機能を新規実装した際、`createBrowserClient().auth.signOut()` をクライアントコンポーネントから呼ぶ実装で PR を出した。self-audit で `lib/supabase/server.ts` が `httpOnly: true` で Cookie を発行していることを確認し、**ブラウザ JS は httpOnly Cookie を削除できない**＝Supabase 側のトークンは失効しても Cookie が残り実質ログイン継続、と判明。「ログアウトできない」バグを直すために「ログアウトできない」実装を出しかけた。CI は緑（型・lint・build・テストは全て通る種類の欠陥）。
+
+**ハック的回避（やらないこと）**:
+- `signOut()` が resolve するから成功とみなす → 戻り値は Cookie 削除の成否を表さない
+- クライアントで消えないので `document.cookie` を直接いじる → httpOnly には効かず、効いたら httpOnly の意味が無い
+- 「テストが緑だから完了」とする → Cookie 属性起因の欠陥は単体テストの射程外
+
+**根本対処**:
+- セッション破棄は Route Handler（`POST /api/auth/signout`）でサーバー側クライアントから実行する。Route Handler は Cookie を書けるので `setAll()` が実際に削除する。
+- コード内に「なぜサーバー側なのか（httpOnly）」をコメントで固定し、将来クライアント側へ戻される事故を防ぐ。
+- CSRF は Cookie の `sameSite=lax` により cross-site POST で Cookie が送られず proxy が 401 を返すことを確認済み。
+
+**適用基準**:
+- 認証・セッションに触る実装では、まず **Cookie の属性（httpOnly / sameSite / domain / secure）を実コードで確認**してから、処理をクライアント／サーバーのどちらに置くか決める。
+- 「型・lint・build・単体テストが緑」は、Cookie 属性・ブラウザ制約・認可境界の欠陥に対して何の保証にもならない。self-audit の役割1（攻撃者）で必ず経路を辿る。
+
+---
+
+### Lesson 29: 依存監査は「自分の変更と無関係」でも定期的に中身を読む
+
+**事象**: 2026-08-03、無関係な機能の self-audit のついでに `pnpm audit --prod` を実行したところ、高リスクが 11 件に増えており **うち 4 件が Next.js 本体**だった。中に `Middleware / Proxy bypass in App Router`（>=16.0.0 <16.2.11）が含まれ、本アプリは `proxy.ts` で全ての認可判定（公開パス・認証UI・/admin・オンボーディング）を行うため、実質的な認可バイパスに相当した。CI の audit ジョブは report-only で赤いまま放置されており、赤の「中身」を誰も読んでいなかったため発見が遅れた。
+
+**ハック的回避（やらないこと）**:
+- 「audit の赤はいつもの brace-expansion だろう」と件数だけ見て中身を読まない
+- report-only だからマージできる＝対処不要、と解釈する
+- 逆に、赤を消したい一心で互換性のない override を入れる（Lesson の brace-expansion / sharp を参照）
+
+**根本対処**:
+- `next 16.2.9 → 16.2.11`（同一マイナー内パッチ）で 4 件を解消。`postcss >=8.5.18` / `fast-uri >=3.1.4` も同一メジャー内パッチで override。
+- 潰せないもの（brace-expansion=互換パッチ不在、sharp=next が `^0.34.5` を宣言）は理由を PR とコメントに明記して上流待ちにする。**「消せないから無視」ではなく「消せない理由を記録して監視」**。
+- Next のバージョン更新後は `.next` を消してクリーンビルドし直す（古い型キャッシュが別ブランチのルートを参照して偽の型エラーを出す）。
+
+**適用基準**:
+- report-only の赤を「既知」で片付けてよいのは、**その回に中身を読んで既知だと確認したとき**だけ。パッケージ名の一覧は毎回目視する。
+- フレームワーク本体（next / react / supabase）の advisory は、アプリのどの機構に効くかを必ず対応付けて重大度を判断する。汎用の CVSS より「このアプリで何が破れるか」を優先。
+
+---
+
 ## テンプレート: 新しい教訓を追加するときの形式
 
 ```markdown
