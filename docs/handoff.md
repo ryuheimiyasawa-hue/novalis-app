@@ -1,9 +1,50 @@
 # Novalis App 開発 — 新セッション引継ぎ
 
-_最終更新: 2026-06-30 / Phase 2 M0+M1 大半を実装・本番反映した直後_
+_最終更新: 2026-08-03 / Phase 2 M2 の内製機能をほぼ作り切った直後_
 
 新しい Claude チャットを開始したら、まず本ファイルを読んでから作業に入ること。
 Phase 2 の実行計画と各項目の状態は `docs/phase2-masterplan.md` が正本。
+
+---
+
+## 00. 現在地（2026-08-03 セッション終了時点）
+
+### このセッションで本番反映まで完了したもの
+
+- **P2-J 飲食店管理画面**（PR #10）。`/admin/restaurants` で運営が実店舗を CRUD 可能。データは現在ダミー。
+- **P2-M 問い合わせ first-party 化**（PR #11）。`/contact` を外部 Google フォームから自前フォームへ置換し、`inquiries` テーブル＋ `/admin/inquiries` 受信箱で対応状況を管理。
+- **管理トップの導線整備**（PR #13）。`/admin` のカードに飲食店・問い合わせ・メトリクスを追加。
+- **P2-B1 会話ビューア**（PR #15）。`/admin/conversations` で個別会話の全文・エスカレ証跡を閲覧（**閲覧専用**、requireAdmin）。
+- **P2-K Messenger 自己連携**（PR #16 ＋ migration 009）。`messenger_link_codes` を追加し、利用者が `/[locale]/messenger` で 6 桁コードを発行 → ボットに送信 → `messenger_links` が自動生成される。**これが無いとテスター展開が不可能だった**（従来 `messenger_links` は読むだけで書き込む処理が存在しなかった）。
+- **ログアウト機能**（PR #17）。従来アプリにログアウトが無く、匿名セッションに入ると自力で抜けられなかった。
+
+### 未マージ / 保留中の PR
+
+- **PR #18 `security/next-16-2-11`** — Next.js の **Middleware/Proxy バイパス脆弱性**（`proxy.ts` が全認可判定を担うため実質的な認可バイパス）＋ SSRF 2 件 ＋ DoS 1 件を修正。`next 16.2.9 → 16.2.11`、`postcss >=8.5.18` / `fast-uri >=3.1.4` の overrides。**最優先でマージすべき**。マージ後に本番でログイン→リダイレクト→オンボーディングの動作確認を推奨（masterplan §6 が Next 更新時の proxy 破壊を警告している）。
+- **PR #12 `phase2/p2m-inquiry-slack-notify`** — 新規問い合わせの Slack 通知。コードは完成・CI 緑。ユーザーが Slack Webhook URL を用意する気になった時点でマージ＋ `SLACK_INQUIRY_WEBHOOK_URL` を Vercel に設定すれば有効化される。未設定なら no-op なので放置しても無害。
+
+### ユーザー側の宿題（着手順）
+
+1. **Sentry DSN 設定**（未了・優先）。コードは入っているが `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` が未設定で、**本番エラーが誰にも通知されていない**。
+2. **アプリアイコン選定**。`docs/brand/` に 3 案（A: 青地＋吹き出し＋太陽 / B: 国旗＋吹き出し＋太陽 / C: 太陽マーク）。B を推奨済み。選定後 Facebook アプリ設定へ。
+3. **Messenger テスター登録**（アプリの役割 → テスター）。審査なしで実ユーザーに使わせる道。
+4. **飲食店・専門家の実データ投入**。専門家データは P2-N（マッチング）の前提。
+5. **弁護士監修の回答待ち**。軽量版パッケージ（`~/Desktop/Novalis弁護士監修依頼_軽量版.docx`、質問 8 問）送付済み。回答でエスカレ文言・PII 方針・4 本柱の可否が確定する。
+
+### 次に着手予定（内製・外部依存なし）
+
+1. **P2-B2 operator 介入**（AI 停止＋人が返信）。**最大の障壁は Web 配信手段が皆無なこと** — ブラウザは自分が送った POST のレスポンスしか受け取れず、realtime/polling/websocket が一切無い。方式決定が最初の論点（簡易ポーリングを推奨済み）。DB 側は `conversations.mode` / `operator_user_id` / `messages.role='operator'` / `operator_takeover_logs` が 001 で完備、アプリ層は完全に未配線。
+2. **P2-N 専門家 embedding マッチング**。実データ投入と同期して着手。
+3. 多言語 RAG の有効化（en/tl の記事本文投入が前提）。
+
+### 踏むと事故る地雷
+
+- **CI の `dependency audit (high+)` の赤は report-only**。branch protection の必須チェックは `lint / typecheck / test / build` のみ。赤でもマージ可。
+- **`brace-expansion` を pnpm overrides で潰そうとするな**。パッチ版が 5.x のみで ESM/named-export 化しており、eslint と @sentry bundler plugin を壊す（`TypeError: expand is not a function`）。PR #14 で試して撤回済み。上流待ち。
+- **`sharp` も同様に触るな**。next が `optionalDependencies: sharp ^0.34.5` を宣言しており、0.35 強制は規約違反。
+- **セッション Cookie は httpOnly**（`lib/supabase/server.ts`）。ブラウザ側 `supabase.auth.signOut()` では消せない。ログアウト等は必ずサーバー側（Route Handler）で行う。
+- **匿名セッションの罠**。「ログインせずに試す」で入ると匿名ユーザーになり、Messenger 連携・問い合わせ送信が仕様上ブロックされる（007/008 の意図的なハードニング）。PR #17 のログアウトで脱出可能になった。
+- **ローカルに本番の機密 env が無い**ため、認証付き E2E はローカル実行不可。検証は単体テスト＋Supabase MCP の実機 SQL＋Vercel プレビューで行う。
 
 ---
 
