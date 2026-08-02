@@ -90,6 +90,8 @@
   },
   "dashboard": {
     "headerLogo": "Novalis",
+    "signOut": "Mag-sign out",
+    "signingOut": "Nagsa-sign out...",
     "greeting": "Maligayang pagdating, {name}",
     "freeBadge": "Libre sa launch period",
     "chatCtaTitle": "Magtanong sa AI assistant",

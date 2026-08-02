@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { isPaymentEnabled } from "@/lib/payment/is-payment-enabled";
 import { DashboardLanguageSwitcher } from "./dashboard-language-switcher";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 
 export default async function DashboardPage({
   params,
@@ -51,6 +52,11 @@ export default async function DashboardPage({
           <span className="text-sm text-neutral-700 dark:text-neutral-300">
             {displayName}
           </span>
+          <SignOutButton
+            locale={safeLocale}
+            label={t("signOut")}
+            pendingLabel={t("signingOut")}
+          />
         </div>
       </header>
 
