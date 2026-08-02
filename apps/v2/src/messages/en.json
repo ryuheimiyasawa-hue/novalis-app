@@ -90,6 +90,8 @@
   },
   "dashboard": {
     "headerLogo": "Novalis",
+    "signOut": "Sign out",
+    "signingOut": "Signing out...",
     "greeting": "Welcome, {name}",
     "freeBadge": "Free during launch",
     "chatCtaTitle": "Ask the AI assistant",
