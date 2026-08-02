@@ -90,6 +90,8 @@
   },
   "dashboard": {
     "headerLogo": "Novalis",
+    "signOut": "ログアウト",
+    "signingOut": "ログアウト中...",
     "greeting": "ようこそ {name} さん",
     "freeBadge": "現在無料開放中",
     "chatCtaTitle": "AI に相談する",
