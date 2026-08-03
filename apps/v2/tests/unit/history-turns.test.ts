@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   OPERATOR_TURN_PREFIX,
+  selectHistoryWindow,
   toHistoryTurns,
 } from "@/lib/chat/persistence";
 
@@ -81,5 +82,68 @@ describe("toHistoryTurns", () => {
 
   it("handles an empty thread", () => {
     expect(toHistoryTurns([])).toEqual([]);
+  });
+});
+
+// The window is a character budget rather than a turn count. A fixed
+// 10 rows was cutting conversations that cost nothing to keep —
+// production's longest thread is 1,228 characters in total — and P2-B2
+// made operator turns compete for the same slots, so a few staff
+// replies could push the user's original question out of view.
+describe("selectHistoryWindow", () => {
+  const row = (content: string) => ({ content });
+
+  it("keeps everything when the whole conversation fits", () => {
+    const rows = [row("aaa"), row("bbb"), row("ccc")];
+    expect(selectHistoryWindow(rows, 100)).toEqual(rows);
+  });
+
+  it("stops at the budget, keeping the newest turns", () => {
+    // Input is newest-first, so the oldest turns are the ones dropped.
+    const rows = [row("12345"), row("12345"), row("12345")];
+    expect(selectHistoryWindow(rows, 10)).toHaveLength(2);
+  });
+
+  it("counts characters, not rows — many short turns all survive", () => {
+    const rows = Array.from({ length: 40 }, () => row("はい"));
+    expect(selectHistoryWindow(rows, 12_000)).toHaveLength(40);
+  });
+
+  it("counts characters, not rows — few long turns get cut", () => {
+    const rows = Array.from({ length: 5 }, () => row("x".repeat(2_000)));
+    expect(selectHistoryWindow(rows, 5_000)).toHaveLength(2);
+  });
+
+  it("never returns empty: the newest turn survives even if oversized", () => {
+    // Dropping the immediate context to satisfy a budget would be worse
+    // than one oversized turn.
+    const rows = [row("x".repeat(50_000)), row("older")];
+    expect(selectHistoryWindow(rows, 100)).toHaveLength(1);
+  });
+
+  it("handles an empty conversation", () => {
+    expect(selectHistoryWindow([], 12_000)).toEqual([]);
+  });
+
+  it("does not mutate the caller's array", () => {
+    const rows = [row("a"), row("b"), row("c")];
+    selectHistoryWindow(rows, 1);
+    expect(rows).toHaveLength(3);
+  });
+
+  it("keeps a staff-heavy thread from evicting the user's first question", () => {
+    // The P2-B2 regression this guards: operator replies are dialogue
+    // now, and under a row cap they crowd out the question being asked.
+    const rows = [
+      row("staff reply 5"),
+      row("staff reply 4"),
+      row("staff reply 3"),
+      row("staff reply 2"),
+      row("staff reply 1"),
+      row("ビザの更新について教えてください"),
+    ];
+    const kept = selectHistoryWindow(rows, 12_000);
+    expect(kept).toHaveLength(6);
+    expect(kept[kept.length - 1].content).toContain("ビザの更新");
   });
 });
