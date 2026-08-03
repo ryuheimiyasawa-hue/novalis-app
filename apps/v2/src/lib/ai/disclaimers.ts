@@ -19,6 +19,7 @@ interface ChatCopy {
   piiBlock: string;
   tooLong: string;
   smalltalkReply: string;
+  operatorPending: string;
 }
 
 const COPY: Record<WhitelistLocale, ChatCopy> = {
@@ -45,4 +46,13 @@ export function getTooLongMessage(locale: WhitelistLocale): string {
 
 export function getSmalltalkReply(locale: WhitelistLocale): string {
   return COPY[locale].smalltalkReply;
+}
+
+/**
+ * Shown when the user sends into a conversation an operator has taken
+ * over: the AI stays silent, so without this the message would land in
+ * total silence and read as a broken app (P2-B2, design §7-3).
+ */
+export function getOperatorPendingMessage(locale: WhitelistLocale): string {
+  return COPY[locale].operatorPending;
 }

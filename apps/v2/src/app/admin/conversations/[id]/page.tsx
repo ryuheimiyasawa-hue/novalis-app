@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CHANNEL_LABEL, MODE_LABEL, ROLE_LABEL } from "../types";
 import type { ConversationMessageRow, ConvChannel, ConvMode, MsgRole } from "../types";
+import { OperatorPanel } from "./operator-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -24,8 +25,10 @@ const ROLE_STYLE: Record<MsgRole, string> = {
 
 export default async function ConversationDetailPage({ params }: PageProps) {
   const { id } = await params;
+  let viewerUserId: string;
   try {
-    await requireAdmin();
+    const ctx = await requireAdmin();
+    viewerUserId = ctx.user.id;
   } catch (e) {
     if (e instanceof AuthError && e.code === "UNAUTHORIZED") {
       redirect(`/ja/login?redirect=/admin/conversations/${id}`);
@@ -39,7 +42,9 @@ export default async function ConversationDetailPage({ params }: PageProps) {
   const admin = getAdminClient();
   const { data: conv, error: convErr } = await admin
     .from("conversations")
-    .select("id, title, channel, mode, user_id, created_at, updated_at")
+    .select(
+      "id, title, channel, mode, user_id, operator_user_id, operator_started_at, created_at, updated_at",
+    )
     .eq("id", id)
     .maybeSingle();
   if (convErr) console.error("[admin/conversations detail] db error:", convErr.message);
@@ -54,6 +59,18 @@ export default async function ConversationDetailPage({ params }: PageProps) {
       .order("created_at", { ascending: true }),
   ]);
   if (msgErr) console.error("[admin/conversations messages] db error:", msgErr.message);
+
+  // Who currently holds the thread, if anyone. Only looked up when a
+  // holder exists so the common (auto) case costs no extra query.
+  let operatorName: string | null = null;
+  if (conv.operator_user_id) {
+    const { data: op } = await admin
+      .from("profiles")
+      .select("display_name")
+      .eq("id", conv.operator_user_id)
+      .maybeSingle();
+    operatorName = op?.display_name ?? null;
+  }
 
   const messages = (msgs ?? []) as ConversationMessageRow[];
   const displayName = profile?.display_name ?? "（表示名なし）";
@@ -77,6 +94,16 @@ export default async function ConversationDetailPage({ params }: PageProps) {
           <span>・開始 {new Date(conv.created_at).toLocaleString("ja-JP")}</span>
         </div>
       </header>
+
+      <OperatorPanel
+        conversationId={conv.id}
+        channel={conv.channel}
+        mode={conv.mode as ConvMode}
+        operatorUserId={conv.operator_user_id}
+        operatorStartedAt={conv.operator_started_at}
+        operatorName={operatorName}
+        viewerUserId={viewerUserId}
+      />
 
       <section className="space-y-3">
         {messages.length === 0 && (

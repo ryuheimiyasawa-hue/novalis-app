@@ -8,6 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { consumeChatStream, type ChatStreamEvent } from "@/lib/chat/sse-client";
+import {
+  isTerminalPollStatus,
+  nextPollDelayMs,
+  type PollMode,
+} from "@/lib/chat/poll-interval";
 import type { Citation } from "@/lib/ai/rag";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { MessageBubble, type BubbleRole } from "./MessageBubble";
@@ -50,6 +55,9 @@ interface Props {
     youLabel: string;
     assistantLabel: string;
     systemLabel: string;
+    operatorLabel: string;
+    operatorBanner: string;
+    pollError: string;
   };
 }
 
@@ -81,6 +89,15 @@ export function ChatShell({
   );
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingText, setStreamingText] = useState("");
+  // P2-B2. `mode` mirrors conversations.mode: while it is "operator" the
+  // AI is muted and replies arrive by polling instead of SSE.
+  const [mode, setMode] = useState<PollMode>("auto");
+  const [pollStopped, setPollStopped] = useState(false);
+  const modeRef = useRef<PollMode>("auto");
+  // Only messages created after this instant can be new to us: the
+  // server already rendered everything up to mount into initialMessages.
+  const cursorRef = useRef<string>(new Date().toISOString());
+  const seenIdsRef = useRef<Set<string>>(new Set());
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   // Cooldown bookkeeping for escalation improvement 2: count user turns and
@@ -95,11 +112,117 @@ export function ChatShell({
     }
   }, [messages, streamingText]);
 
+  // P2-B2 polling loop. Runs only while a conversation exists, pauses
+  // when the tab is hidden, and backs off then gives up on repeated
+  // failures rather than retrying forever (see poll-interval.ts).
+  useEffect(() => {
+    if (!conversationId) return;
+
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let failures = 0;
+
+    function schedule() {
+      if (cancelled) return;
+      const delay = nextPollDelayMs({
+        mode: modeRef.current,
+        consecutiveFailures: failures,
+      });
+      if (delay === null) {
+        setPollStopped(true);
+        return;
+      }
+      timer = setTimeout(() => void tick(), delay);
+    }
+
+    async function tick() {
+      if (cancelled) return;
+      // Nobody is looking; skip the request but keep the loop alive so
+      // it resumes the moment the tab comes back.
+      if (typeof document !== "undefined" && document.hidden) {
+        schedule();
+        return;
+      }
+
+      try {
+        const res = await fetch(
+          `/api/chat/conversations/${conversationId}/updates?after=${encodeURIComponent(cursorRef.current)}`,
+          { headers: { accept: "application/json" } },
+        );
+
+        // 401/403/404 cannot be fixed by retrying — stop and say so.
+        if (isTerminalPollStatus(res.status)) {
+          if (!cancelled) setPollStopped(true);
+          return;
+        }
+        if (!res.ok) throw new Error(`poll ${res.status}`);
+
+        const payload = (await res.json()) as {
+          ok: boolean;
+          data?: {
+            mode: PollMode;
+            messages: Array<{
+              id: string;
+              role: string;
+              content: string;
+              created_at: string;
+            }>;
+          };
+        };
+        if (!payload.ok || !payload.data) throw new Error("poll payload");
+        if (cancelled) return;
+
+        failures = 0;
+        modeRef.current = payload.data.mode;
+        setMode(payload.data.mode);
+
+        const rows = payload.data.messages;
+        if (rows.length > 0) {
+          // Advance the cursor past everything we were handed, whatever
+          // its role, so the next poll stays a narrow index range scan.
+          cursorRef.current = rows[rows.length - 1]!.created_at;
+
+          // Render operator turns only. Assistant replies already
+          // arrived over SSE and the user's own messages were appended
+          // optimistically; re-adding either would double them up.
+          const fresh = rows.filter(
+            (r) => r.role === "operator" && !seenIdsRef.current.has(r.id),
+          );
+          if (fresh.length > 0) {
+            for (const r of fresh) seenIdsRef.current.add(r.id);
+            setMessages((prev) => [
+              ...prev,
+              ...fresh.map((r) => ({
+                id: `srv-${r.id}`,
+                role: "operator" as BubbleRole,
+                content: r.content,
+              })),
+            ]);
+          }
+        }
+      } catch {
+        failures += 1;
+      }
+      schedule();
+    }
+
+    schedule();
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, [conversationId]);
+
   function resetConversation() {
     setMessages([]);
     setConversationId(null);
     setStreamingText("");
     setIsStreaming(false);
+    setMode("auto");
+    setPollStopped(false);
+    modeRef.current = "auto";
+    cursorRef.current = new Date().toISOString();
+    seenIdsRef.current.clear();
     userTurnsRef.current = 0;
     lastCardTurnRef.current = null;
     // Strip the ?conversation_id=... query so a reload doesn't put us
@@ -135,6 +258,7 @@ export function ChatShell({
     let escalationText: string | null = null;
     let smalltalkText: string | null = null;
     let blockedText: string | null = null;
+    let operatorPendingText: string | null = null;
     let errored = false;
 
     await consumeChatStream(
@@ -162,6 +286,13 @@ export function ChatShell({
               smalltalkText = e.text;
             } else if (e.kind === "blocked") {
               blockedText = e.text;
+            } else if (e.kind === "operator_pending") {
+              // Staff hold this thread. Learn the mode immediately so the
+              // banner appears and polling tightens without waiting for
+              // the next auto-interval poll.
+              operatorPendingText = e.text;
+              modeRef.current = "operator";
+              setMode("operator");
             } else if (e.kind === "error") {
               errored = true;
             }
@@ -231,6 +362,12 @@ export function ChatShell({
           role: "system",
           content: blockedText,
         });
+      } else if (operatorPendingText !== null) {
+        next.push({
+          id: nextId(),
+          role: "system",
+          content: operatorPendingText,
+        });
       } else if (errored) {
         next.push({
           id: nextId(),
@@ -264,6 +401,7 @@ export function ChatShell({
     you: labels.youLabel,
     assistant: labels.assistantLabel,
     system: labels.systemLabel,
+    operator: labels.operatorLabel,
     citations: labels.citationsHeading,
   };
 
@@ -292,6 +430,23 @@ export function ChatShell({
           </Button>
         </div>
       </header>
+
+      {mode === "operator" && (
+        <p
+          role="status"
+          className="rounded-md border border-blue-500/30 bg-blue-500/10 px-3 py-2 text-sm text-blue-700 dark:text-blue-300"
+        >
+          {labels.operatorBanner}
+        </p>
+      )}
+      {pollStopped && (
+        <p
+          role="status"
+          className="rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground"
+        >
+          {labels.pollError}
+        </p>
+      )}
 
       <div
         ref={scrollRef}

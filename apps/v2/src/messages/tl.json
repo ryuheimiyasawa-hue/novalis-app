@@ -202,6 +202,7 @@
     "piiBlock": "Hindi maaaring ipadala sa chat ang personal na impormasyon (residence card number, passport number, phone number, email, atbp.). Mangyaring isulat muli ang inyong tanong nang walang kasamang personal na impormasyon.",
     "tooLong": "Masyadong mahaba ang inyong mensahe. Mangyaring panatilihin itong wala pang 2000 karakter.",
     "smalltalkReply": "Maaari akong tumulong sa mga pangkalahatang tanong tungkol sa buhay sa Japan — visa, health insurance, paaralan ng inyong anak, mga pamamaraan ng gobyerno, at iba pang katulad. Magtanong nang malaya.",
+    "operatorPending": "May kawani ng Novalis na tumitingin sa usapang ito. Sasagot po sila sa lalong madaling panahon — maghintay lamang sandali.",
     "ui": {
       "title": "AI Konsultasyon",
       "subtitle": "Pangkalahatang tanong tungkol sa visa, social insurance, mga pamamaraan ng gobyerno, at iba pa.",
@@ -224,7 +225,10 @@
       "backToDashboard": "Bumalik sa dashboard",
       "youLabel": "Ikaw",
       "assistantLabel": "AI Assistant",
-      "systemLabel": "Sistema"
+      "systemLabel": "Sistema",
+      "operatorLabel": "Kawani ng Novalis",
+      "operatorBanner": "May kawani na tumutugon sa usapang ito. Nakahinto muna ang awtomatikong sagot ng AI.",
+      "pollError": "Hindi maabot ang server. Pakisariwa (reload) ang pahina."
     }
   }
 }

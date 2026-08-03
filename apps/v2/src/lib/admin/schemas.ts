@@ -233,3 +233,27 @@ export const RestaurantListQuerySchema = z.object({
   cuisine_type: z.string().max(50).optional(),
   is_active: z.enum(["true", "false"]).optional(),
 });
+
+// P2-B2 operator takeover.
+//
+// `reason` is the operator's own note on why they stepped in; it lands
+// in operator_takeover_logs and is never shown to the user. Optional
+// because the common case is "the escalation card fired, I'm taking
+// this" and forcing a sentence there would just produce empty ritual.
+export const OperatorTakeoverSchema = z.object({
+  reason: z.string().trim().max(500).optional(),
+});
+export type OperatorTakeoverInput = z.infer<typeof OperatorTakeoverSchema>;
+
+export const OperatorReleaseSchema = z.object({
+  force: z.boolean().optional(),
+  reason: z.string().trim().max(500).optional(),
+});
+export type OperatorReleaseInput = z.infer<typeof OperatorReleaseSchema>;
+
+// Same 2500-char ceiling as a user chat message (/api/chat/send), so an
+// operator can always answer at the length the question was asked at.
+export const OperatorMessageSchema = z.object({
+  content: z.string().trim().min(1).max(2_500),
+});
+export type OperatorMessageInput = z.infer<typeof OperatorMessageSchema>;

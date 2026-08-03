@@ -26,30 +26,33 @@ export interface NewConversationOpts {
 interface ConversationRow {
   id: string;
   user_id: string;
+  mode?: "auto" | "operator";
 }
 
 /**
  * Resolve a conversation by id (validating ownership) or create a
- * new one for the user. Returns the conversation id and a flag for
- * which path was taken.
+ * new one for the user. Returns the conversation id, a flag for which
+ * path was taken, and the current mode — the send route needs the mode
+ * to know whether an operator has silenced the AI for this thread
+ * (P2-B2). A freshly created conversation is always 'auto'.
  */
 export async function resolveConversation(
   userId: string,
   desiredId: string | null,
   opts: NewConversationOpts = {},
-): Promise<{ id: string; created: boolean }> {
+): Promise<{ id: string; created: boolean; mode: "auto" | "operator" }> {
   const admin = getAdminClient();
 
   if (desiredId) {
     const { data, error } = await admin
       .from("conversations")
-      .select("id, user_id")
+      .select("id, user_id, mode")
       .eq("id", desiredId)
       .maybeSingle<ConversationRow>();
     if (error) throw new Error(`resolveConversation read: ${error.message}`);
     if (!data) throw new ConversationNotFoundError(desiredId);
     if (data.user_id !== userId) throw new ConversationForbiddenError(desiredId);
-    return { id: data.id, created: false };
+    return { id: data.id, created: false, mode: data.mode ?? "auto" };
   }
 
   const { data, error } = await admin
@@ -63,7 +66,7 @@ export async function resolveConversation(
     .select("id")
     .single<ConversationRow>();
   if (error) throw new Error(`resolveConversation insert: ${error.message}`);
-  return { id: data.id, created: true };
+  return { id: data.id, created: true, mode: "auto" };
 }
 
 /**
