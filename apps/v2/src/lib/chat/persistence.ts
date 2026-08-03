@@ -23,6 +23,31 @@ export interface NewConversationOpts {
   title?: string;
 }
 
+/**
+ * Marks a history turn as written by a human staff member rather than by
+ * the model (P2-B2).
+ *
+ * Operator replies are, by their nature, advice about one person's
+ * situation — the exact thing rule 1 of the system prompt forbids the
+ * model from producing. Feeding them in as ordinary assistant turns
+ * would show the model its own "past self" giving individualised advice
+ * and invite it to continue in that register, quietly dissolving the
+ * boundary the escalation design exists to hold.
+ *
+ * So the turn is labelled and the system prompt is told what the label
+ * means: refer to it, never imitate it, never claim it as your own.
+ * English on purpose — it is an instruction to the model, not user-
+ * facing copy, and keeping it out of the conversation's language makes
+ * it less likely to be echoed verbatim into a reply.
+ *
+ * The Stage-2 classifier receives the same history, so it now sees that
+ * a human answered individually earlier in the thread. That nudges it
+ * toward classifying follow-ups as individual — i.e. toward escalation,
+ * which is the safe direction, and arguably the right one for a thread
+ * that already needed a person.
+ */
+export const OPERATOR_TURN_PREFIX = "[Novalis support staff wrote]: ";
+
 interface ConversationRow {
   id: string;
   user_id: string;
@@ -340,11 +365,21 @@ export async function loadConversationHistory(
   const admin = getAdminClient();
   // Pull the most-recent `limit` rows in DESC order to bound the
   // result set, then flip back to chronological for the model.
+  //
+  // `operator` rows are included as of P2-B2. Leaving them out meant
+  // that once staff released a thread, the AI resumed with no idea what
+  // the human had just told the user — so "what documents did you say
+  // again?" got answered from nothing, contradicting live staff advice.
+  // They are tagged rather than passed through as ordinary assistant
+  // turns; see OPERATOR_TURN_PREFIX.
+  //
+  // `system` rows (escalation cards, PII blocks) stay out: they are UI
+  // notices, not dialogue.
   const { data, error } = await admin
     .from("messages")
     .select("role, content")
     .eq("conversation_id", conversationId)
-    .in("role", ["user", "assistant"])
+    .in("role", ["user", "assistant", "operator"])
     .order("created_at", { ascending: false })
     .limit(limit);
   if (error) {
@@ -354,10 +389,25 @@ export async function loadConversationHistory(
     return [];
   }
   if (!data || data.length === 0) return [];
-  return data
-    .reverse()
-    .map<HistoryTurn>((row) => ({
+  return toHistoryTurns(data);
+}
+
+/**
+ * Map persisted rows (newest-first, as the query returns them) to the
+ * chronological turn list the model expects. Pure so the role mapping —
+ * the part with the safety consequences — is testable without a
+ * Supabase mock.
+ */
+export function toHistoryTurns(
+  rowsNewestFirst: Array<{ role: string; content: string }>,
+): HistoryTurn[] {
+  return [...rowsNewestFirst].reverse().map<HistoryTurn>((row) => {
+    if (row.role === "operator") {
+      return { role: "model", text: `${OPERATOR_TURN_PREFIX}${row.content}` };
+    }
+    return {
       role: row.role === "assistant" ? "model" : "user",
       text: row.content,
-    }));
+    };
+  });
 }
