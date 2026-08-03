@@ -162,44 +162,43 @@ type Preflight =
  *  so multi-turn context informs routing decisions (e.g. "更新です"
  *  by itself is vague, but with prior "ビザの相談がしたい" it becomes
  *  a clear continuation that the classifier can recognise). */
-async function preflight(input: {
-  message: string;
-  locale: WhitelistLocale;
-  history?: HistoryTurn[];
-}): Promise<Preflight> {
-  const trimmed = input.message.trim();
-
+/**
+ * Synchronous input gate: empty / oversized / PII. Split out of
+ * preflight() because the operator-mode path in /api/chat/send skips the
+ * whole AI pipeline yet must still enforce these — otherwise a user's
+ * residence-card number would be persisted verbatim just because staff
+ * happened to be handling the thread (P2-B2, design §7-10).
+ *
+ * Returns the blocking result, or null when the input is clean. The
+ * caller passes an already-trimmed string.
+ */
+export function screenUserInput(
+  trimmed: string,
+  locale: WhitelistLocale,
+): ChatBlocked | null {
   if (trimmed.length === 0) {
     return {
-      kind: "stop",
-      result: {
-        kind: "blocked",
-        reason: "empty",
-        text: getTooLongMessage(input.locale),
-        decision: buildDecision({
-          stage: "empty",
-          outcome: "blocked",
-          reason: "empty input",
-        }),
-      },
+      kind: "blocked",
+      reason: "empty",
+      text: getTooLongMessage(locale),
+      decision: buildDecision({
+        stage: "empty",
+        outcome: "blocked",
+        reason: "empty input",
+      }),
     };
   }
   if (trimmed.length > MAX_INPUT_CHARS) {
-    console.warn(
-      `[chat] too_long block: chars=${trimmed.length} locale=${input.locale}`,
-    );
+    console.warn(`[chat] too_long block: chars=${trimmed.length} locale=${locale}`);
     return {
-      kind: "stop",
-      result: {
-        kind: "blocked",
-        reason: "too_long",
-        text: getTooLongMessage(input.locale),
-        decision: buildDecision({
-          stage: "too_long",
-          outcome: "blocked",
-          reason: `over ${MAX_INPUT_CHARS} chars`,
-        }),
-      },
+      kind: "blocked",
+      reason: "too_long",
+      text: getTooLongMessage(locale),
+      decision: buildDecision({
+        stage: "too_long",
+        outcome: "blocked",
+        reason: `over ${MAX_INPUT_CHARS} chars`,
+      }),
     };
   }
 
@@ -207,23 +206,33 @@ async function preflight(input: {
   if (piiHits.length > 0) {
     const summary = summarisePiiHits(piiHits);
     console.warn(
-      `[chat] pii block: types=[${summary.types.join(",")}] count=${summary.count} locale=${input.locale}`,
+      `[chat] pii block: types=[${summary.types.join(",")}] count=${summary.count} locale=${locale}`,
     );
     return {
-      kind: "stop",
-      result: {
-        kind: "blocked",
-        reason: "pii",
-        text: getPiiBlockMessage(input.locale),
-        piiTypes: summary.types,
-        decision: buildDecision({
-          stage: "pii",
-          outcome: "blocked",
-          reason: `pii:${summary.types.join(",")}`,
-        }),
-      },
+      kind: "blocked",
+      reason: "pii",
+      text: getPiiBlockMessage(locale),
+      piiTypes: summary.types,
+      decision: buildDecision({
+        stage: "pii",
+        outcome: "blocked",
+        reason: `pii:${summary.types.join(",")}`,
+      }),
     };
   }
+
+  return null;
+}
+
+async function preflight(input: {
+  message: string;
+  locale: WhitelistLocale;
+  history?: HistoryTurn[];
+}): Promise<Preflight> {
+  const trimmed = input.message.trim();
+
+  const screened = screenUserInput(trimmed, input.locale);
+  if (screened) return { kind: "stop", result: screened };
 
   const kwHit = detectIndividualKeywords(trimmed, input.locale);
   if (kwHit) {

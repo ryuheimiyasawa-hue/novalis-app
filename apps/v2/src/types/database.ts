@@ -595,6 +595,33 @@ export type Database = {
         Args: { p_user_id: string; p_period: string };
         Returns: number;
       };
+      // P2-B2. Both return a single-row set (Supabase gives us an array).
+      operator_takeover: {
+        Args: {
+          p_conversation_id: string;
+          p_operator_user_id: string;
+          p_reason?: string | null;
+        };
+        Returns: Array<{
+          outcome: "taken" | "already_self" | "conflict" | "not_found";
+          conv_mode: "auto" | "operator" | null;
+          conv_operator_user_id: string | null;
+          conv_operator_started_at: string | null;
+        }>;
+      };
+      operator_release: {
+        Args: {
+          p_conversation_id: string;
+          p_operator_user_id: string;
+          p_force?: boolean;
+          p_reason?: string | null;
+        };
+        Returns: Array<{
+          outcome: "released" | "already_auto" | "conflict" | "not_found";
+          conv_mode: "auto" | "operator" | null;
+          conv_operator_user_id: string | null;
+        }>;
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

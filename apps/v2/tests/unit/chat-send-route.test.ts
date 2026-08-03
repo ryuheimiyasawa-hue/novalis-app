@@ -20,10 +20,14 @@ vi.mock("@/lib/chat/persistence", async () => {
     ...actual,
     resolveConversation: vi.fn(),
     persistResult: vi.fn(async () => ({})),
+    persistUserMessage: vi.fn(async () => ({ id: "msg-user-1" })),
   };
 });
 vi.mock("@/lib/ai/chat-pipeline", () => ({
   processChatStream: vi.fn(),
+  // The operator-mode branch runs the input gate directly. Default to
+  // "clean input"; the PII test overrides it.
+  screenUserInput: vi.fn(() => null),
 }));
 // Auto-title runs after the `done` event for newly created
 // conversations. It is out of scope for these wiring tests, so stub it
@@ -39,9 +43,11 @@ import { checkChatQuota } from "@/lib/chat/trial-quota";
 import {
   ConversationForbiddenError,
   ConversationNotFoundError,
+  persistResult,
+  persistUserMessage,
   resolveConversation,
 } from "@/lib/chat/persistence";
-import { processChatStream } from "@/lib/ai/chat-pipeline";
+import { processChatStream, screenUserInput } from "@/lib/ai/chat-pipeline";
 import { buildDecision } from "@/lib/ai/whitelist-decision";
 
 const mockRequireAuth = vi.mocked(requireAuth);
@@ -57,7 +63,11 @@ beforeEach(() => {
     decision: { allowed: true, reason: "payment_disabled" },
     period: "2026-05",
   });
-  mockResolveConversation.mockResolvedValue({ id: "conv-1", created: true });
+  mockResolveConversation.mockResolvedValue({
+    id: "conv-1",
+    created: true,
+    mode: "auto",
+  });
 });
 
 function makeReq(body: unknown): Request {
@@ -282,6 +292,90 @@ describe("POST /api/chat/send — SSE happy path", () => {
       type: "done",
       kind: "error",
       code: "INTERNAL_ERROR",
+    });
+  });
+});
+
+// P2-B2. When staff have taken the conversation over, the whole AI
+// pipeline must be bypassed — no classifier, no Gemini, no quota spend —
+// while the user's message is still stored for staff to read.
+describe("POST /api/chat/send — operator mode", () => {
+  const mockPersistUserMessage = vi.mocked(persistUserMessage);
+  const mockPersistResult = vi.mocked(persistResult);
+  const mockScreenUserInput = vi.mocked(screenUserInput);
+
+  beforeEach(() => {
+    mockResolveConversation.mockResolvedValue({
+      id: "conv-1",
+      created: false,
+      mode: "operator",
+    });
+    mockPersistUserMessage.mockResolvedValue({ id: "msg-user-1" });
+    mockScreenUserInput.mockReturnValue(null);
+  });
+
+  it("never calls the AI pipeline", async () => {
+    await POST(makeReq({ message: "まだ返事がありません" }) as never);
+    expect(mockProcessChatStream).not.toHaveBeenCalled();
+  });
+
+  it("stores the user message and ends with done(operator_pending)", async () => {
+    const res = await POST(makeReq({ message: "こんにちは" }) as never);
+    const events = await readSSE(res);
+
+    expect(mockPersistUserMessage).toHaveBeenCalledWith({
+      conversationId: "conv-1",
+      userId: "user-1",
+      content: "こんにちは",
+    });
+    expect(events[0].type).toBe("meta");
+    expect(events[events.length - 1]).toMatchObject({
+      type: "done",
+      kind: "operator_pending",
+      userMessageId: "msg-user-1",
+    });
+    expect(events.some((e) => e.type === "token")).toBe(false);
+  });
+
+  it("does not consume the chat quota (no AI cost was incurred)", async () => {
+    await POST(makeReq({ message: "こんにちは" }) as never);
+    // persistResult is what bumps chat_usage; the operator path skips it.
+    expect(mockPersistResult).not.toHaveBeenCalled();
+  });
+
+  it("still refuses PII rather than storing it verbatim", async () => {
+    mockScreenUserInput.mockReturnValue({
+      kind: "blocked",
+      reason: "pii",
+      text: "個人情報は送信できません",
+      piiTypes: ["phone_jp"],
+      decision: buildDecision({
+        stage: "pii",
+        outcome: "blocked",
+        reason: "pii:phone_jp",
+      }),
+    });
+
+    const res = await POST(makeReq({ message: "090-1234-5678" }) as never);
+    const events = await readSSE(res);
+
+    expect(mockPersistUserMessage).not.toHaveBeenCalled();
+    expect(events[events.length - 1]).toMatchObject({
+      type: "done",
+      kind: "blocked",
+      reason: "pii",
+    });
+  });
+
+  it("reports a failed persist instead of dropping it silently", async () => {
+    // Lesson 25: a swallowed persist failure here means staff never see
+    // the question. The stream still completes so the user isn't stuck.
+    mockPersistUserMessage.mockRejectedValueOnce(new Error("db down"));
+    const res = await POST(makeReq({ message: "こんにちは" }) as never);
+    const events = await readSSE(res);
+    expect(events[events.length - 1]).toMatchObject({
+      type: "done",
+      kind: "operator_pending",
     });
   });
 });

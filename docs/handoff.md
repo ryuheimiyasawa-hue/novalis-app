@@ -1,15 +1,29 @@
 # Novalis App 開発 — 新セッション引継ぎ
 
-_最終更新: 2026-08-03 / Phase 2 M2 の内製機能をほぼ作り切った直後_
+_最終更新: 2026-08-03 / セキュリティ修正を本番反映し、P2-B2 operator 介入を実装した直後_
 
 新しい Claude チャットを開始したら、まず本ファイルを読んでから作業に入ること。
 Phase 2 の実行計画と各項目の状態は `docs/phase2-masterplan.md` が正本。
 
 ---
 
-## 00. 現在地（2026-08-03 セッション終了時点）
+## 00. 現在地（2026-08-03 後半セッション終了時点）
 
-### このセッションで本番反映まで完了したもの
+### 直近セッションで動いたこと
+
+- **PR #18 マージ済み（本番反映済み）**。Next.js 16.2.11。マージ後に本番で proxy の認可を実測確認した: 未認証の `/admin`・`/admin/conversations`・`/ja/chat`・`/ja/dashboard` はすべて `/ja/login?redirect=...` へ 307、`/ja` と `/ja/contact` は 200、`x-middleware-subrequest` 系のバイパスヘッダを付けても素通りしない、API は 401。**認可バイパスは塞がった**。
+- **PR #19 `phase2/p2b2-operator-takeover`（レビュー待ち）**。P2-B2 operator 介入。設計書は `docs/phase2-b2-operator-design.md`（design-gate 10項目・承認済み）。
+- **migration 010 は本番 DB に適用済み**（Supabase MCP、`schema_migrations` に記録あり）。`operator_takeover` / `operator_release` の 2 関数。**PR #19 がマージ前でも本番に関数だけ存在する状態**だが、呼び出すコードが未デプロイなので無害。
+- 残り high 3 件（brace-expansion ×2 / sharp）は上流にパッチが無く据置き。CI の audit 赤はこれ。
+
+### P2-B2 で決めたこと（次に触るとき前提になる）
+
+- 配信は**ポーリング**（通常 30 秒 / 運営対応中 5 秒 / タブ非表示で停止 / 失敗は指数バックオフ後に諦めてバナー）。Realtime は 200 名規模で再検討。
+- **operator ロールは新設せず admin のみ**。`requireOperatorRole()` は `requireAdmin()` の別名のまま（理由はコード内コメント）。
+- **自動 release は作らない**。返信中に AI が再開する事故のほうが放置より悪い。admin 一覧の「対応中 N 件・最長 X 経過」バナーと admin の強制解除で運用する。
+- **Messenger チャネルは takeover 不可**（返信を FB へ返す経路が審査待ち）。UI 側で無効化済み。
+
+### さらに前のセッションで本番反映まで完了したもの
 
 - **P2-J 飲食店管理画面**（PR #10）。`/admin/restaurants` で運営が実店舗を CRUD 可能。データは現在ダミー。
 - **P2-M 問い合わせ first-party 化**（PR #11）。`/contact` を外部 Google フォームから自前フォームへ置換し、`inquiries` テーブル＋ `/admin/inquiries` 受信箱で対応状況を管理。
@@ -20,7 +34,7 @@ Phase 2 の実行計画と各項目の状態は `docs/phase2-masterplan.md` が�
 
 ### 未マージ / 保留中の PR
 
-- **PR #18 `security/next-16-2-11`** — Next.js の **Middleware/Proxy バイパス脆弱性**（`proxy.ts` が全認可判定を担うため実質的な認可バイパス）＋ SSRF 2 件 ＋ DoS 1 件を修正。`next 16.2.9 → 16.2.11`、`postcss >=8.5.18` / `fast-uri >=3.1.4` の overrides。**最優先でマージすべき**。マージ後に本番でログイン→リダイレクト→オンボーディングの動作確認を推奨（masterplan §6 が Next 更新時の proxy 破壊を警告している）。
+- **PR #19 `phase2/p2b2-operator-takeover`** — P2-B2 operator 介入。CI 緑・migration 適用済み。マージ後は本番で「takeover → 別ブラウザの利用者側に運営返信が 5 秒以内に出る → release で AI 応答が戻る」を目視確認すること（ローカルに本番 env が無く認証付き E2E が組めないため、ここだけ手動）。
 - **PR #12 `phase2/p2m-inquiry-slack-notify`** — 新規問い合わせの Slack 通知。コードは完成・CI 緑。ユーザーが Slack Webhook URL を用意する気になった時点でマージ＋ `SLACK_INQUIRY_WEBHOOK_URL` を Vercel に設定すれば有効化される。未設定なら no-op なので放置しても無害。
 
 ### ユーザー側の宿題（着手順）
@@ -33,9 +47,10 @@ Phase 2 の実行計画と各項目の状態は `docs/phase2-masterplan.md` が�
 
 ### 次に着手予定（内製・外部依存なし）
 
-1. **P2-B2 operator 介入**（AI 停止＋人が返信）。**最大の障壁は Web 配信手段が皆無なこと** — ブラウザは自分が送った POST のレスポンスしか受け取れず、realtime/polling/websocket が一切無い。方式決定が最初の論点（簡易ポーリングを推奨済み）。DB 側は `conversations.mode` / `operator_user_id` / `messages.role='operator'` / `operator_takeover_logs` が 001 で完備、アプリ層は完全に未配線。
+1. **PR #19 のマージと本番目視確認**（上記）。
 2. **P2-N 専門家 embedding マッチング**。実データ投入と同期して着手。
 3. 多言語 RAG の有効化（en/tl の記事本文投入が前提）。
+4. operator 介入の残タスク（優先度低）: 対応すべき会話の通知（エスカレ発生時に Slack へ、PR #12 の仕組みを流用）、`updates` エンドポイントのレート制限。
 
 ### 踏むと事故る地雷
 
@@ -45,6 +60,8 @@ Phase 2 の実行計画と各項目の状態は `docs/phase2-masterplan.md` が�
 - **セッション Cookie は httpOnly**（`lib/supabase/server.ts`）。ブラウザ側 `supabase.auth.signOut()` では消せない。ログアウト等は必ずサーバー側（Route Handler）で行う。
 - **匿名セッションの罠**。「ログインせずに試す」で入ると匿名ユーザーになり、Messenger 連携・問い合わせ送信が仕様上ブロックされる（007/008 の意図的なハードニング）。PR #17 のログアウトで脱出可能になった。
 - **ローカルに本番の機密 env が無い**ため、認証付き E2E はローカル実行不可。検証は単体テスト＋Supabase MCP の実機 SQL＋Vercel プレビューで行う。
+- **AI パイプラインをバイパスする分岐を足すときは、入口の PII / 長さガードまで一緒に外していないか数える**（Lesson 30）。`processChatStream` を呼ばない経路は `screenUserInput()` を明示的に通すこと。
+- **`conversations.mode='operator'` の会話は AI が答えない**。「本番でチャットが無反応」の調査では、まず `SELECT mode, operator_user_id FROM conversations WHERE id = ...` を見る。自動 release は意図的に存在しないので、放置された takeover は admin 一覧のバナーからしか気付けない。
 
 ---
 

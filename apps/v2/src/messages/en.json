@@ -202,6 +202,7 @@
     "piiBlock": "Personal information (residence card number, passport number, phone number, email, etc.) cannot be sent through chat. Please rephrase your question without including personal information.",
     "tooLong": "Your message is too long. Please keep it under 2000 characters.",
     "smalltalkReply": "I can help with general questions about life in Japan — residence status, health insurance, your child's school, government procedures, and similar topics. Feel free to ask.",
+    "operatorPending": "A member of our staff is looking at this conversation. They will reply shortly — please hold on a moment.",
     "ui": {
       "title": "AI Consultation",
       "subtitle": "General questions about residence status, social insurance, government procedures and more.",
@@ -224,7 +225,10 @@
       "backToDashboard": "Back to dashboard",
       "youLabel": "You",
       "assistantLabel": "AI Assistant",
-      "systemLabel": "System"
+      "systemLabel": "System",
+      "operatorLabel": "Support staff",
+      "operatorBanner": "A staff member is handling this conversation. Automatic AI replies are paused.",
+      "pollError": "Can't reach the server. Please reload the page."
     }
   }
 }

@@ -4,12 +4,18 @@ import { z } from "zod";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { AuthError } from "@/lib/auth/errors";
 import { fail } from "@/lib/api/response";
-import { processChatStream, type StreamEvent } from "@/lib/ai/chat-pipeline";
+import {
+  processChatStream,
+  screenUserInput,
+  type StreamEvent,
+} from "@/lib/ai/chat-pipeline";
+import { getOperatorPendingMessage } from "@/lib/ai/disclaimers";
 import { checkChatQuota } from "@/lib/chat/trial-quota";
 import {
   ConversationForbiddenError,
   ConversationNotFoundError,
   persistResult,
+  persistUserMessage,
   resolveConversation,
   updateConversationTitle,
 } from "@/lib/chat/persistence";
@@ -33,6 +39,10 @@ import { generateConversationTitle } from "@/lib/chat/title";
 // For escalate / blocked the stream still opens (so the client gets
 // the same shape) but no tokens are emitted; the final `done` event
 // carries the system message text and reason.
+//
+// P2-B2 adds one more terminal kind: when the conversation is in
+// operator mode the AI is bypassed entirely and the stream ends with
+//   data: {"type":"done","kind":"operator_pending","text":"...","userMessageId":"..."}
 
 const BodySchema = z.object({
   message: z.string().min(1).max(2500),
@@ -74,10 +84,12 @@ export async function POST(req: NextRequest) {
   // 4. Conversation
   let conversationId: string;
   let conversationCreated: boolean;
+  let conversationMode: "auto" | "operator";
   try {
     const conv = await resolveConversation(userId, body.conversationId ?? null);
     conversationId = conv.id;
     conversationCreated = conv.created;
+    conversationMode = conv.mode;
   } catch (e) {
     if (e instanceof ConversationNotFoundError) return fail("NOT_FOUND");
     if (e instanceof ConversationForbiddenError) return fail("FORBIDDEN");
@@ -97,6 +109,65 @@ export async function POST(req: NextRequest) {
       send({ type: "meta", conversationId, period });
 
       try {
+        // P2-B2. An operator has taken this thread over, so the AI must
+        // stay silent: no classifier, no RAG, no Gemini, no quota spend.
+        // We still store what the user said (that's the whole point —
+        // staff need to read it) and still refuse PII, since the input
+        // gate is about what may enter the database, not about who
+        // answers.
+        if (conversationMode === "operator") {
+          const trimmed = message.trim();
+          const screened = screenUserInput(trimmed, locale);
+          if (screened) {
+            send({
+              type: "done",
+              kind: "blocked",
+              reason: screened.reason,
+              text: screened.text,
+              piiTypes: screened.piiTypes ?? [],
+            });
+            return;
+          }
+
+          let userMessageId: string | undefined;
+          try {
+            const row = await persistUserMessage({
+              conversationId,
+              userId,
+              content: trimmed,
+            });
+            userMessageId = row.id;
+          } catch (persistErr) {
+            // Same reasoning as the main persist path below: a dropped
+            // write here means staff never see the question, so it must
+            // alert rather than only hit the console (Lesson 25).
+            const errMessage =
+              persistErr instanceof Error ? persistErr.message : String(persistErr);
+            console.error(
+              JSON.stringify({
+                event: "chat_persist_failed",
+                conversationId,
+                userId,
+                period,
+                resultKind: "operator_pending",
+                error: errMessage,
+              }),
+            );
+            Sentry.captureException(persistErr, {
+              tags: { area: "chat", op: "persist", resultKind: "operator_pending" },
+              extra: { conversationId, userId, period },
+            });
+          }
+
+          send({
+            type: "done",
+            kind: "operator_pending",
+            text: getOperatorPendingMessage(locale),
+            userMessageId,
+          });
+          return;
+        }
+
         const result = await processChatStream(
           { message, locale, conversationId },
           (e: StreamEvent) => send(e),

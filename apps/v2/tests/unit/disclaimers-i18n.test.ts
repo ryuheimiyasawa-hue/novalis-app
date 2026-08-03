@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   getAnswerDisclaimer,
   getEscalationMessage,
+  getOperatorPendingMessage,
   getPiiBlockMessage,
   getSmalltalkReply,
   getTooLongMessage,
@@ -13,12 +14,22 @@ import {
 // pipeline silently falls through to undefined.
 
 describe("disclaimers i18n source", () => {
-  it.each(["ja", "en", "tl"] as const)("provides all five strings for %s", (locale) => {
+  it.each(["ja", "en", "tl"] as const)("provides all six strings for %s", (locale) => {
     expect(getAnswerDisclaimer(locale)).toMatch(/.+/);
     expect(getEscalationMessage(locale)).toMatch(/.+/);
     expect(getPiiBlockMessage(locale)).toMatch(/.+/);
     expect(getTooLongMessage(locale)).toMatch(/.+/);
     expect(getSmalltalkReply(locale)).toMatch(/.+/);
+    expect(getOperatorPendingMessage(locale)).toMatch(/.+/);
+  });
+
+  it("returns distinct operator-pending copy per locale (P2-B2)", () => {
+    expect(getOperatorPendingMessage("ja")).not.toBe(
+      getOperatorPendingMessage("en"),
+    );
+    expect(getOperatorPendingMessage("en")).not.toBe(
+      getOperatorPendingMessage("tl"),
+    );
   });
 
   it("returns the Japanese smalltalk reply verbatim from messages/ja.json", () => {

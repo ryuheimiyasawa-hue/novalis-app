@@ -31,7 +31,7 @@ interface MessageRow {
 
 interface HydratedMessage {
   id: string;
-  role: "user" | "assistant" | "system";
+  role: "user" | "assistant" | "system" | "operator";
   content: string;
   disclaimer?: string;
   citations?: Citation[];
@@ -41,8 +41,9 @@ interface HydratedMessage {
 /**
  * Map a persisted message row to the shell's UiMessage shape.
  *
- *  - role: user/assistant pass through; operator is treated as
- *    assistant for now (W6 operator UI lands later). system rows are
+ *  - role: user/assistant/operator pass through. Operator rows used to
+ *    be rendered as `assistant`, which attributed a staff member's words
+ *    to the AI; P2-B2 gives them their own bubble. system rows are
  *    either escalation cards (is_escalated=true) or block notices.
  *  - persistence appends the disclaimer to assistant content with
  *    "\n\n" so the stored row is one self-contained string. We re-
@@ -64,7 +65,7 @@ function hydrate(row: MessageRow): HydratedMessage {
   }
   return {
     id: row.id,
-    role: row.role === "operator" ? "assistant" : row.role,
+    role: row.role,
     content: row.content,
     citations:
       row.citations && row.citations.length > 0 ? row.citations : undefined,
@@ -204,6 +205,9 @@ export default async function ChatPage({ params, searchParams }: Props) {
               youLabel: t("youLabel"),
               assistantLabel: t("assistantLabel"),
               systemLabel: t("systemLabel"),
+              operatorLabel: t("operatorLabel"),
+              operatorBanner: t("operatorBanner"),
+              pollError: t("pollError"),
             }}
           />
         </div>

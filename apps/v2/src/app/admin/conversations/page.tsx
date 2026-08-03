@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ElapsedSince } from "@/components/admin/elapsed-since";
 import { ConversationsFilter } from "./conversations-filter";
 import { CHANNEL_LABEL, MODE_LABEL } from "./types";
 import type { ConversationListRow, ConvChannel, ConvMode } from "./types";
@@ -84,6 +85,19 @@ export default async function ConversationsPage({ searchParams }: PageProps) {
     message_count: countByConv.get(c.id) ?? 0,
   }));
 
+  // P2-B2. There is deliberately no auto-release cron (design §10-c), so
+  // a forgotten takeover would silence the AI on that thread forever.
+  // This banner is the safety net: it counts every held conversation
+  // regardless of the current filters, and names the oldest one.
+  const { data: heldRows } = await admin
+    .from("conversations")
+    .select("id, operator_started_at")
+    .eq("mode", "operator")
+    .order("operator_started_at", { ascending: true })
+    .limit(200);
+  const held = heldRows ?? [];
+  const oldestHeldAt = held[0]?.operator_started_at ?? null;
+
   return (
     <div className="space-y-6">
       <header className="space-y-1">
@@ -92,6 +106,19 @@ export default async function ConversationsPage({ searchParams }: PageProps) {
           利用者と AI（および運営）の会話を閲覧します。個別会話の全文・エスカレ証跡を確認できます（管理者のみ・閲覧専用、直近{LIST_LIMIT}件）。
         </p>
       </header>
+
+      {held.length > 0 && (
+        <p className="rounded-md border border-blue-500/30 bg-blue-500/10 px-3 py-2 text-sm">
+          運営対応中の会話が {held.length} 件あります
+          {oldestHeldAt && (
+            <>
+              （最長 <ElapsedSince since={oldestHeldAt} />
+              経過）
+            </>
+          )}
+          。対応中は AI の自動応答が停止したままです。終わった会話は「対応を終える」で戻してください。
+        </p>
+      )}
 
       <ConversationsFilter
         currentChannel={channelFilter ?? null}

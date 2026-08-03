@@ -52,6 +52,14 @@ export type ChatStreamEvent =
       text: string;
       piiTypes: string[];
     }
+  | {
+      // P2-B2: staff have taken the thread over, so no AI reply is
+      // coming. The user's message was stored for them to read.
+      type: "done";
+      kind: "operator_pending";
+      text: string;
+      userMessageId?: string;
+    }
   | { type: "done"; kind: "error"; code: string };
 
 /**
