@@ -10,6 +10,7 @@ import {
   type StreamEvent,
 } from "@/lib/ai/chat-pipeline";
 import { getOperatorPendingMessage } from "@/lib/ai/disclaimers";
+import { notifyEscalation } from "@/lib/chat/escalation-notify";
 import { checkChatQuota } from "@/lib/chat/trial-quota";
 import {
   ConversationForbiddenError,
@@ -258,6 +259,28 @@ export async function POST(req: NextRequest) {
           if (title) {
             await updateConversationTitle(conversationId, title);
           }
+        }
+
+        // Tell staff a conversation needs a human. Runs after the `done`
+        // event so it never delays the user's reply, but is awaited
+        // before close because serverless does not guarantee work that
+        // continues past the response. Never throws, and no-ops when the
+        // webhook is unset.
+        if (result.kind === "escalate") {
+          // notifyEscalation swallows its own failures, but guard here
+          // too: if that contract ever breaks, the outer catch would
+          // append a spurious done(error) after the escalation the user
+          // has already been shown.
+          await notifyEscalation({
+            conversationId,
+            reason: result.reason,
+            locale,
+          }).catch((e) => {
+            console.error(
+              "[chat] escalation notify threw:",
+              e instanceof Error ? e.message : e,
+            );
+          });
         }
       } catch (err) {
         console.error(

@@ -35,6 +35,12 @@ vi.mock("@/lib/ai/chat-pipeline", () => ({
 vi.mock("@/lib/chat/title", () => ({
   generateConversationTitle: vi.fn(async () => null),
 }));
+// Escalation alerting is env-gated and would no-op in tests anyway, but
+// mock it so the wiring is asserted rather than inferred, and so the
+// route never reaches for the admin Supabase client here.
+vi.mock("@/lib/chat/escalation-notify", () => ({
+  notifyEscalation: vi.fn(async () => undefined),
+}));
 
 import { POST } from "@/app/api/chat/send/route";
 import { requireAuth } from "@/lib/auth/require-auth";
@@ -48,6 +54,7 @@ import {
   resolveConversation,
 } from "@/lib/chat/persistence";
 import { processChatStream, screenUserInput } from "@/lib/ai/chat-pipeline";
+import { notifyEscalation } from "@/lib/chat/escalation-notify";
 import { buildDecision } from "@/lib/ai/whitelist-decision";
 
 const mockRequireAuth = vi.mocked(requireAuth);
@@ -377,5 +384,63 @@ describe("POST /api/chat/send — operator mode", () => {
       type: "done",
       kind: "operator_pending",
     });
+  });
+});
+
+// P2-B2 follow-up: staff have to learn that a conversation needs a
+// human, otherwise the takeover feature has no trigger.
+describe("POST /api/chat/send — escalation alerting", () => {
+  const mockNotifyEscalation = vi.mocked(notifyEscalation);
+
+  function escalateOnce() {
+    mockProcessChatStream.mockImplementationOnce(async () => ({
+      kind: "escalate",
+      reason: "keyword",
+      text: "専門家にご相談ください",
+      detail: "kw:在留資格",
+      decision: buildDecision({
+        stage: "keyword",
+        outcome: "escalate",
+        reason: "kw:在留資格",
+      }),
+    }));
+  }
+
+  it("alerts staff when a conversation escalates", async () => {
+    escalateOnce();
+    const res = await POST(makeReq({ message: "私のビザは更新できますか" }) as never);
+    // POST returns as soon as the stream is constructed; the alert runs
+    // inside start(), so drain the body before asserting.
+    await readSSE(res);
+    expect(mockNotifyEscalation).toHaveBeenCalledWith({
+      conversationId: "conv-1",
+      reason: "keyword",
+      locale: "ja",
+    });
+  });
+
+  it("does not alert on an ordinary answer", async () => {
+    mockProcessChatStream.mockImplementationOnce(async () => ({
+      kind: "smalltalk",
+      text: "こんにちは",
+      detail: "greeting",
+      decision: buildDecision({
+        stage: "llm_smalltalk",
+        outcome: "smalltalk",
+        reason: "greeting",
+      }),
+    }));
+    const res = await POST(makeReq({ message: "こんにちは" }) as never);
+    await readSSE(res);
+    expect(mockNotifyEscalation).not.toHaveBeenCalled();
+  });
+
+  it("still returns the escalation to the user when alerting fails", async () => {
+    // Slack being down must never cost the user their reply.
+    escalateOnce();
+    mockNotifyEscalation.mockRejectedValueOnce(new Error("slack down"));
+    const res = await POST(makeReq({ message: "私のビザは" }) as never);
+    const events = await readSSE(res);
+    expect(events.some((e) => e.kind === "escalate")).toBe(true);
   });
 });

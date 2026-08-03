@@ -1,8 +1,19 @@
 import { type NextRequest, NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { getAdminClient } from "@/lib/supabase/admin";
-import { processChat, type ChatResult } from "@/lib/ai/chat-pipeline";
+import {
+  processChat,
+  screenUserInput,
+  type ChatResult,
+} from "@/lib/ai/chat-pipeline";
+import { getOperatorPendingMessage } from "@/lib/ai/disclaimers";
 import { checkChatQuota } from "@/lib/chat/trial-quota";
-import { resolveConversation, persistResult } from "@/lib/chat/persistence";
+import {
+  resolveConversation,
+  persistResult,
+  persistUserMessage,
+} from "@/lib/chat/persistence";
+import { notifyEscalation } from "@/lib/chat/escalation-notify";
 import { verifyMessengerSignature } from "@/lib/messenger/signature";
 import { parseMessagingEvents } from "@/lib/messenger/parse";
 import { resolveChallenge } from "@/lib/messenger/challenge";
@@ -89,6 +100,31 @@ export async function POST(req: NextRequest) {
     }
   }
   return NextResponse.json({ ok: true });
+}
+
+/**
+ * A dropped write here is invisible from the outside: Messenger still
+ * shows the user a reply, while the conversation quietly stops being
+ * recorded. That is Lesson 25 exactly, and the web path already reports
+ * it to Sentry — this path only had a console.error, so nothing would
+ * have alerted. No message content is included, only ids.
+ */
+function reportPersistFailure(
+  err: unknown,
+  ctx: { mid: string; conversationId: string; userId: string; resultKind?: string },
+) {
+  const message = err instanceof Error ? err.message : String(err);
+  console.error(
+    JSON.stringify({
+      event: "messenger_persist_failed",
+      ...ctx,
+      error: message,
+    }),
+  );
+  Sentry.captureException(err, {
+    tags: { area: "messenger", op: "persist", resultKind: ctx.resultKind ?? "operator_pending" },
+    extra: ctx,
+  });
 }
 
 function replyText(result: ChatResult): string {
@@ -206,7 +242,36 @@ async function handleEvent(
     { channel: "messenger" },
   );
 
-  // 6. Run the pipeline + persist (same as the web path, minus streaming).
+  // 6. Operator mode: staff hold this thread, so the AI stays silent.
+  //
+  // Unreachable today — the takeover API refuses messenger conversations
+  // because an operator reply has no route back to Facebook. It is here
+  // anyway so the invariant lives with the code that would violate it:
+  // if messenger takeover is ever enabled, this path must not keep
+  // answering over the top of a human. The input gate still runs, since
+  // skipping the pipeline must never mean skipping what may be written
+  // to the database (Lesson 30).
+  if (conv.mode === "operator") {
+    const trimmed = ev.text.trim();
+    const screened = screenUserInput(trimmed, locale);
+    if (screened) {
+      await send(screened.text);
+      return;
+    }
+    try {
+      await persistUserMessage({
+        conversationId: conv.id,
+        userId,
+        content: trimmed,
+      });
+    } catch (err) {
+      reportPersistFailure(err, { mid: ev.mid, conversationId: conv.id, userId });
+    }
+    await send(getOperatorPendingMessage(locale));
+    return;
+  }
+
+  // 7. Run the pipeline + persist (same as the web path, minus streaming).
   const result = await processChat({
     message: ev.text,
     locale,
@@ -223,14 +288,32 @@ async function handleEvent(
       whitelistDecision: result.decision,
     });
   } catch (err) {
-    console.error(
-      `[messenger] persist failed mid=${ev.mid}: ${err instanceof Error ? err.message : String(err)}`,
-    );
+    reportPersistFailure(err, {
+      mid: ev.mid,
+      conversationId: conv.id,
+      userId,
+      resultKind: result.kind,
+    });
   }
 
-  // 7. Reply.
+  // 8. Reply.
   const out = await send(replyText(result));
   if (!out.ok) {
     console.warn(`[messenger] send failed mid=${ev.mid}: ${out.error}`);
+  }
+
+  // 9. Tell staff if this one needs a human. After the reply so it never
+  // delays the user, awaited so it completes before the handler returns.
+  if (result.kind === "escalate") {
+    await notifyEscalation({
+      conversationId: conv.id,
+      reason: result.reason,
+      locale,
+    }).catch((e) => {
+      console.error(
+        "[messenger] escalation notify threw:",
+        e instanceof Error ? e.message : e,
+      );
+    });
   }
 }

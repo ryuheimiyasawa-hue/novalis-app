@@ -29,6 +29,13 @@ const baseSchema = z.object({
   // Optional — when unset, notifyNewInquiry() no-ops and the inbox is the
   // only surface. Secret: set in Vercel env, never commit the URL.
   SLACK_INQUIRY_WEBHOOK_URL: z.string().url().optional(),
+  // Slack Incoming Webhook for escalation alerts (P2-B2 follow-up).
+  // Separate from the inquiry hook on purpose: an escalation is someone
+  // waiting mid-conversation, so it usually wants a different channel
+  // and a different notification setting than an inbox item. Optional —
+  // when unset, notifyEscalation() no-ops and /admin/conversations is
+  // the only surface. Secret: set in Vercel env, never commit the URL.
+  SLACK_ESCALATION_WEBHOOK_URL: z.string().url().optional(),
   // Escalation cumulative-scoring controls (P2-L). Scaffolded now so the
   // audit trail (P1-F) and the future cumulative model read the same config.
   // Default OFF: the pipeline keeps the Phase 1 single-message escalation
