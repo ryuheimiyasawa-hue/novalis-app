@@ -1,7 +1,14 @@
 name: CI
 
-# Quality gate for the Novalis monorepo (apps/v2). Runs on every PR to main
-# and on direct pushes to main.
+# Quality gate for the Novalis monorepo (apps/v2). Runs on every pull
+# request, whatever it targets, and on direct pushes to main.
+#
+# The base filter used to be `branches: [main]`, which meant a PR stacked
+# on another feature branch got no quality run at all — the checks list
+# showed only Vercel, and nothing said the gate had been skipped. A check
+# that silently does not run is worse than one that fails, so the filter
+# is gone: every PR is gated, and stacking costs a little CI time instead
+# of coverage.
 #
 # Only `quality` (lint / typecheck / test / build) is a required check in
 # branch protection, so `audit` failing does NOT block a merge — it is red
@@ -20,7 +27,6 @@ name: CI
 
 on:
   pull_request:
-    branches: [main]
   push:
     branches: [main]
 
