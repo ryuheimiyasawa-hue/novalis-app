@@ -1,4 +1,5 @@
 import { type NextRequest } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
 import { requireOperatorRole } from "@/lib/auth/require-admin";
 import { AuthError } from "@/lib/auth/errors";
@@ -80,7 +81,20 @@ export async function POST(
     .select("id, created_at")
     .single();
   if (error) {
-    console.error("[admin/operator-message] insert:", error.message);
+    // The operator watched their reply "fail to send" and the user is
+    // still waiting. Never let this stay a console line.
+    console.error(
+      JSON.stringify({
+        event: "operator_message_failed",
+        conversationId: id,
+        operatorUserId,
+        error: error.message,
+      }),
+    );
+    Sentry.captureException(new Error(`operator message insert: ${error.message}`), {
+      tags: { area: "operator", op: "message" },
+      extra: { conversationId: id, operatorUserId },
+    });
     return fail("INTERNAL_ERROR");
   }
 

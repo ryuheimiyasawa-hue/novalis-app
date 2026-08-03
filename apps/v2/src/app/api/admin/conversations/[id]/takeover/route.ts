@@ -1,4 +1,5 @@
 import { type NextRequest } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
 import { requireOperatorRole } from "@/lib/auth/require-admin";
 import { AuthError } from "@/lib/auth/errors";
@@ -19,6 +20,33 @@ import {
 // precisely so they cannot drift apart; see design §5.
 
 const UuidSchema = z.string().uuid();
+
+/**
+ * A failed takeover is not a cosmetic error: staff pressed the button
+ * because they wanted to stop the AI from answering this user, and a
+ * silent 500 means it keeps answering. Alert, don't just console.error
+ * (Lesson 25 — the failure has to reach someone).
+ */
+function reportFailure(
+  op: string,
+  message: string,
+  conversationId: string,
+  operatorUserId: string,
+) {
+  console.error(
+    JSON.stringify({
+      event: "operator_takeover_failed",
+      op,
+      conversationId,
+      operatorUserId,
+      error: message,
+    }),
+  );
+  Sentry.captureException(new Error(`operator takeover ${op}: ${message}`), {
+    tags: { area: "operator", op },
+    extra: { conversationId, operatorUserId },
+  });
+}
 
 export async function POST(
   req: NextRequest,
@@ -57,7 +85,7 @@ export async function POST(
     .eq("id", id)
     .maybeSingle();
   if (convErr) {
-    console.error("[admin/takeover] conv lookup:", convErr.message);
+    reportFailure("conv_lookup", convErr.message, id, operatorUserId);
     return fail("INTERNAL_ERROR");
   }
   if (!conv) return fail("NOT_FOUND");
@@ -73,13 +101,13 @@ export async function POST(
     p_reason: body.reason ?? null,
   });
   if (error) {
-    console.error("[admin/takeover] rpc error:", error.message);
+    reportFailure("rpc", error.message, id, operatorUserId);
     return fail("INTERNAL_ERROR");
   }
 
   const row = data?.[0];
   if (!row) {
-    console.error("[admin/takeover] rpc returned no row");
+    reportFailure("rpc_empty", "returned no row", id, operatorUserId);
     return fail("INTERNAL_ERROR");
   }
 

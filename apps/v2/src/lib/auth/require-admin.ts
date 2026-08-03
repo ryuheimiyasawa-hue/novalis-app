@@ -36,5 +36,13 @@ export async function requireEditor(): Promise<AdminContext> {
 
 export async function requireOperatorRole(): Promise<AdminContext> {
   // Operator takeover is admin-only (W2 design §6-4, plan file §8).
+  //
+  // P2-B2 revisited this and kept it: adding a separate 'operator' role
+  // means a CHECK-constraint migration on admin_roles, and today the
+  // only person answering users is the admin. When staff who must NOT
+  // touch the CMS start handling conversations, extend the CHECK and
+  // accept 'operator' here — deliberately NOT `requireEditor`, since
+  // editing articles and speaking to users are different privileges
+  // (design doc §10-b).
   return requireAdmin();
 }

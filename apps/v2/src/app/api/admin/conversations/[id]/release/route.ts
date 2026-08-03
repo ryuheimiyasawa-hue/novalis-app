@@ -1,4 +1,5 @@
 import { type NextRequest } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
 import { requireOperatorRole } from "@/lib/auth/require-admin";
 import { AuthError } from "@/lib/auth/errors";
@@ -57,16 +58,36 @@ export async function POST(
     p_conversation_id: id,
     p_operator_user_id: operatorUserId,
     p_force: force,
-    p_reason: force ? (body.reason ?? "forced release by admin") : (body.reason ?? null),
+    p_reason: body.reason ?? (force ? "forced release by admin" : null),
   });
+
+  // A failed release leaves the AI muted on a thread staff think they
+  // handed back, so this must alert rather than only log.
+  const reportFailure = (op: string, message: string) => {
+    console.error(
+      JSON.stringify({
+        event: "operator_release_failed",
+        op,
+        conversationId: id,
+        operatorUserId,
+        force,
+        error: message,
+      }),
+    );
+    Sentry.captureException(new Error(`operator release ${op}: ${message}`), {
+      tags: { area: "operator", op },
+      extra: { conversationId: id, operatorUserId, force },
+    });
+  };
+
   if (error) {
-    console.error("[admin/release] rpc error:", error.message);
+    reportFailure("rpc", error.message);
     return fail("INTERNAL_ERROR");
   }
 
   const row = data?.[0];
   if (!row) {
-    console.error("[admin/release] rpc returned no row");
+    reportFailure("rpc_empty", "returned no row");
     return fail("INTERNAL_ERROR");
   }
 

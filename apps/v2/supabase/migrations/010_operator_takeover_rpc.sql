@@ -23,6 +23,17 @@
 -- PUBLIC/anon/authenticated and granted only to service_role. These
 -- functions mutate conversation state, so an anon-key caller must
 -- never be able to reach them.
+--
+-- Rollback: this migration is additive — it creates two functions and
+-- touches no table, column, policy or row. To undo it:
+--
+--   DROP FUNCTION IF EXISTS public.operator_takeover(uuid, uuid, text);
+--   DROP FUNCTION IF EXISTS public.operator_release(uuid, uuid, boolean, text);
+--
+-- Any conversation left in operator mode keeps its row state; hand it
+-- back with a plain UPDATE (mode='auto', operator_user_id=NULL,
+-- operator_started_at=NULL) before dropping, or the AI stays muted on
+-- that thread.
 
 -- =============================================================================
 -- operator_takeover
