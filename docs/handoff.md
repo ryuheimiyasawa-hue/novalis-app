@@ -47,7 +47,7 @@ Phase 2 の実行計画と各項目の状態は `docs/phase2-masterplan.md` が�
 
 ### ユーザー側の宿題（着手順）
 
-1. **Sentry DSN 設定**（未了・優先）。コードは入っているが `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` が未設定で、**本番エラーが誰にも通知されていない**。
+1. ~~**Sentry DSN 設定**（未了・優先）~~ → **記述が古い。2026-08-03 に実測で訂正**。本番のクライアントバンドル（`/_next/static/` の全 chunk を走査）に `o<org>.ingest.us.sentry.io/4511360248709120` 形式の DSN が埋め込まれており、`NEXT_PUBLIC_SENTRY_DSN` は **Vercel 本番に設定済み**。サーバー側の `SENTRY_DSN` はバンドルに出ないため外部からは確認できないが、通常セットで設定するものなので入っている可能性が高い。Vercel の env 画面で 1 度だけ目視確認すれば確定する（server 側が未設定なら、route handler からの `Sentry.captureException`＝operator 系アラートと persist 失敗アラートが no-op のままになる）。
 2. **アプリアイコン選定**。`docs/brand/` に 3 案（A: 青地＋吹き出し＋太陽 / B: 国旗＋吹き出し＋太陽 / C: 太陽マーク）。B を推奨済み。選定後 Facebook アプリ設定へ。
 3. **Messenger テスター登録**（アプリの役割 → テスター）。審査なしで実ユーザーに使わせる道。
 4. **飲食店・専門家の実データ投入**。専門家データは P2-N（マッチング）の前提。
