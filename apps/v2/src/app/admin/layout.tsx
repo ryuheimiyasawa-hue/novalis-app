@@ -3,6 +3,7 @@ import { requireEditor } from "@/lib/auth/require-admin";
 import { AuthError } from "@/lib/auth/errors";
 import { createClient } from "@/lib/supabase/server";
 import { AdminNav } from "@/components/admin/nav";
+import { MigrationDriftBanner } from "@/components/admin/migration-drift-banner";
 import { Toaster } from "@/components/ui/sonner";
 
 // /admin/* — operator console for editors and admins.
@@ -43,7 +44,10 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen flex">
       <AdminNav role={role} displayName={profile?.display_name ?? null} />
-      <main className="flex-1 p-6 bg-background">{children}</main>
+      <main className="flex-1 p-6 bg-background">
+        <MigrationDriftBanner />
+        {children}
+      </main>
       <Toaster />
     </div>
   );

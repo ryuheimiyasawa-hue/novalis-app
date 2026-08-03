@@ -14,7 +14,8 @@
     "e2e": "playwright test",
     "clean": "rm -rf .next",
     "reindex": "tsx scripts/reindex.ts",
-    "purge:anon": "tsx scripts/purge-anon-users.ts"
+    "purge:anon": "tsx scripts/purge-anon-users.ts",
+    "check:migrations": "tsx scripts/check-migrations.ts"
   },
   "dependencies": {
     "@google/genai": "^1.52.0",
