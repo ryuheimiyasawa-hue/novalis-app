@@ -8,7 +8,7 @@ _前提: M0 セキュリティ恒久化を最優先で先行(ユーザ承認済 
 すべて feature ブランチ → PR → CI → merge → 本番デプロイ済み。詳細は `docs/handoff.md` §0。
 
 - ✅ **P0-A** セキュリティ恒久化マイグレーション 008（本番適用・検証済み）
-- 🟡 **P0-B** Supabase CLI 移行 → 保留（MCP `apply_migration` で履歴記録が機能。baseline 整合は CI 拡張時）
+- ✅ **P0-B** 未適用検知（2026-08-03、PR #21）。001-011 の baseline 登録済み、マニフェスト＋実行時突合で検知。CLI 全面移行は不採用（理由は §P0-B 実施結果）
 - ✅ **P0-C** 認証ハードニング（パスワード長8・漏洩PW保護・匿名purge CLI）
 - ✅ **P1-D** PII安全Sentry＋persist失敗アラート（コード反映済み。**SENTRY_DSN 設定待ち**で起動）
 - ✅ **P1-E** Next.js 16.2.9＋間接high解消＋audit ブロッキング化
@@ -135,6 +135,16 @@ Phase 2 完了とは、内製で作り切れる範囲(M0-M2)が本番稼働し�
 成果物: `config.toml`、`health-check.ts`、CI の migration 検証ジョブ、`tasks/vercel-deploy-checklist.md` の migration 節更新。
 
 完了基準: `schema_migrations` に 001-008 が baseline 登録され、未適用検知ジョブが緑。
+
+**実施結果(2026-08-03、PR #21)**: 未適用検知は完了、CLI 移行は不採用。
+
+baseline 登録は完了(001-011 が `schema_migrations` に揃った)。ただし登録前に本番カタログで実在を 13 項目検証しており、`migration repair` を無検証で流してはいない。010 の履歴名も数字接頭辞ありに揃えた。
+
+検知の実装は当初案(CI から本番 DB へ接続)を採らず、シークレット不要の 2 段構成にした。CI は `tests/unit/migration-manifest.test.ts` でマニフェストとファイル実体を突合し(マージ前にブロック)、実行時はアプリが既存の service-role キーで履歴テーブルと突合して admin 全ページにバナーを出す(`src/lib/supabase/migration-drift.ts`)。理由は、既存 CI が「シークレット不要」を明示的な設計方針として守っており、それを壊す価値が検知タイミングの前倒し分に見合わないため。検知はマージ前ではなくデプロイ直後になるが、実際の事故(Lesson 24 は 8 日間放置)に効くのは「誰も見ていない期間を潰すこと」の方。
+
+`health-check.ts`(起動時の必須カラム assertion)は未実装のまま残す。migration 単位の突合で Lesson 24/27 の再発経路は塞がったが、**手作業 DDL による部分適用は依然として検知できない**(履歴行だけ残り DDL が欠ける)。カラム単位の assertion はその穴に効くので、手作業適用を再開する場合は必須。
+
+Supabase CLI 全面移行(`config.toml` + `db push`)は引き続き不採用。MCP `apply_migration` がトランザクショナルかつ履歴記録も行うため、CLI を足す利得が小さい。
 
 #### P0-C 認証ハードニング + 匿名 purge(1.5人日)
 

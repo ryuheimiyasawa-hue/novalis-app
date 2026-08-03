@@ -14,7 +14,14 @@ Phase 2 の実行計画と各項目の状態は `docs/phase2-masterplan.md` が�
 - **PR #18 マージ済み（本番反映済み）**。Next.js 16.2.11。マージ後に本番で proxy の認可を実測確認した: 未認証の `/admin`・`/admin/conversations`・`/ja/chat`・`/ja/dashboard` はすべて `/ja/login?redirect=...` へ 307、`/ja` と `/ja/contact` は 200、`x-middleware-subrequest` 系のバイパスヘッダを付けても素通りしない、API は 401。**認可バイパスは塞がった**。
 - **PR #19 マージ済み（本番反映済み、`9199f81`）**。P2-B2 operator 介入。設計書は `docs/phase2-b2-operator-design.md`（design-gate 10項目・承認済み）。デプロイ後に本番で確認: 公開ページ 200、`/admin/conversations` と `/ja/chat` はログインへ 307、新規 API 4 本（updates / takeover / release / messages）はいずれも未認証で 401。
 - **migration 010 適用済み**（Supabase MCP、`schema_migrations` に記録あり）。`operator_takeover` / `operator_release` の 2 関数。
-- **UI の実動作確認は未実施**。ローカルに本番 env が無く認証付き E2E が組めないため、「takeover → 利用者側に運営返信が出る → release で AI 応答が戻る」はブラウザ手動確認が残っている。適用直後の DB は held 0 / 証跡 0 / operator メッセージ 0。
+- **P2-B2 の UI 実動作確認は完了**。本番で takeover → 運営返信 → release まで通し、`operator_takeover_logs` に takeover と release が同一担当者で 1 件ずつ残ることを確認済み。未確認は 2 点のみ（運営対応中に利用者が発言したときの案内表示、release 後に AI が再開すること）。
+- **PR #21 `phase2/p0b-migration-drift`（レビュー待ち）**。P0-B 未適用検知。migration 011 は本番適用済み。001〜007 は本番カタログで実在を 13 項目検証したうえで `schema_migrations` に baseline 登録済み（現在 001-011 の 11 件が揃っている）。010 の履歴名も `010_operator_takeover_rpc` に揃えた。
+
+### マイグレーション運用（P0-B 以降のルール）
+
+マイグレーションを足すときは 3 つセットで行う。ファイルを `apps/v2/supabase/migrations/` に置く、`src/lib/supabase/migration-manifest.ts` の `EXPECTED_MIGRATIONS` に basename を足す、本番に適用する。マニフェストを忘れると CI が落ち、適用を忘れると admin の全ページに赤いバナーが出る。手元では `pnpm check:migrations` で確認できる（DB env が空でもマニフェスト側だけは検証される）。
+
+**この仕組みが守れないもの**: 「マイグレーションが走った」ことは保証するが「DDL が存在する」ことは保証しない。Lesson 24 のような部分適用は履歴行だけ残って検知をすり抜ける。いま守っているのは MCP `apply_migration` がトランザクショナルであることなので、**SQL Editor で手作業適用をするなら従来どおり `information_schema` / `pg_catalog` で個別 verify が必須**。
 - 残り high 3 件（brace-expansion ×2 / sharp）は上流にパッチが無く据置き。CI の audit 赤はこれ。
 
 ### P2-B2 で決めたこと（次に触るとき前提になる）
@@ -40,7 +47,7 @@ Phase 2 の実行計画と各項目の状態は `docs/phase2-masterplan.md` が�
 
 ### ユーザー側の宿題（着手順）
 
-1. **Sentry DSN 設定**（未了・優先）。コードは入っているが `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` が未設定で、**本番エラーが誰にも通知されていない**。
+1. ~~**Sentry DSN 設定**（未了・優先）~~ → **記述が古い。2026-08-03 に実測で訂正**。本番のクライアントバンドル（`/_next/static/` の全 chunk を走査）に `o<org>.ingest.us.sentry.io/4511360248709120` 形式の DSN が埋め込まれており、`NEXT_PUBLIC_SENTRY_DSN` は **Vercel 本番に設定済み**。サーバー側の `SENTRY_DSN` はバンドルに出ないため外部からは確認できないが、通常セットで設定するものなので入っている可能性が高い。Vercel の env 画面で 1 度だけ目視確認すれば確定する（server 側が未設定なら、route handler からの `Sentry.captureException`＝operator 系アラートと persist 失敗アラートが no-op のままになる）。
 2. **アプリアイコン選定**。`docs/brand/` に 3 案（A: 青地＋吹き出し＋太陽 / B: 国旗＋吹き出し＋太陽 / C: 太陽マーク）。B を推奨済み。選定後 Facebook アプリ設定へ。
 3. **Messenger テスター登録**（アプリの役割 → テスター）。審査なしで実ユーザーに使わせる道。
 4. **飲食店・専門家の実データ投入**。専門家データは P2-N（マッチング）の前提。

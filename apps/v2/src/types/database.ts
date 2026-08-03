@@ -609,6 +609,12 @@ export type Database = {
           conv_operator_started_at: string | null;
         }>;
       };
+      // P0-B. Reads supabase_migrations.schema_migrations, which lives
+      // outside the schemas PostgREST serves directly.
+      applied_migrations: {
+        Args: Record<string, never>;
+        Returns: Array<{ name: string }>;
+      };
       operator_release: {
         Args: {
           p_conversation_id: string;

@@ -1,12 +1,22 @@
 name: CI
 
 # Quality gate for the Novalis monorepo (apps/v2). Runs on every PR to main
-# and on direct pushes to main. The `quality` job is the blocking gate
-# (lint / typecheck / test / build); `audit` is report-only until P1-E lands
-# the Next.js security patch, at which point it flips to blocking.
+# and on direct pushes to main.
 #
-# Branch protection (require the `quality` check before merge) is configured
-# in the GitHub repo settings, not here.
+# Only `quality` (lint / typecheck / test / build) is a required check in
+# branch protection, so `audit` failing does NOT block a merge — it is red
+# whenever an unfixable upstream advisory is outstanding. Read what it
+# actually lists every time before waving it through; Lesson 29 is exactly
+# the case where "the audit is always red" hid four Next.js advisories,
+# one of them an authorization bypass.
+#
+# No secrets by design: the test suite self-skips live-API tests, and the
+# build reads env lazily at runtime. Migration drift is checked without
+# database access — tests/unit/migration-manifest.test.ts compares the
+# manifest against supabase/migrations/, and the running app compares that
+# manifest against the database (P0-B).
+#
+# Branch protection itself is configured in the GitHub repo settings.
 
 on:
   pull_request:
@@ -66,8 +76,12 @@ jobs:
           cache: pnpm
       - name: Install
         run: pnpm install --frozen-lockfile
-      # Blocking as of P1-E: all high-severity advisories are resolved
-      # (Next.js 16.2.9 + pnpm overrides forcing patched ws / protobufjs /
-      # hono under @google/genai). Fails the build on any new high.
+      # Report-only in practice (not a required check). Currently red on
+      # three advisories with no compatible upstream fix: brace-expansion
+      # (patched only in 5.x, which is ESM-only and breaks eslint and the
+      # Sentry bundler plugin — tried and reverted in PR #14) and sharp
+      # (next declares optionalDependencies sharp ^0.34.5, so forcing 0.35
+      # violates the peer contract). Anything else appearing here is new
+      # and must be triaged, not assumed known.
       - name: Audit (production deps, high+)
         run: pnpm audit --prod --audit-level high
