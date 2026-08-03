@@ -12,8 +12,9 @@ Phase 2 の実行計画と各項目の状態は `docs/phase2-masterplan.md` が�
 ### 直近セッションで動いたこと
 
 - **PR #18 マージ済み（本番反映済み）**。Next.js 16.2.11。マージ後に本番で proxy の認可を実測確認した: 未認証の `/admin`・`/admin/conversations`・`/ja/chat`・`/ja/dashboard` はすべて `/ja/login?redirect=...` へ 307、`/ja` と `/ja/contact` は 200、`x-middleware-subrequest` 系のバイパスヘッダを付けても素通りしない、API は 401。**認可バイパスは塞がった**。
-- **PR #19 `phase2/p2b2-operator-takeover`（レビュー待ち）**。P2-B2 operator 介入。設計書は `docs/phase2-b2-operator-design.md`（design-gate 10項目・承認済み）。
-- **migration 010 は本番 DB に適用済み**（Supabase MCP、`schema_migrations` に記録あり）。`operator_takeover` / `operator_release` の 2 関数。**PR #19 がマージ前でも本番に関数だけ存在する状態**だが、呼び出すコードが未デプロイなので無害。
+- **PR #19 マージ済み（本番反映済み、`9199f81`）**。P2-B2 operator 介入。設計書は `docs/phase2-b2-operator-design.md`（design-gate 10項目・承認済み）。デプロイ後に本番で確認: 公開ページ 200、`/admin/conversations` と `/ja/chat` はログインへ 307、新規 API 4 本（updates / takeover / release / messages）はいずれも未認証で 401。
+- **migration 010 適用済み**（Supabase MCP、`schema_migrations` に記録あり）。`operator_takeover` / `operator_release` の 2 関数。
+- **UI の実動作確認は未実施**。ローカルに本番 env が無く認証付き E2E が組めないため、「takeover → 利用者側に運営返信が出る → release で AI 応答が戻る」はブラウザ手動確認が残っている。適用直後の DB は held 0 / 証跡 0 / operator メッセージ 0。
 - 残り high 3 件（brace-expansion ×2 / sharp）は上流にパッチが無く据置き。CI の audit 赤はこれ。
 
 ### P2-B2 で決めたこと（次に触るとき前提になる）
