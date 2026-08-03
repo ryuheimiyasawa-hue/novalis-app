@@ -346,9 +346,13 @@ export async function persistResult(args: {
  *   actual AI conversation, so they are filtered out (including them
  *   would prime the model to escalate again and confuse the dialogue
  *   shape).
- * - limit defaults to 10 turns (≈5 user + 5 assistant). Calibrated so
- *   classifier + RAG context + history together stay well under
- *   Gemini 2.5 Flash's 1M-token window with budget headroom.
+ * - the window is a character budget, not a turn count. A fixed 10 rows
+ *   truncated conversations that were nowhere near any token limit —
+ *   production's longest thread is 1,228 characters in total, roughly
+ *   400 tokens against Gemini 2.5 Flash's 1M-token window — and P2-B2
+ *   made it worse by letting operator turns compete for the same ten
+ *   slots, so a few staff replies could push the user's original
+ *   question out of view. See HISTORY_MAX_CHARS.
  * - returns [] when conversationId is null, when the conversation has
  *   no prior turns, or when the fetch fails (we never want a history
  *   error to break the chat reply — degrade gracefully to single-turn).
@@ -359,9 +363,11 @@ export async function persistResult(args: {
  */
 export async function loadConversationHistory(
   conversationId: string | null,
-  limit = 10,
+  opts: { maxChars?: number; maxRows?: number } = {},
 ): Promise<HistoryTurn[]> {
   if (!conversationId) return [];
+  const maxChars = opts.maxChars ?? HISTORY_MAX_CHARS;
+  const maxRows = opts.maxRows ?? HISTORY_MAX_ROWS;
   const admin = getAdminClient();
   // Pull the most-recent `limit` rows in DESC order to bound the
   // result set, then flip back to chronological for the model.
@@ -381,7 +387,7 @@ export async function loadConversationHistory(
     .eq("conversation_id", conversationId)
     .in("role", ["user", "assistant", "operator"])
     .order("created_at", { ascending: false })
-    .limit(limit);
+    .limit(maxRows);
   if (error) {
     console.warn(
       `[chat] loadConversationHistory failed (degrading to single-turn): ${error.message}`,
@@ -389,7 +395,63 @@ export async function loadConversationHistory(
     return [];
   }
   if (!data || data.length === 0) return [];
-  return toHistoryTurns(data);
+  return toHistoryTurns(selectHistoryWindow(data, maxChars));
+}
+
+/**
+ * Character budget for the history handed to the model.
+ *
+ * 12,000 characters is roughly 4,000 tokens for the mixed Japanese /
+ * English / Tagalog text this app sees, and history goes to three calls
+ * per user message (classifier, smalltalk, answer) — so about 12,000
+ * input tokens per message at the ceiling, well under a yen at Flash
+ * pricing. It is also an order of magnitude above production's longest
+ * conversation, which means today every thread fits whole.
+ *
+ * A budget rather than a turn count because turns vary from "はい" to
+ * 2,000 characters; counting rows charges the same for both and cuts
+ * conversations that cost nothing to keep.
+ *
+ * When real conversations start reaching this ceiling — which is the
+ * point where turns genuinely have to be dropped rather than merely
+ * counted — summarising the older half becomes worth its cost. Not
+ * before: that would add an LLM call, a failure path, and a stored
+ * derivative of user speech for a case that does not yet occur.
+ */
+export const HISTORY_MAX_CHARS = 12_000;
+
+/**
+ * Hard ceiling on rows fetched, so one pathological thread cannot pull
+ * an unbounded result set out of the database before the budget is even
+ * applied. Not the primary limit — HISTORY_MAX_CHARS is.
+ */
+export const HISTORY_MAX_ROWS = 60;
+
+/**
+ * Take the most recent rows that fit the character budget.
+ *
+ * Input and output are both newest-first. The oldest surviving turn is
+ * whichever one the budget stops at, so context is lost from the far end
+ * of the conversation — the same direction as before, just much later.
+ *
+ * The newest row is always kept even when it alone exceeds the budget:
+ * returning nothing would silently drop the user's immediate context and
+ * is worse than one oversized turn (which MAX_INPUT_CHARS already caps
+ * at 2,000 characters for user messages anyway).
+ */
+export function selectHistoryWindow<T extends { content: string }>(
+  rowsNewestFirst: readonly T[],
+  maxChars: number,
+): T[] {
+  const kept: T[] = [];
+  let used = 0;
+  for (const row of rowsNewestFirst) {
+    const cost = row.content.length;
+    if (kept.length > 0 && used + cost > maxChars) break;
+    kept.push(row);
+    used += cost;
+  }
+  return kept;
 }
 
 /**
