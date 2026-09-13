@@ -67,6 +67,35 @@ const JA_PATTERNS: Pattern[] = [
   // Money owed / unpaid — typically a personal claim.
   { keyword: "滞納", re: /滞納/ },
   { keyword: "未払い", re: /未払い/ },
+  // --- 税務 (lawyer review 2026-08-10, §3-3) -------------------------
+  // 税理士法は他士業より線が厳しい。経費判定・所得区分の振り分け・申告
+  // 義務の有無の判定は独占業務に抵触すると明示された。逆に、期限・提出
+  // 先・提出方法・必要書類の案内と、確定申告と年末調整の制度上の違いの
+  // 説明は一般情報として返してよい。だからここで拾うのは「判定を求める
+  // 形」だけで、「いつ・どこに・何を」を尋ねる形は素通しさせる。
+  { keyword: "経費になりますか", re: /経費に(なり|でき|計上)/ },
+  { keyword: "経費で落とせますか", re: /経費で落と/ },
+  { keyword: "申告が必要ですか", re: /申告(が|は)必要/ },
+  { keyword: "申告しないと", re: /申告(を)?し(ないと|なくて)/ },
+  { keyword: "扶養に入れますか", re: /扶養に(入れ|入り|なれ)/ },
+  {
+    keyword: "所得区分の判定",
+    re: /(雑所得|事業所得|給与所得|一時所得)(に|です)/,
+  },
+
+  // --- 個別紛争トリガー (lawyer review 2026-08-10, §3-4) -------------
+  // 独占業務の外でも弁護士法72条の「法律事件」に当たりうる、と具体例を
+  // 列挙された類型。退去強制手続の係属、在留不許可処分を争う、離婚に伴
+  // う配偶者の在留資格、解雇の有効性、未払残業代の計算、労災の不支給決
+  // 定への不服。解雇と離婚は上の既存パターンで既に拾えているため、ここ
+  // では残りを埋める。
+  { keyword: "退去強制", re: /退去強制|強制送還/ },
+  { keyword: "収容", re: /収容され|入管に収容/ },
+  { keyword: "不許可・不交付", re: /不許可|不交付|不認可/ },
+  { keyword: "不服申立", re: /審査請求|異議申(立|し立)|不服申(立|し立)/ },
+  { keyword: "残業代", re: /残業代/ },
+  { keyword: "労災", re: /労災/ },
+  { keyword: "調停・訴訟", re: /調停|訴訟|裁判/ },
 ];
 
 const EN_PATTERNS: Pattern[] = [
@@ -103,6 +132,33 @@ const EN_PATTERNS: Pattern[] = [
     keyword: "how much do/will I",
     re: /\bhow\s+much\s+(do|will|should)\s+i\b/i,
   },
+  // --- Tax determinations (lawyer review 2026-08-10, §3-3) ----------
+  // 税理士法 draws a harder line than the other professions: deciding
+  // what is deductible, which income category something falls into,
+  // and whether a given person must file are all reserved work.
+  // Explaining deadlines, where to file, how to file, and what
+  // documents are needed stays fine, so these anchor on the
+  // determination verbs rather than on the word "tax".
+  {
+    keyword: "can I deduct/expense",
+    re: /\bcan\s+i\s+(deduct|expense|write\s+off|claim)\b/i,
+  },
+  { keyword: "is it deductible", re: /\b(tax[- ]?)?deductible\b/i },
+  {
+    keyword: "do I have to file",
+    re: /\b(do|does)\s+i\s+(have\s+to|need\s+to)\s+file\b|\bam\s+i\s+required\s+to\s+file\b/i,
+  },
+  { keyword: "am I a dependent", re: /\bam\s+i\s+(a\s+)?dependent\b/i },
+
+  // --- Individual dispute triggers (lawyer review 2026-08-10, §3-4) --
+  { keyword: "deportation", re: /\b(deport(ation|ed)?|removal\s+order)\b/i },
+  { keyword: "detained", re: /\b(detained|detention\s+cent(er|re))\b/i },
+  { keyword: "overtime pay", re: /\bovertime\s+pay\b/i },
+  {
+    keyword: "workers compensation",
+    re: /\bworkers?[' ]?\s*comp(ensation)?\b|\blabou?r\s+accident\b/i,
+  },
+  { keyword: "appeal a decision", re: /\bappeal\s+(the|this|a|my)\s+(decision|denial|rejection|ruling)\b/i },
 ];
 
 const TL_PATTERNS: Pattern[] = [
@@ -117,6 +173,16 @@ const TL_PATTERNS: Pattern[] = [
   { keyword: "tinanggal sa trabaho", re: /\btinanggal\s+sa\s+trabaho\b/i },
   { keyword: "diniborsiyo", re: /\bdini[bv]orsiyo\b/i },
   { keyword: "ipa-extend", re: /\bipa-?extend\b/i },
+  // --- Tax determinations (lawyer review 2026-08-10, §3-3) ----------
+  { keyword: "kailangan ko bang mag-file", re: /\bkailangan\s+ko\s+bang\s+mag-?file\b/i },
+  { keyword: "buwis", re: /\bbuwis\b/i },
+  { keyword: "dependent/umaasa", re: /\bdependent\b/i },
+
+  // --- Individual dispute triggers (lawyer review 2026-08-10, §3-4) --
+  { keyword: "deport", re: /\bdeport(ed|asyon)?\b/i },
+  { keyword: "overtime", re: /\bovertime\b/i },
+  { keyword: "tinanggihan", re: /\btinanggihan\b/i },
+  { keyword: "kaso sa korte", re: /\b(korte|husgado|demanda)\b/i },
 ];
 
 const PATTERNS_BY_LOCALE: Record<WhitelistLocale, Pattern[]> = {

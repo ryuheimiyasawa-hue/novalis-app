@@ -1,6 +1,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { hasLocale } from "next-intl";
 import { routing } from "@/lib/i18n/routing";
@@ -37,9 +38,11 @@ export default async function TermsPage({
           label={tCommon("language")}
         />
       </div>
-      <article className="max-w-3xl mx-auto space-y-4 leading-relaxed [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mt-2 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mt-6 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_a]:underline">
+      <article className="max-w-3xl mx-auto space-y-4 leading-relaxed [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mt-2 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mt-6 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_a]:underline [&_table]:w-full [&_table]:text-sm [&_table]:border-collapse [&_th]:border [&_th]:border-border [&_th]:bg-muted [&_th]:p-2 [&_th]:text-left [&_th]:align-top [&_td]:border [&_td]:border-border [&_td]:p-2 [&_td]:align-top [&_table]:block [&_table]:overflow-x-auto">
         <h1 className="sr-only">{t("termsTitle")}</h1>
-        <ReactMarkdown>{content}</ReactMarkdown>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml>
+          {content}
+        </ReactMarkdown>
       </article>
     </main>
   );
