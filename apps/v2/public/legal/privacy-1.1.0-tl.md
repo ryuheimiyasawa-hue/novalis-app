@@ -125,5 +125,5 @@ Email: ryuhei.miyasawa@novalisgroup.biz
 Bersyon: 1.1.0
 Pinagtibay: Mayo 8, 2026
 Huling binago: Agosto 20, 2026
-Bisa mula: Setyembre 1, 2026
+Bisa mula: Setyembre 28, 2026
 Novalis Inc.
