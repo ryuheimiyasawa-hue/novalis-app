@@ -1,16 +1,31 @@
 # 弁護士監修回答（2026-08-10 受領）— 対応事項と未決事項
 
 _原本: `~/Downloads/Novalis弁護士監修依頼_軽量版＋追記.docx`_
-_状態: **文言・法務文書・判定ロジックは完了（ブランチ `legal/lawyer-review-1.1`）。3-1 と規約矛盾3点は 2026-09-13 に決着。同意フロー（2-5 / 2-6）は Q1〜Q6 回答済みで設計承認待ち。**_
+_状態: **2026-09-13 時点で同意フロー 1.1 まで実装完了（ブランチ `legal/lawyer-review-1.1`、未マージ）。migration 012 本番未適用。1.1.0 は未有効化（施行日未定）。**_
 
-## 次回再開時にやること (2026-09-13 更新)
+## 次回再開時にやること (2026-09-13 実装後)
 
-作業ツリーの状態: 08-20 の作業分と 09-13 の規約修正は **ブランチ `legal/lawyer-review-1.1` にコミット済み**（main は未変更、PR 未作成）。596 テスト・typecheck・lint green。
+ブランチ `legal/lawyer-review-1.1`。同意フロー 1.1 の実装まで完了（未マージ、PR 未作成）。615 テスト・typecheck・lint・build green。migration 012 は PGlite 上で 21 項目検証済み、**本番未適用**。
 
-1. `tasks/consent-1.1-design.md` の設計全体について宮澤の承認を得る（Q1〜Q6 は回答済み）
-2. 承認後、migration（consent_logs 独立化 + record_consent RPC + RLS 変更）から実装する。migration の本番適用は宮澤手動
-3. 実装完了後に施行日を決め、1.1.0 の 6 ファイル末尾と `lib/legal/versions.ts` を同時に更新する
-4. 既存20名への事前告知（アプリ外の手作業）
+**本番反映の順番（逆にすると新規オンボーディングが止まる）:**
+
+1. migration `012_consent_logs_independent.sql` を本番に適用する
+2. 適用直後に、ファイル末尾の VERIFICATION の (0)〜(d) を1本ずつ流して実測確認する（Lesson 24 / 27）
+3. その後にコードをデプロイする（PR マージ）
+   - 1 と 3 の間は旧コードが動くが、トリガーが subject_kind を埋めるので壊れない
+   - 3 を先にやると、record_consent が無いので /api/onboarding と /api/consent が 500 になる
+4. デプロイ直後の挙動: 同意ログが無いのに onboarded 済みの本登録ユーザー1名（と同様の匿名ユーザー）は /consent に案内される。1.0.0 のまま同意済みの人は何も変わらない
+
+**1.1.0 の有効化（別作業、施行日決定後）:**
+
+5. 施行日を決め、1.1.0 の 6 ファイル末尾と `lib/legal/versions.ts` と `tests/unit/legal-docs.test.ts` の PENDING_VERSION を同時に更新する
+6. 既存の本登録ユーザー（実測 5 名）へ事前告知（アプリ外の手作業）。有効化した瞬間に全員が /consent に案内され、Messenger 経由でも再同意まで AI は応答しない
+
+**残課題:**
+
+- Messenger の再同意案内文は日本語のみ（既存の連携案内と同じ）。英語・タガログ語併記は未対応
+- proxy 本体（リダイレクトの配線）には単体テストが無い。判定ロジック `gateDecision` は `tests/unit/consent-gate.test.ts` で固定
+- migration の PGlite 検証スクリプトはリポジトリ外（CI 化は未対応）
 
 ## 進捗 (2026-08-20)
 

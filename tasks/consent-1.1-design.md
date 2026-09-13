@@ -194,3 +194,27 @@ N+1 は発生しない（1ユーザー1クエリ）。データ件数が10倍（
 - ~~Q1 / Q2 / Q3 / Q5 / Q6~~ 2026-09-13 回答済み（冒頭の回答まとめ）
 - ~~弁護士の原本に残る3つの矛盾~~ 2026-09-13 当方で修正、テストで固定
 - ~~3-1 弁護士の相談先~~ 2026-09-13 決着。現行設計のまま、弁護士から金銭を受け取らない条件で特定弁護士の掲載可。同意フローとは独立
+
+---
+
+## 11. 改訂 (2026-09-13 実装前の実測を受けて) **承認済み 2026-09-13、実装済み**
+
+### 実測で分かったこと
+
+- 本番 auth.users は本登録 5 名 + 匿名 15 名（「既存20名」はこの合計）。consent_logs 15 行はすべて 1.0.0。内訳は本登録 2 名 2 行、匿名 12 名 13 行。§2-1 の「現状 anon は1行も無い」は誤り
+- 本登録 5 名のうち、onboarded_at があるのに同意ログが無い人が 1 名、未オンボーディングが 2 名
+- 匿名はすでに実際には `/onboarding` を通って同意している（trigger が profiles を先に作るため、ensureProfile の「匿名は onboarded 済みにする」分岐がほぼ走らない）。ただしその分岐が走れば同意を飛ばせる
+- 実際に同意を書いているのは `/api/onboarding`。`/api/consent` は呼ばれていない
+- Gemini に届く経路は `/api/chat/send` と Messenger webhook の 2 つ。webhook はセッションが無く proxy も素通しなので、画面側のゲートだけでは再同意前のユーザーが Messenger 経由で Gemini に届く（Lesson 30）
+
+### 変更点
+
+1. **データモデルを簡素化。** `auth_user_id` 列の新設と二重書きをやめ、`user_id` の FK だけ外す。列名はそのまま（auth user id を指す）。`subject_kind` は `auth.users.is_anonymous` から埋める。`terms_opened` / `privacy_opened` を追加。移行も読み取り側の変更も不要になり、ロールバックは FK を張り直すだけ
+2. **RLS は緩めずに締める。** `consent_logs_self_insert` を削除する。クライアントから直接書く経路は存在せず、書き込みは service_role の `record_consent` RPC のみ。§2-3 の「述語を外す」は、匿名 JWT から直接 INSERT で証跡を汚せる穴を開け直すので不採用
+3. **ゲートは 2 層。**
+   - 画面: proxy の既存 `checkOnboarded`（1 クエリ）を `consent_gate_state()` RPC（同じく 1 クエリ、RLS 下で自分の行だけ）に置き換え、未オンボーディングは `/onboarding`、版が古ければ `/consent` へ。DB 障害時は従来どおり fail-open。クエリ数は増えないので Lesson 7 の負債は悪化しない
+   - API: `/api/chat/send` と Messenger webhook で送信前に最新版への同意を確認する。こちらは **fail-closed**（確認できなければ Gemini に送らない）。webhook は固定文言で再同意ページへ案内
+4. **匿名の同意漏れを塞ぐ。** ensureProfile の匿名 onboarded 自動付与を削除し、匿名も必ず同意を通す
+5. 再同意画面 `/[locale]/consent` を新設（チェック3つ、都道府県なし）。`/api/onboarding` と `/api/consent` は両方 `record_consent` RPC を使い、版不一致は 409
+
+6. **本番反映の順番:** migration 012 → 実測 verify → コードのデプロイ。migration が先でも旧コードが壊れないよう、`subject_kind` を省略した INSERT をトリガーで埋める（PGlite で確認済み）
