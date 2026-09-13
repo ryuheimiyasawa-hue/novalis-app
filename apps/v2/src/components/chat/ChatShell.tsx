@@ -308,9 +308,9 @@ export function ChatShell({
             (payload as { error?: { code?: string } } | null)?.error?.code ===
             "CONSENT_REQUIRED"
           ) {
-            // Terms changed while this tab was open. Full navigation, not
-            // router.push, so the proxy re-evaluates the gate.
-            window.location.assign(`/${locale}/consent`);
+            // Terms changed while this tab was open. Client navigation still
+            // goes through the proxy, which re-evaluates the gate on arrival.
+            router.push(`/${locale}/consent`);
           } else {
             const code =
               (payload as { error?: { code?: string } } | null)?.error?.code ??
