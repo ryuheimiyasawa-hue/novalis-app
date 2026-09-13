@@ -92,8 +92,6 @@ Maaaring baguhin ng Kumpanya ang Mga Tuntuning ito alinsunod sa Artikulo 548-4 n
 
 Sa pagbabago ng Mga Tuntuning ito sa ilalim ng naunang talata, itatakda ng Kumpanya ang petsa ng pagkakabisa ng binagong Mga Tuntunin at, bago dumating ang petsang iyon, ipaaalam nito ang katotohanan ng pagbabago, ang nilalaman ng binagong Mga Tuntunin, at ang petsa ng pagkakabisa sa pamamagitan ng pag-post sa loob ng Serbisyo, in-app na abiso, email, o iba pang naaangkop na paraan.
 
-Maaaring baguhin ng Kumpanya ang Mga Tuntuning ito anumang oras nang walang abiso sa mga Gumagamit kung itinuring nitong kinakailangan.
-
 Ang mga makabuluhang susog ay iaanunsyo nang maaga sa pamamagitan ng Serbisyo o sa pamamagitan ng email.
 
 ## Artikulo 12. Pangangasiwa ng Personal na Impormasyon
@@ -112,7 +110,7 @@ Hindi maaaring isalin o sangla ng mga Gumagamit ang kanilang posisyon sa ilalim 
 
 Ang Mga Tuntuning ito ay pinamamahalaan ng batas ng Japan.
 
-Sa kaganapan ng isang hindi pagkakaunawaan tungkol sa Serbisyo, ang korte na may hurisdiksyon sa lokasyon ng pinunong tanggapan ng Kumpanya ay magiging eksklusibo at karagdagang napagkasunduang korte ng hurisdiksyon.
+Sa kaganapan ng isang hindi pagkakaunawaan tungkol sa Serbisyo, ang korte na may hurisdiksyon sa lokasyon ng pinunong tanggapan ng Kumpanya ay magiging karagdagang napagkasunduang korte ng hurisdiksyon.
 
 ---
 

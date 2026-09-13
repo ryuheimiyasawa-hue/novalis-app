@@ -92,8 +92,6 @@ The Company may amend these Terms pursuant to Article 548-4 of the Civil Code wh
 
 When amending these Terms under the preceding paragraph, the Company shall determine the date on which the amended Terms take effect and, before that date arrives, shall give notice of the fact of the amendment, the content of the amended Terms, and their effective date by posting within the Service, by in-app notification, by email, or by other appropriate means.
 
-The Company may amend these Terms at any time without notice to Users if it deems it necessary.
-
 Material amendments will be announced in advance through the Service or by email.
 
 ## Article 12. Handling of Personal Information
@@ -112,7 +110,7 @@ Users may not assign or pledge their position under the use contract or any righ
 
 These Terms shall be governed by Japanese law.
 
-In the event of a dispute regarding the Service, the court having jurisdiction over the location of the Company's head office shall be an exclusive and additional agreed court of jurisdiction.
+In the event of a dispute regarding the Service, the court having jurisdiction over the location of the Company's head office shall be an additional agreed court of jurisdiction.
 
 ---
 

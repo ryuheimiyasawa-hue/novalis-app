@@ -104,10 +104,6 @@ Kung matuklasan na ang isang gumagamit ay wala pang 18 taong gulang, maaaring ka
 
 ## Artikulo 11. Mga Pagbabago sa Patakaran sa Privacy
 
-Ang nilalaman ng Patakarang ito ay maaaring baguhin nang hindi naaabisuhan ang mga gumagamit, maliban sa mga bagay na ibinibigay nang naiiba ng batas o sa Patakarang ito.
-
-Ang nirebisang Patakaran ay magkakabisa mula sa oras na ito ay i-post sa site na ito.
-
 Maaaring baguhin ng Kumpanya ang Patakarang ito bilang tugon sa mga pagbabago sa batas o kung kinakailangan.
 
 Kapag binago ng Kumpanya ang layunin ng paggamit ng personal na impormasyon, gagawin nito ito sa loob ng saklaw na makatwirang kinikilalang may kaugnayan sa layunin ng paggamit bago ang pagbabago, at ipapaalam nito sa indibidwal ang binagong layunin ng paggamit o ipapahayag ito sa loob ng Serbisyo.

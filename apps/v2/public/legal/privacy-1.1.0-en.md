@@ -104,10 +104,6 @@ If a user is found to be under the age of 18, the Company may cancel that user's
 
 ## Article 11. Changes to the Privacy Policy
 
-The contents of this Policy may be changed without notifying users, except for matters provided otherwise by law or in this Policy.
-
-The revised Policy will take effect from the time it is posted on this site.
-
 The Company may change this Policy in response to changes in law or as otherwise necessary.
 
 Where the Company changes the purpose of use of personal information, it will do so within a scope reasonably recognised as having relevance to the purpose of use before the change, and will notify the individual of the changed purpose of use or announce it within the Service.

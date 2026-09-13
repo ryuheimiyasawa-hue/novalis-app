@@ -93,3 +93,35 @@ describe("the Article 5 table renders as a table", () => {
     expect(src).toContain("remarkPlugins={[remarkGfm]}");
   });
 });
+
+// The lawyer's returned docx kept leftovers from the old template next to
+// the clauses that replaced them: a "change without notice" paragraph
+// beside the Civil Code 548-4 notice duty, "exclusive" beside the
+// additional-jurisdiction rewrite. Either leftover would undercut the
+// notice we owe users before 1.1.0 takes effect. Checks are scoped to
+// the article, because suspending the service (terms Art. 6/10) may
+// legitimately happen without notice.
+function article(body: string, n: number) {
+  const heading = new RegExp(`^## (第${n}条|Article ${n}\\.|Artikulo ${n}\\.)`, "m");
+  const start = body.search(heading);
+  if (start < 0) throw new Error(`article ${n} not found`);
+  const rest = body.slice(start + 3);
+  const end = rest.search(/^(## |---)/m);
+  return end < 0 ? rest : rest.slice(0, end);
+}
+
+describe(`${PENDING_VERSION} carries no template leftovers that contradict the revision`, () => {
+  const leftovers = [
+    { type: "terms", n: 11, ja: "通知することなく", en: "without notice", tl: "walang abiso" },
+    { type: "terms", n: 15, ja: "専属的", en: "exclusive", tl: "eksklusibo" },
+    { type: "privacy", n: 11, ja: "通知することなく", en: "without notifying", tl: "hindi naaabisuhan" },
+    { type: "privacy", n: 11, ja: "掲載した時点から効力", en: "posted on this site", tl: "i-post sa site na ito" },
+  ] as const;
+
+  for (const l of leftovers) {
+    it.each(LOCALES)(`${l.type} article ${l.n} %s has no "${l.en}"`, async (locale) => {
+      const body = await read(l.type, PENDING_VERSION, locale);
+      expect(article(body, l.n)).not.toContain(l[locale]);
+    });
+  }
+});
