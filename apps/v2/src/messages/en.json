@@ -76,6 +76,13 @@
     "cityLabel": "City / Ward (optional)",
     "cityPlaceholder": "e.g. Shibuya"
   },
+  "consent": {
+    "heading": "Updated Terms of Service and Privacy Policy",
+    "subheading": "To keep using Novalis, please review the updated documents and agree to them.",
+    "submit": "Agree and continue",
+    "error": "Could not record your agreement. Please try again.",
+    "errorVersion": "The documents were updated while this page was open. Please reload the page."
+  },
   "welcomeModal": {
     "heading": "Welcome",
     "subheading": "Choose your language",

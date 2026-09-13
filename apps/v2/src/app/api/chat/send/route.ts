@@ -21,6 +21,8 @@ import {
   updateConversationTitle,
 } from "@/lib/chat/persistence";
 import { generateConversationTitle } from "@/lib/chat/title";
+import { checkConsent } from "@/lib/legal/consent";
+import { getAdminClient } from "@/lib/supabase/admin";
 
 // /api/chat/send — W5 production SSE endpoint.
 //
@@ -66,6 +68,15 @@ export async function POST(req: NextRequest) {
     if (e instanceof AuthError) return fail(e.code);
     throw e;
   }
+
+  // 1b. Consent to the documents in force. Everything below can send the
+  // message to Gemini (overseas) or store it, and the privacy policy makes
+  // both conditional on this consent. Fail closed: if we cannot confirm it,
+  // nothing is sent. The proxy redirect covers page loads; this covers a
+  // tab left open across a version bump and direct API calls.
+  const consent = await checkConsent(getAdminClient(), userId);
+  if (consent === "stale") return fail("CONSENT_REQUIRED");
+  if (consent === "error") return fail("INTERNAL_ERROR");
 
   // 2. Body
   let body: z.infer<typeof BodySchema>;

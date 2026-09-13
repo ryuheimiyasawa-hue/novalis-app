@@ -31,7 +31,10 @@ vi.mock("@/lib/chat/escalation-notify", () => ({
   notifyEscalation: vi.fn(async () => undefined),
 }));
 
+vi.mock("@/lib/legal/consent", () => ({ checkConsent: vi.fn() }));
+
 import { GET, POST } from "@/app/api/messenger/webhook/route";
+import { checkConsent } from "@/lib/legal/consent";
 import { computeSignature } from "@/lib/messenger/signature";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { sendMessengerText } from "@/lib/messenger/graph";
@@ -59,6 +62,7 @@ const mockResolveConversation = vi.mocked(resolveConversation);
 const mockPersistResult = vi.mocked(persistResult);
 const mockPersistUserMessage = vi.mocked(persistUserMessage);
 const mockNotifyEscalation = vi.mocked(notifyEscalation);
+const mockCheckConsent = vi.mocked(checkConsent);
 
 /**
  * Minimal stand-in for the Supabase client, covering only the call
@@ -167,6 +171,7 @@ beforeEach(() => {
   mockPersistResult.mockResolvedValue({});
   mockPersistUserMessage.mockResolvedValue({ id: "msg-1" });
   mockGetAdminClient.mockReturnValue(linkedAdmin());
+  mockCheckConsent.mockResolvedValue("current");
 });
 
 describe("GET — verification handshake", () => {
@@ -353,6 +358,38 @@ describe("POST — linked sender, normal flow", () => {
     mockProcessChat.mockResolvedValue(answerResult());
     await POST(postReq(messageEvent("hi")));
     expect(mockNotifyEscalation).not.toHaveBeenCalled();
+  });
+});
+
+// Messenger has no session, so the proxy's consent redirect never runs for
+// it. This gate is the only thing between a linked user who has not agreed
+// to the current documents and Gemini (Lesson 30).
+describe("POST — consent gate", () => {
+  it("tells a linked user to re-consent and never calls the model", async () => {
+    mockCheckConsent.mockResolvedValue("stale");
+    await POST(postReq(messageEvent("在留資格について教えて")));
+
+    expect(mockCheckConsent).toHaveBeenCalledWith(expect.anything(), "user-1");
+    expect(mockProcessChat).not.toHaveBeenCalled();
+    expect(mockPersistUserMessage).not.toHaveBeenCalled();
+    expect(mockCheckChatQuota).not.toHaveBeenCalled();
+    expect(mockSend).toHaveBeenCalledOnce();
+    expect(mockSend.mock.calls[0][1]).toContain("https://example.com/ja/consent");
+  });
+
+  it("fails closed when consent cannot be confirmed", async () => {
+    mockCheckConsent.mockResolvedValue("error");
+    const res = await POST(postReq(messageEvent("hi")));
+
+    expect(res.status).toBe(200);
+    expect(mockProcessChat).not.toHaveBeenCalled();
+    expect(mockPersistUserMessage).not.toHaveBeenCalled();
+  });
+
+  it("does not check consent for an unlinked sender (there is no user yet)", async () => {
+    mockGetAdminClient.mockReturnValue(fakeAdmin({}));
+    await POST(postReq(messageEvent("hello")));
+    expect(mockCheckConsent).not.toHaveBeenCalled();
   });
 });
 

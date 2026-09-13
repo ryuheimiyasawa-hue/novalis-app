@@ -1,15 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { z } from "zod";
+import type { z } from "zod";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { AuthError } from "@/lib/auth/errors";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { ConsentFieldsSchema, isConsentCurrent } from "@/lib/legal/consent";
 
-const ConsentSchema = z.object({
-  terms_version: z.string().min(1),
-  privacy_version: z.string().min(1),
-  age_verified: z.literal(true),
-});
-
+// Re-consent after a terms / privacy revision (lawyer review 2-6), and the
+// consent step for anyone already onboarded but missing a current log.
+// First-time users consent through /api/onboarding instead, which also
+// collects the profile fields; this route never marks a user onboarded.
 export async function POST(req: NextRequest) {
   let user;
   try {
@@ -24,9 +23,9 @@ export async function POST(req: NextRequest) {
     throw e;
   }
 
-  let body: z.infer<typeof ConsentSchema>;
+  let body: z.infer<typeof ConsentFieldsSchema>;
   try {
-    body = ConsentSchema.parse(await req.json());
+    body = ConsentFieldsSchema.parse(await req.json());
   } catch {
     return NextResponse.json(
       { ok: false, error: "INVALID_INPUT" },
@@ -34,47 +33,27 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const admin = getAdminClient();
+  // A form left open across a version bump would otherwise record consent to
+  // the old documents, and the gate would send the user straight back here.
+  if (!isConsentCurrent(body)) {
+    return NextResponse.json(
+      { ok: false, error: "VERSION_MISMATCH" },
+      { status: 409 },
+    );
+  }
 
-  const { error: insertError } = await admin.from("consent_logs").insert({
-    user_id: user.id,
-    terms_version: body.terms_version,
-    privacy_version: body.privacy_version,
-    age_verified: body.age_verified,
+  const { error } = await getAdminClient().rpc("record_consent", {
+    p_user_id: user.id,
+    p_terms_version: body.terms_version,
+    p_privacy_version: body.privacy_version,
+    p_terms_opened: body.terms_opened,
+    p_privacy_opened: body.privacy_opened,
+    p_mark_onboarded: false,
   });
-  if (insertError) {
-    console.error("[consent] insert failed:", insertError.message);
-    return NextResponse.json(
-      { ok: false, error: "INTERNAL_ERROR" },
-      { status: 500 },
+  if (error) {
+    console.error(
+      JSON.stringify({ event: "consent_record_failed", route: "consent", user_id: user.id, message: error.message }),
     );
-  }
-
-  // Set onboarded_at only if currently NULL; always set age_verified.
-  const { data: profile, error: fetchError } = await admin
-    .from("profiles")
-    .select("onboarded_at")
-    .eq("id", user.id)
-    .maybeSingle();
-  if (fetchError) {
-    console.error("[consent] profile fetch failed:", fetchError.message);
-    return NextResponse.json(
-      { ok: false, error: "INTERNAL_ERROR" },
-      { status: 500 },
-    );
-  }
-
-  const updates: { age_verified: true; onboarded_at?: string } = {
-    age_verified: true,
-  };
-  if (!profile?.onboarded_at) updates.onboarded_at = new Date().toISOString();
-
-  const { error: updateError } = await admin
-    .from("profiles")
-    .update(updates)
-    .eq("id", user.id);
-  if (updateError) {
-    console.error("[consent] profile update failed:", updateError.message);
     return NextResponse.json(
       { ok: false, error: "INTERNAL_ERROR" },
       { status: 500 },

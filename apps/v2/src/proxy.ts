@@ -3,6 +3,7 @@ import { createServerClient, type CookieOptionsWithName } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 import { routing } from "@/lib/i18n/routing";
+import { gateDecision } from "@/lib/legal/consent";
 import { NextResponse, type NextRequest } from "next/server";
 
 const intl = createIntlMiddleware(routing);
@@ -46,8 +47,10 @@ const PUBLIC_UI_PATTERNS: RegExp[] = [
 // Authenticated paths that must remain reachable while onboarded_at IS NULL.
 // /onboarding itself is the cure for the missing onboarded_at — redirecting
 // it to itself would loop. /legal/* is in PUBLIC_UI_PATTERNS already.
-const ONBOARDING_EXEMPT_PATTERNS: RegExp[] = [
+// /consent is exempt for the same reason when the consented version is stale.
+const GATE_EXEMPT_PATTERNS: RegExp[] = [
   new RegExp(`^/${LOCALE_RE}/onboarding(/.*)?$`),
+  new RegExp(`^/${LOCALE_RE}/consent(/.*)?$`),
 ];
 
 function isPublicApi(pathname: string): boolean {
@@ -57,8 +60,8 @@ function isPublicUi(pathname: string): boolean {
   if (pathname === "/") return true;
   return PUBLIC_UI_PATTERNS.some((re) => re.test(pathname));
 }
-function isOnboardingExempt(pathname: string): boolean {
-  return ONBOARDING_EXEMPT_PATTERNS.some((re) => re.test(pathname));
+function isGateExempt(pathname: string): boolean {
+  return GATE_EXEMPT_PATTERNS.some((re) => re.test(pathname));
 }
 
 function getCookieDomain(): string | undefined {
@@ -85,10 +88,10 @@ function loginRedirect(req: NextRequest): NextResponse {
   return NextResponse.redirect(url);
 }
 
-function onboardingRedirect(req: NextRequest): NextResponse {
+function gateRedirect(req: NextRequest, page: "onboarding" | "consent"): NextResponse {
   const locale = pickLocale(req.nextUrl.pathname);
   const url = req.nextUrl.clone();
-  url.pathname = `/${locale}/onboarding`;
+  url.pathname = `/${locale}/${page}`;
   url.search = "";
   return NextResponse.redirect(url);
 }
@@ -120,10 +123,10 @@ export async function proxy(req: NextRequest) {
   const authed = await checkAuth(req);
   if (!authed.ok) return loginRedirect(req);
 
-  // Onboarded check: skip for /onboarding (exempt) and admin? Admin requires onboarded.
-  if (!isOnboardingExempt(pathname) && authed.userId && authed.supabase) {
-    const onboarded = await checkOnboarded(authed.supabase, authed.userId);
-    if (!onboarded) return onboardingRedirect(req);
+  // Onboarding + consent gate (admin pages included). /onboarding and /consent are exempt.
+  if (!isGateExempt(pathname) && authed.userId && authed.supabase) {
+    const gate = await checkGate(authed.supabase);
+    if (gate !== "pass") return gateRedirect(req, gate);
   }
 
   if (pathname.startsWith("/admin")) return authed.response;
@@ -173,25 +176,23 @@ async function checkAuth(req: NextRequest): Promise<AuthCheckResult> {
   };
 }
 
-async function checkOnboarded(
+async function checkGate(
   supabase: SupabaseClient<Database>,
-  userId: string,
-): Promise<boolean> {
+): Promise<"pass" | "onboarding" | "consent"> {
   // Note: this is an extra DB round-trip on every authenticated UI request.
   // Optimization (e.g. encoding onboarded flag in a JWT claim or short-lived
   // cookie cache) is tracked as a Phase 2 task in tasks/lessons.md.
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("onboarded_at")
-    .eq("id", userId)
-    .maybeSingle();
+  // consent_gate_state() (migration 012) answers both questions in that one
+  // round-trip; do not split it back into two queries (Lesson 7).
+  const { data, error } = await supabase.rpc("consent_gate_state");
   if (error) {
-    console.warn("[proxy] onboarded check failed:", error.message);
-    // Fail open on transient DB errors so users are not blocked entirely;
-    // the (authed) layout's getUser() call would catch a real auth issue.
-    return true;
+    console.warn("[proxy] consent gate check failed:", error.message);
+    // Fail open on transient DB errors so users are not blocked entirely.
+    // This is a redirect for page loads only: /api/chat/send and the
+    // Messenger webhook re-check consent and fail closed before Gemini.
+    return "pass";
   }
-  return !!data?.onboarded_at;
+  return gateDecision(data?.[0]);
 }
 
 export const config = {

@@ -6,6 +6,7 @@ import {
   CURRENT_TERMS_VERSION,
   CURRENT_PRIVACY_VERSION,
 } from "@/lib/legal/versions";
+import { isConsentCurrent } from "@/lib/legal/consent";
 
 export async function GET() {
   let user;
@@ -32,9 +33,7 @@ export async function GET() {
   const latest = rows?.[0] ?? null;
   const consentedTermsVersion = latest?.terms_version ?? null;
   const consentedPrivacyVersion = latest?.privacy_version ?? null;
-  const isLatest =
-    consentedTermsVersion === CURRENT_TERMS_VERSION &&
-    consentedPrivacyVersion === CURRENT_PRIVACY_VERSION;
+  const isLatest = isConsentCurrent(latest);
 
   return NextResponse.json({
     latestTermsVersion: CURRENT_TERMS_VERSION,

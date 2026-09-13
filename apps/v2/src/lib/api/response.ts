@@ -11,6 +11,9 @@ export type ApiErrorCode =
   | "NOT_FOUND"
   | "CONFLICT"
   | "RATE_LIMITED"
+  // The user has not agreed to the terms / privacy version in force.
+  // Distinct from FORBIDDEN so the client can route to /consent.
+  | "CONSENT_REQUIRED"
   | "INTERNAL_ERROR";
 
 const STATUS_FOR: Record<ApiErrorCode, number> = {
@@ -20,6 +23,7 @@ const STATUS_FOR: Record<ApiErrorCode, number> = {
   NOT_FOUND: 404,
   CONFLICT: 409,
   RATE_LIMITED: 429,
+  CONSENT_REQUIRED: 403,
   INTERNAL_ERROR: 500,
 };
 

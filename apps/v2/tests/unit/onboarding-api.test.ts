@@ -11,11 +11,10 @@ vi.mock("@/lib/supabase/admin", () => ({
 import { POST } from "@/app/api/onboarding/route";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { getAdminClient } from "@/lib/supabase/admin";
-
-type AnyFn = ReturnType<typeof vi.fn>;
-interface FakeAdmin {
-  from: AnyFn;
-}
+import {
+  CURRENT_PRIVACY_VERSION,
+  CURRENT_TERMS_VERSION,
+} from "@/lib/legal/versions";
 
 function makeRequest(body: unknown): Request {
   return new Request("https://app.novalis.ph/api/onboarding", {
@@ -25,37 +24,34 @@ function makeRequest(body: unknown): Request {
   });
 }
 
+// Records the order of writes: profile fields must land before
+// record_consent stamps onboarded_at.
 function makeAdminMock(
   opts: {
-    insertError?: { message: string } | null;
-    fetchData?: { onboarded_at: string | null } | null;
     updateError?: { message: string } | null;
+    rpcError?: { message: string } | null;
   } = {},
-): FakeAdmin {
-  const insert = vi.fn().mockResolvedValue({ error: opts.insertError ?? null });
-  const select = vi.fn().mockReturnValue({
-    eq: vi.fn().mockReturnValue({
-      maybeSingle: vi.fn().mockResolvedValue({
-        data: opts.fetchData ?? { onboarded_at: null },
-        error: null,
-      }),
-    }),
+) {
+  const calls: string[] = [];
+  const updateEq = vi.fn(async () => {
+    calls.push("profiles.update");
+    return { error: opts.updateError ?? null };
   });
-  const update = vi.fn().mockReturnValue({
-    eq: vi.fn().mockResolvedValue({ error: opts.updateError ?? null }),
+  const update = vi.fn(() => ({ eq: updateEq }));
+  const rpc = vi.fn(async (name: string) => {
+    calls.push(`rpc:${name}`);
+    return { data: "log-1", error: opts.rpcError ?? null };
   });
-  return {
-    from: vi.fn((table: string) => {
-      if (table === "consent_logs") return { insert };
-      if (table === "profiles") return { select, update };
-      throw new Error(`unexpected table: ${table}`);
-    }),
-  };
+  const from = vi.fn((table: string) => {
+    if (table === "profiles") return { update };
+    throw new Error(`unexpected table: ${table}`);
+  });
+  return { from, rpc, update, calls };
 }
 
 const validBody = {
-  terms_version: "1.0.0",
-  privacy_version: "1.0.0",
+  terms_version: CURRENT_TERMS_VERSION,
+  privacy_version: CURRENT_PRIVACY_VERSION,
   age_verified: true,
   preferred_language: "ja" as const,
   prefecture_code: "JP-13",
@@ -75,53 +71,76 @@ describe("POST /api/onboarding", () => {
 
   it("returns 400 when prefecture_code does not match JP-NN format", async () => {
     vi.mocked(requireAuth).mockResolvedValueOnce({ id: "u1" } as never);
-    vi.mocked(getAdminClient).mockReturnValueOnce(makeAdminMock() as never);
-    const res = await POST(
-      makeRequest({ ...validBody, prefecture_code: "Tokyo" }) as never,
-    );
+    const res = await POST(makeRequest({ ...validBody, prefecture_code: "13" }) as never);
     expect(res.status).toBe(400);
   });
 
   it("returns 400 when age_verified is false", async () => {
     vi.mocked(requireAuth).mockResolvedValueOnce({ id: "u1" } as never);
-    vi.mocked(getAdminClient).mockReturnValueOnce(makeAdminMock() as never);
-    const res = await POST(
-      makeRequest({ ...validBody, age_verified: false }) as never,
-    );
+    const res = await POST(makeRequest({ ...validBody, age_verified: false }) as never);
     expect(res.status).toBe(400);
   });
 
   it("returns 400 when preferred_language is invalid", async () => {
     vi.mocked(requireAuth).mockResolvedValueOnce({ id: "u1" } as never);
-    vi.mocked(getAdminClient).mockReturnValueOnce(makeAdminMock() as never);
-    const res = await POST(
-      makeRequest({ ...validBody, preferred_language: "fr" }) as never,
-    );
+    const res = await POST(makeRequest({ ...validBody, preferred_language: "zh" }) as never);
     expect(res.status).toBe(400);
   });
 
-  it("returns 200 success on a valid submission", async () => {
+  it("returns 409 and writes nothing when the version is not the one in force", async () => {
+    const admin = makeAdminMock();
     vi.mocked(requireAuth).mockResolvedValueOnce({ id: "u1" } as never);
-    vi.mocked(getAdminClient).mockReturnValueOnce(makeAdminMock() as never);
-    const res = await POST(makeRequest(validBody) as never);
+    vi.mocked(getAdminClient).mockReturnValue(admin as never);
+    const res = await POST(makeRequest({ ...validBody, privacy_version: "0.9.0" }) as never);
+    expect(res.status).toBe(409);
+    expect(admin.calls).toEqual([]);
+  });
+
+  it("saves the profile, then records consent and marks onboarded in one RPC", async () => {
+    const admin = makeAdminMock();
+    vi.mocked(requireAuth).mockResolvedValueOnce({ id: "u1" } as never);
+    vi.mocked(getAdminClient).mockReturnValueOnce(admin as never);
+    const res = await POST(makeRequest({ ...validBody, privacy_opened: true }) as never);
+
     expect(res.status).toBe(200);
-    const json = await res.json();
-    expect(json).toEqual({ success: true });
+    expect(await res.json()).toEqual({ success: true });
+    expect(admin.calls).toEqual(["profiles.update", "rpc:record_consent"]);
+    // onboarded_at / age_verified are the RPC's job, never the plain update.
+    expect(admin.update).toHaveBeenCalledWith({
+      preferred_language: "ja",
+      prefecture_code: "JP-13",
+      city_name: "Shibuya",
+    });
+    expect(admin.rpc).toHaveBeenCalledWith("record_consent", {
+      p_user_id: "u1",
+      p_terms_version: CURRENT_TERMS_VERSION,
+      p_privacy_version: CURRENT_PRIVACY_VERSION,
+      p_terms_opened: false,
+      p_privacy_opened: true,
+      p_mark_onboarded: true,
+    });
   });
 
   it("accepts an empty optional city_name", async () => {
     vi.mocked(requireAuth).mockResolvedValueOnce({ id: "u1" } as never);
     vi.mocked(getAdminClient).mockReturnValueOnce(makeAdminMock() as never);
-    const res = await POST(
-      makeRequest({ ...validBody, city_name: "" }) as never,
-    );
+    const res = await POST(makeRequest({ ...validBody, city_name: "" }) as never);
     expect(res.status).toBe(200);
   });
 
-  it("returns 500 when consent_logs insert fails", async () => {
+  it("does not record consent when the profile update fails", async () => {
+    const admin = makeAdminMock({ updateError: { message: "db down" } });
+    vi.mocked(requireAuth).mockResolvedValueOnce({ id: "u1" } as never);
+    vi.mocked(getAdminClient).mockReturnValueOnce(admin as never);
+    const res = await POST(makeRequest(validBody) as never);
+    expect(res.status).toBe(500);
+    expect(admin.rpc).not.toHaveBeenCalled();
+  });
+
+  it("returns 500 when record_consent fails", async () => {
     vi.mocked(requireAuth).mockResolvedValueOnce({ id: "u1" } as never);
     vi.mocked(getAdminClient).mockReturnValueOnce(
-      makeAdminMock({ insertError: { message: "db down" } }) as never,
+      makeAdminMock({ rpcError: { message: "db down" } }) as never,
     );
     const res = await POST(makeRequest(validBody) as never);
     expect(res.status).toBe(500);

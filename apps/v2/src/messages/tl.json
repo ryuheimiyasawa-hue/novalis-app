@@ -76,6 +76,13 @@
     "cityLabel": "Lungsod / Ward (opsyonal)",
     "cityPlaceholder": "hal. Shibuya"
   },
+  "consent": {
+    "heading": "Binagong Mga Tuntunin ng Serbisyo at Patakaran sa Privacy",
+    "subheading": "Upang patuloy na gamitin ang Novalis, mangyaring suriin ang mga binagong dokumento at sumang-ayon sa mga ito.",
+    "submit": "Sumang-ayon at magpatuloy",
+    "error": "Hindi naitala ang iyong pagsang-ayon. Pakisubukang muli.",
+    "errorVersion": "Na-update ang mga dokumento habang nakabukas ang pahinang ito. Mangyaring i-reload ang pahina."
+  },
   "welcomeModal": {
     "heading": "Maligayang pagdating",
     "subheading": "Pumili ng iyong wika",
