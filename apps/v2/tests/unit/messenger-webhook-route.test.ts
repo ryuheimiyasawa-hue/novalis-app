@@ -377,6 +377,18 @@ describe("POST — consent gate", () => {
     expect(mockSend.mock.calls[0][1]).toContain("https://example.com/ja/consent");
   });
 
+  it("answers in the user's language and links the matching locale", async () => {
+    mockCheckConsent.mockResolvedValue("stale");
+    mockGetAdminClient.mockReturnValue(linkedAdmin({ profiles: { data: { preferred_language: "tl" } } }));
+    await POST(postReq(messageEvent("hello")));
+
+    const sent = mockSend.mock.calls[0][1];
+    expect(sent).toContain("https://example.com/tl/consent");
+    expect(sent).toContain("Patakaran sa Privacy");
+    expect(sent).not.toContain("{url}");
+    expect(mockProcessChat).not.toHaveBeenCalled();
+  });
+
   it("fails closed when consent cannot be confirmed", async () => {
     mockCheckConsent.mockResolvedValue("error");
     const res = await POST(postReq(messageEvent("hi")));

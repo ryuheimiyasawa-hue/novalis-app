@@ -236,6 +236,7 @@
       "operatorLabel": "Kawani ng Novalis",
       "operatorBanner": "May kawani na tumutugon sa usapang ito. Nakahinto muna ang awtomatikong sagot ng AI.",
       "pollError": "Hindi maabot ang server. Pakisariwa (reload) ang pahina."
-    }
+    },
+    "consentRequired": "Binago ang aming Mga Tuntunin ng Serbisyo at Patakaran sa Privacy. Upang patuloy na gamitin ang Novalis, kailangan ang iyong pagsang-ayon.\nMangyaring buksan ang {url} sa iyong browser, suriin ang mga dokumento, at sumang-ayon."
   }
 }
