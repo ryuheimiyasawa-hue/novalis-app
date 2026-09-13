@@ -1,17 +1,17 @@
 # 弁護士監修回答（2026-08-10 受領）— 対応事項と未決事項
 
 _原本: `~/Downloads/Novalis弁護士監修依頼_軽量版＋追記.docx`_
-_状態: **2026-09-13 時点で同意フロー 1.1 まで実装完了（ブランチ `legal/lawyer-review-1.1`、未マージ）。migration 012 本番未適用。1.1.0 は未有効化（施行日未定）。**_
+_状態: **2026-09-13 時点で同意フロー 1.1 まで実装完了（PR #29、未マージ）。migration 012 本番適用済み。1.1.0 は未有効化（施行日未定）。**_
 
 ## 次回再開時にやること (2026-09-13 実装後)
 
-ブランチ `legal/lawyer-review-1.1`。同意フロー 1.1 の実装まで完了（未マージ、PR 未作成）。615 テスト・typecheck・lint・build green。migration 012 は PGlite 上で 21 項目検証済み、**本番未適用**。
+ブランチ `legal/lawyer-review-1.1`。同意フロー 1.1 の実装まで完了。PR: https://github.com/ryuheimiyasawa-hue/novalis-app/pull/29（未マージ）。615 テスト・typecheck・lint・build green。migration 012 は PGlite 上で 21 項目検証済み、**2026-09-13 本番適用済み**（version 20260913034119）。VERIFICATION (0)〜(d) を実測で全項目確認、subject_kind は anonymous 13 / permanent 2、security advisor の件数は適用前と同じ（新規警告なし）。
 
 **本番反映の順番（逆にすると新規オンボーディングが止まる）:**
 
-1. migration `012_consent_logs_independent.sql` を本番に適用する
-2. 適用直後に、ファイル末尾の VERIFICATION の (0)〜(d) を1本ずつ流して実測確認する（Lesson 24 / 27）
-3. その後にコードをデプロイする（PR マージ）
+1. ~~migration `012_consent_logs_independent.sql` を本番に適用する~~ 2026-09-13 済
+2. ~~VERIFICATION の (0)〜(d) を実測確認する~~ 2026-09-13 済
+3. コードをデプロイする（PR #29 マージ）← ここから
    - 1 と 3 の間は旧コードが動くが、トリガーが subject_kind を埋めるので壊れない
    - 3 を先にやると、record_consent が無いので /api/onboarding と /api/consent が 500 になる
 4. デプロイ直後の挙動: 同意ログが無いのに onboarded 済みの本登録ユーザー1名（と同様の匿名ユーザー）は /consent に案内される。1.0.0 のまま同意済みの人は何も変わらない
