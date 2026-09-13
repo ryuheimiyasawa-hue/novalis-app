@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   getAnswerDisclaimer,
+  getConsentRequiredMessage,
   getEscalationMessage,
   getOperatorPendingMessage,
   getPiiBlockMessage,
@@ -22,6 +23,16 @@ describe("disclaimers i18n source", () => {
     expect(getSmalltalkReply(locale)).toMatch(/.+/);
     expect(getOperatorPendingMessage(locale)).toMatch(/.+/);
   });
+
+  it.each(["ja", "en", "tl"] as const)(
+    "puts the re-consent link into the Messenger consent message for %s",
+    (locale) => {
+      const url = `https://example.com/${locale}/consent`;
+      const text = getConsentRequiredMessage(locale, url);
+      expect(text).toContain(url);
+      expect(text).not.toContain("{url}");
+    },
+  );
 
   it("returns distinct operator-pending copy per locale (P2-B2)", () => {
     expect(getOperatorPendingMessage("ja")).not.toBe(

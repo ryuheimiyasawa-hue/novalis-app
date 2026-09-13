@@ -236,6 +236,7 @@
       "operatorLabel": "Support staff",
       "operatorBanner": "A staff member is handling this conversation. Automatic AI replies are paused.",
       "pollError": "Can't reach the server. Please reload the page."
-    }
+    },
+    "consentRequired": "Our Terms of Service and Privacy Policy have been updated. To keep using Novalis, you need to agree to them.\nPlease open {url} in your browser, review the documents, and agree."
   }
 }

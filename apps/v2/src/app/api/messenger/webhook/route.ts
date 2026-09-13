@@ -6,7 +6,7 @@ import {
   screenUserInput,
   type ChatResult,
 } from "@/lib/ai/chat-pipeline";
-import { getOperatorPendingMessage } from "@/lib/ai/disclaimers";
+import { getConsentRequiredMessage, getOperatorPendingMessage } from "@/lib/ai/disclaimers";
 import { checkChatQuota } from "@/lib/chat/trial-quota";
 import {
   resolveConversation,
@@ -212,21 +212,6 @@ async function handleEvent(
   }
   const userId = link.data.user_id;
 
-  // 2b. Consent to the documents in force, before anything reaches Gemini.
-  // Messenger has no session, so the proxy's redirect never sees this path;
-  // without this check a linked user who has not re-consented would keep
-  // chatting (Lesson 30). Fail closed: throw like the lookup above so the
-  // message is not processed.
-  const consent = await checkConsent(admin, userId);
-  if (consent === "error") throw new Error("consent check failed");
-  if (consent === "stale") {
-    await send(
-      "利用規約とプライバシーポリシーが改定されました。引き続きご利用いただくには、同意が必要です。\n" +
-        `${cfg.appUrl}/ja/consent をブラウザで開いて、内容をご確認のうえ同意してください。`,
-    );
-    return;
-  }
-
   // 3. Locale from the user's profile (default ja).
   const prof = await admin
     .from("profiles")
@@ -234,6 +219,18 @@ async function handleEvent(
     .eq("id", userId)
     .maybeSingle<{ preferred_language: string | null }>();
   const locale = ((prof.data?.preferred_language ?? "ja") as WhitelistLocale);
+
+  // 3b. Consent to the documents in force, before anything reaches Gemini.
+  // Messenger has no session, so the proxy's redirect never sees this path;
+  // without this check a linked user who has not re-consented would keep
+  // chatting (Lesson 30). Fail closed: throw like the lookup above so the
+  // message is not processed. Only reads have happened so far.
+  const consent = await checkConsent(admin, userId);
+  if (consent === "error") throw new Error("consent check failed");
+  if (consent === "stale") {
+    await send(getConsentRequiredMessage(locale, `${cfg.appUrl}/${locale}/consent`));
+    return;
+  }
 
   // 4. Quota.
   const quota = await checkChatQuota(userId);
