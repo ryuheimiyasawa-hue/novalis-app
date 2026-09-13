@@ -34,13 +34,12 @@ export async function ensureProfile(user: User): Promise<EnsureProfileResult> {
   const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
   const trialStart = new Date();
   const trialEnd = new Date(trialStart.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
-  // Anonymous users (Supabase signInAnonymously) bypass the consent +
-  // prefecture onboarding form so they can immediately try the chat.
-  // We mark onboarded_at and age_verified at insert time so the proxy
-  // does not bounce them back to /onboarding. Real users still go
-  // through the form on first FB OAuth / email signup.
+  // Anonymous users go through /onboarding like everyone else. They used
+  // to be stamped onboarded here so they could skip the consent form; the
+  // lawyer review of 2026-08-10 (2-5) requires consent from anonymous
+  // trial users too, so that shortcut is gone. onboarded_at and
+  // age_verified are set only by record_consent (migration 012).
   const isAnon = user.is_anonymous === true;
-  const onboardedAt = isAnon ? trialStart.toISOString() : null;
 
   const { error } = await admin.from("profiles").insert({
     id: user.id,
@@ -55,8 +54,8 @@ export async function ensureProfile(user: User): Promise<EnsureProfileResult> {
     city_name: "",
     trial_started_at: trialStart.toISOString(),
     trial_ends_at: trialEnd.toISOString(),
-    onboarded_at: onboardedAt,
-    age_verified: isAnon,
+    onboarded_at: null,
+    age_verified: false,
   });
 
   // 23505 = unique_violation: trigger inserted the row between our SELECT and INSERT.

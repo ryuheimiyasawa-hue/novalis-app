@@ -304,6 +304,13 @@ export function ChatShell({
             toast.error(labels.errorAuth);
           } else if (status === 429) {
             toast.error(labels.errorQuota);
+          } else if (
+            (payload as { error?: { code?: string } } | null)?.error?.code ===
+            "CONSENT_REQUIRED"
+          ) {
+            // Terms changed while this tab was open. Full navigation, not
+            // router.push, so the proxy re-evaluates the gate.
+            window.location.assign(`/${locale}/consent`);
           } else {
             const code =
               (payload as { error?: { code?: string } } | null)?.error?.code ??

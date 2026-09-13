@@ -76,6 +76,13 @@
     "cityLabel": "City / Ward (optional)",
     "cityPlaceholder": "e.g. Shibuya"
   },
+  "consent": {
+    "heading": "Updated Terms of Service and Privacy Policy",
+    "subheading": "To keep using Novalis, please review the updated documents and agree to them.",
+    "submit": "Agree and continue",
+    "error": "Could not record your agreement. Please try again.",
+    "errorVersion": "The documents were updated while this page was open. Please reload the page."
+  },
   "welcomeModal": {
     "heading": "Welcome",
     "subheading": "Choose your language",
@@ -197,8 +204,8 @@
     "language": "Language"
   },
   "chat": {
-    "disclaimer": "This is general information. Please consult a professional for your specific situation.",
-    "escalation": "Your question requires professional judgment based on your specific situation. We recommend consulting an expert. Please reach out through the contact channel below.",
+    "disclaimer": "I am an AI and may present inaccurate information, so please verify my responses yourself. This is general information only; for final decisions or matters specific to your situation, please consult a professional.",
+    "escalation": "Your question requires professional judgment based on your individual circumstances, so we are unable to answer it. Consulting a professional may be helpful, so we list the contacts below for your reference. Whether to consult anyone, and whom to consult, is for you to decide.",
     "piiBlock": "Personal information (residence card number, passport number, phone number, email, etc.) cannot be sent through chat. Please rephrase your question without including personal information.",
     "tooLong": "Your message is too long. Please keep it under 2000 characters.",
     "smalltalkReply": "I can help with general questions about life in Japan — residence status, health insurance, your child's school, government procedures, and similar topics. Feel free to ask.",

@@ -41,9 +41,21 @@ describe("disclaimers i18n source", () => {
     expect(getSmalltalkReply("en")).not.toBe(getSmalltalkReply("tl"));
   });
 
-  it("returns the Japanese escalation copy verbatim from messages/ja.json", () => {
+  // The next two strings are dictated word-for-word by the 2026-08-10
+  // lawyer review (docs/lawyer-review-actions.md §2-1, §2-2). The
+  // escalation copy is worded to stay clear of 士業への斡旋, and the
+  // disclaimer exists to rebut 損害 / 因果関係 / 過失 in a dispute
+  // rather than to disclaim liability. Neither may be reworded for
+  // tone or brevity without going back to the lawyer.
+  it("returns the lawyer-mandated Japanese escalation copy verbatim", () => {
     expect(getEscalationMessage("ja")).toBe(
-      "ご質問の内容は個別の状況に応じた専門的な判断が必要なため、専門家へのご相談をお勧めします。下記の窓口よりお気軽にご相談ください。",
+      "ご質問の内容は個別の状況に応じた専門的な判断が必要なため、お答えすることができません。専門家へのご相談が有効な場合もございますので、参考情報として下記の相談先を記載いたします。ご相談の要否および相談先は、お客様にてご判断ください。",
+    );
+  });
+
+  it("returns the lawyer-mandated Japanese answer disclaimer verbatim", () => {
+    expect(getAnswerDisclaimer("ja")).toBe(
+      "私はAIであり、不正確な情報を表示する可能性があるため、ユーザーにおいて応答内容を再確認してください。また、これは一般的な情報提供であり、最終的な判断や個別具体的な判断については専門家にご相談ください。",
     );
   });
 

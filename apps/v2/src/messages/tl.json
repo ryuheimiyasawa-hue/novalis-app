@@ -76,6 +76,13 @@
     "cityLabel": "Lungsod / Ward (opsyonal)",
     "cityPlaceholder": "hal. Shibuya"
   },
+  "consent": {
+    "heading": "Binagong Mga Tuntunin ng Serbisyo at Patakaran sa Privacy",
+    "subheading": "Upang patuloy na gamitin ang Novalis, mangyaring suriin ang mga binagong dokumento at sumang-ayon sa mga ito.",
+    "submit": "Sumang-ayon at magpatuloy",
+    "error": "Hindi naitala ang iyong pagsang-ayon. Pakisubukang muli.",
+    "errorVersion": "Na-update ang mga dokumento habang nakabukas ang pahinang ito. Mangyaring i-reload ang pahina."
+  },
   "welcomeModal": {
     "heading": "Maligayang pagdating",
     "subheading": "Pumili ng iyong wika",
@@ -197,8 +204,8 @@
     "language": "Wika"
   },
   "chat": {
-    "disclaimer": "Ito ay pangkalahatang impormasyon lamang. Mangyaring kumonsulta sa isang propesyonal para sa inyong partikular na sitwasyon.",
-    "escalation": "Ang inyong tanong ay nangangailangan ng propesyonal na pag-aaral batay sa inyong partikular na sitwasyon. Inirerekomenda namin na kumonsulta sa isang eksperto. Mangyaring makipag-ugnayan sa amin sa pamamagitan ng nasa ibaba na contact form.",
+    "disclaimer": "Ako ay isang AI at maaaring magpakita ng hindi tumpak na impormasyon, kaya mangyaring suriin ninyong muli ang aking mga sagot. Pangkalahatang impormasyon lamang din ito; para sa panghuling pasya o sa mga bagay na partikular sa inyong sitwasyon, mangyaring kumonsulta sa isang propesyonal.",
+    "escalation": "Ang inyong tanong ay nangangailangan ng propesyonal na pagsusuri batay sa inyong indibidwal na sitwasyon, kaya hindi namin ito masasagot. Maaaring makatulong ang pagkonsulta sa isang propesyonal, kaya nakalista sa ibaba ang mga contact bilang sanggunian. Nasa inyo ang pasya kung kailangan ninyong kumonsulta at kung kanino kayo kokonsulta.",
     "piiBlock": "Hindi maaaring ipadala sa chat ang personal na impormasyon (residence card number, passport number, phone number, email, atbp.). Mangyaring isulat muli ang inyong tanong nang walang kasamang personal na impormasyon.",
     "tooLong": "Masyadong mahaba ang inyong mensahe. Mangyaring panatilihin itong wala pang 2000 karakter.",
     "smalltalkReply": "Maaari akong tumulong sa mga pangkalahatang tanong tungkol sa buhay sa Japan — visa, health insurance, paaralan ng inyong anak, mga pamamaraan ng gobyerno, at iba pang katulad. Magtanong nang malaya.",

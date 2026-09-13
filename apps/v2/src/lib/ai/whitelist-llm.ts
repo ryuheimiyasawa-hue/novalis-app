@@ -131,6 +131,25 @@ ALL of the following at the same time:
 
 If EITHER (1) or (2) is missing → NOT individual. Pick general.
 
+EXCEPTION — TAX DETERMINATIONS OVERRIDE THE TWO-FACT RULE.
+税理士法 draws a harder line than the other professions. The 2026-08-10
+lawyer review named three things as reserved work that we must never
+answer, no matter how few personal facts the message carries:
+  - whether a cost counts as a deductible expense (経費判定)
+  - which income category something belongs to (所得区分の振り分け)
+  - whether this person has to file a return (申告義務の有無の判定)
+Pick "individual" for these even when condition (1) is not met. A bare
+"この費用は経費になりますか" has zero concrete facts and is still
+reserved work.
+
+The mirror image is equally binding — the same review confirmed these
+ARE ordinary general information, so keep answering them:
+  - the filing deadline, where to file, how to file
+  - which documents are required
+  - how 確定申告 and 年末調整 differ as systems
+Asking WHEN / WHERE / HOW / WHAT-DOCUMENT is general. Asking the system
+to DECIDE something about this person's tax position is individual.
+
 ═══════════════════════════════════════════════════════════════════════
 "general" — DEFAULT. Any substantive message about life in Japan that
 does not clearly satisfy BOTH (1) and (2) above. Includes:
@@ -197,6 +216,26 @@ WORKED EXAMPLES — STUDY THESE, they are the calibration target:
   Input:  "国民年金と厚生年金の違いは？"
   Output: {"category":"general","reason":"public information about systems"}
 
+  Input:  "この交通費って経費で落とせるものなんでしょうか"
+  Output: {"category":"individual","reason":"経費判定は税理士の独占業務"}
+  WHY:    No status, no date, no party — condition (1) is NOT met, yet
+          this is still reserved work. The tax exception overrides the
+          two-fact rule. Never answer a deductibility question.
+
+  Input:  "自分の場合、申告っているんですかね"
+  Output: {"category":"individual","reason":"申告義務の有無の判定は税理士の独占業務"}
+  WHY:    Casual phrasing, zero concrete facts, still a determination
+          about whether THIS person must file.
+
+  Input:  "確定申告の期限と提出先を教えてください"
+  Output: {"category":"general","reason":"filing deadline and venue are public information"}
+  WHY:    WHEN and WHERE are general. Answer it.
+
+  Input:  "確定申告と年末調整は何が違うんですか"
+  Output: {"category":"general","reason":"difference between the two systems is public information"}
+  WHY:    Explaining how two systems differ is not a determination
+          about this person.
+
   Input:  "こんにちは"
   Output: {"category":"smalltalk","reason":"greeting only"}
 
@@ -211,6 +250,9 @@ TIE-BREAKER — when uncertain between individual and general:
     first turn ends the conversation badly.
   Only pick "individual" when conditions (1) AND (2) are clearly,
   obviously satisfied on this single message.
+  The tax exception above is NOT subject to this tie-breaker: a
+  deductibility / income-category / filing-obligation question is
+  "individual" even on a vague first turn.
 
 ═══════════════════════════════════════════════════════════════════════
 Reply with JSON only, no prose, matching this exact schema:

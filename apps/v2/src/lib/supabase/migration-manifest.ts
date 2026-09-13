@@ -36,6 +36,7 @@ export const EXPECTED_MIGRATIONS = [
   "009_messenger_link_codes",
   "010_operator_takeover_rpc",
   "011_applied_migrations_reader",
+  "012_consent_logs_independent",
 ] as const;
 
 export type ExpectedMigration = (typeof EXPECTED_MIGRATIONS)[number];

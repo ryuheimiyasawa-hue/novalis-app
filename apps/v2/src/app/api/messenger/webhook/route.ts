@@ -21,6 +21,7 @@ import { sendMessengerText } from "@/lib/messenger/graph";
 import { isLinkCodeShape, normalizeLinkCode } from "@/lib/messenger/link-code";
 import { linkMessengerAccount } from "@/lib/messenger/link-account";
 import type { WhitelistLocale } from "@/lib/ai/whitelist-keywords";
+import { checkConsent } from "@/lib/legal/consent";
 
 // Facebook Messenger webhook (P2-K).
 //   GET  — one-time verification handshake (echo hub.challenge).
@@ -210,6 +211,21 @@ async function handleEvent(
     return;
   }
   const userId = link.data.user_id;
+
+  // 2b. Consent to the documents in force, before anything reaches Gemini.
+  // Messenger has no session, so the proxy's redirect never sees this path;
+  // without this check a linked user who has not re-consented would keep
+  // chatting (Lesson 30). Fail closed: throw like the lookup above so the
+  // message is not processed.
+  const consent = await checkConsent(admin, userId);
+  if (consent === "error") throw new Error("consent check failed");
+  if (consent === "stale") {
+    await send(
+      "利用規約とプライバシーポリシーが改定されました。引き続きご利用いただくには、同意が必要です。\n" +
+        `${cfg.appUrl}/ja/consent をブラウザで開いて、内容をご確認のうえ同意してください。`,
+    );
+    return;
+  }
 
   // 3. Locale from the user's profile (default ja).
   const prof = await admin

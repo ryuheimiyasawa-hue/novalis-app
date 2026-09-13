@@ -136,3 +136,50 @@ describe("detectIndividualKeywords — locale isolation", () => {
     expect(hit?.keyword).toBe("離婚したい");
   });
 });
+
+// The 2026-08-10 lawyer review drew two lines that stage 1 has to hold
+// (docs/lawyer-review-actions.md §3-3, §3-4).
+//
+// 税理士法 is stricter than the other professions: judging whether a
+// cost is deductible, sorting income into a category, and deciding
+// whether a given person must file are all reserved work. But the
+// filing deadline, where to file, how to file, what documents are
+// needed, and the difference between 確定申告 and 年末調整 are ordinary
+// general information the assistant should keep answering.
+//
+// So both halves matter. Escalating everything tax-shaped would gut the
+// product; escalating nothing would cross 税理士法. These two blocks pin
+// the boundary in both directions.
+describe("detectIndividualKeywords — 税務の線引き (lawyer review §3-3)", () => {
+  it.each([
+    ["この費用は経費になりますか", "経費になりますか"],
+    ["私は確定申告が必要ですか", "申告が必要ですか"],
+    ["これは雑所得ですか給与所得ですか", "所得区分の判定"],
+    ["妻を扶養に入れられますか", "扶養に入れますか"],
+  ])("escalates the reserved-work question: %s", (input, keyword) => {
+    expect(detectIndividualKeywords(input, "ja")?.keyword).toBe(keyword);
+  });
+
+  it.each([
+    "確定申告の期限はいつですか",
+    "確定申告はどこに提出しますか",
+    "確定申告に必要な書類を教えてください",
+    "確定申告と年末調整の制度上の違いは何ですか",
+  ])("does NOT escalate the general 制度 question: %s", (input) => {
+    expect(detectIndividualKeywords(input, "ja")).toBeNull();
+  });
+});
+
+// 弁護士法72条の「法律事件」に当たりうる類型として弁護士が列挙したもの。
+// 解雇と離婚は既存パターンが拾うため、ここでは残りを押さえる。
+describe("detectIndividualKeywords — 個別紛争トリガー (lawyer review §3-4)", () => {
+  it.each([
+    ["退去強制になりそうです", "退去強制"],
+    ["在留資格が不許可になりました", "不許可・不交付"],
+    ["残業代を計算してください", "残業代"],
+    ["労災が不支給になりました", "労災"],
+    ["不服申立をしたいです", "不服申立"],
+  ])("escalates: %s", (input, keyword) => {
+    expect(detectIndividualKeywords(input, "ja")?.keyword).toBe(keyword);
+  });
+});

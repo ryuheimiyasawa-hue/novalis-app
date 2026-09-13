@@ -55,21 +55,29 @@ export type Database = {
         }>;
         Relationships: [];
       };
+      // 012: user_id is the auth user id with no FK, so rows outlive the
+      // account. Written only through the record_consent RPC.
       consent_logs: {
         Row: {
           id: string;
           user_id: string;
+          subject_kind: "permanent" | "anonymous";
           terms_version: string;
           privacy_version: string;
           age_verified: boolean;
+          terms_opened: boolean;
+          privacy_opened: boolean;
           consented_at: string;
         };
         Insert: {
           id?: string;
           user_id: string;
+          subject_kind: "permanent" | "anonymous";
           terms_version: string;
           privacy_version: string;
           age_verified: boolean;
+          terms_opened?: boolean;
+          privacy_opened?: boolean;
           consented_at?: string;
         };
         Update: Partial<{
@@ -614,6 +622,28 @@ export type Database = {
       applied_migrations: {
         Args: Record<string, never>;
         Returns: Array<{ name: string }>;
+      };
+      // 012. service_role only. Inserts the consent log and stamps
+      // profiles in one transaction; returns the new consent_logs.id.
+      record_consent: {
+        Args: {
+          p_user_id: string;
+          p_terms_version: string;
+          p_privacy_version: string;
+          p_terms_opened: boolean;
+          p_privacy_opened: boolean;
+          p_mark_onboarded: boolean;
+        };
+        Returns: string;
+      };
+      // 012. Runs as the caller; zero rows when the caller has no profile.
+      consent_gate_state: {
+        Args: Record<string, never>;
+        Returns: Array<{
+          onboarded: boolean;
+          terms_version: string | null;
+          privacy_version: string | null;
+        }>;
       };
       operator_release: {
         Args: {

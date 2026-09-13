@@ -42,7 +42,13 @@ vi.mock("@/lib/chat/escalation-notify", () => ({
   notifyEscalation: vi.fn(async () => undefined),
 }));
 
+// Consent gate (tasks/consent-1.1-design.md §11). Default "current"; the
+// gate tests below override it.
+vi.mock("@/lib/legal/consent", () => ({ checkConsent: vi.fn() }));
+vi.mock("@/lib/supabase/admin", () => ({ getAdminClient: vi.fn(() => ({})) }));
+
 import { POST } from "@/app/api/chat/send/route";
+import { checkConsent } from "@/lib/legal/consent";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { AuthError } from "@/lib/auth/errors";
 import { checkChatQuota } from "@/lib/chat/trial-quota";
@@ -61,11 +67,13 @@ const mockRequireAuth = vi.mocked(requireAuth);
 const mockCheckChatQuota = vi.mocked(checkChatQuota);
 const mockResolveConversation = vi.mocked(resolveConversation);
 const mockProcessChatStream = vi.mocked(processChatStream);
+const mockCheckConsent = vi.mocked(checkConsent);
 
 beforeEach(() => {
   vi.resetAllMocks();
   // Defaults: auth ok, quota allowed, conversation resolved.
   mockRequireAuth.mockResolvedValue({ id: "user-1" } as never);
+  mockCheckConsent.mockResolvedValue("current");
   mockCheckChatQuota.mockResolvedValue({
     decision: { allowed: true, reason: "payment_disabled" },
     period: "2026-05",
@@ -104,6 +112,31 @@ async function readSSE(res: Response): Promise<Array<Record<string, unknown>>> {
   }
   return events;
 }
+
+describe("POST /api/chat/send — consent gate", () => {
+  it("refuses with CONSENT_REQUIRED before anything reaches the model or the DB", async () => {
+    mockCheckConsent.mockResolvedValueOnce("stale");
+    const res = await POST(makeReq({ message: "在留資格について" }) as never);
+    expect(res.status).toBe(403);
+    expect((await res.json()).error.code).toBe("CONSENT_REQUIRED");
+    expect(mockProcessChatStream).not.toHaveBeenCalled();
+    expect(vi.mocked(persistUserMessage)).not.toHaveBeenCalled();
+    expect(mockCheckChatQuota).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when consent cannot be confirmed", async () => {
+    mockCheckConsent.mockResolvedValueOnce("error");
+    const res = await POST(makeReq({ message: "hi" }) as never);
+    expect(res.status).toBe(500);
+    expect(mockProcessChatStream).not.toHaveBeenCalled();
+  });
+
+  it("checks the authenticated user, not anything from the body", async () => {
+    mockCheckConsent.mockResolvedValueOnce("stale");
+    await POST(makeReq({ message: "hi", userId: "someone-else" }) as never);
+    expect(mockCheckConsent).toHaveBeenCalledWith(expect.anything(), "user-1");
+  });
+});
 
 describe("POST /api/chat/send — pre-stream guards", () => {
   it("returns 401 when unauthenticated", async () => {

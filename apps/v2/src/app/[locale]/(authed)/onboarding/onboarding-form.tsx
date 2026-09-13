@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PREFECTURES } from "@/lib/i18n/prefectures";
+import {
+  ConsentCheckboxes,
+  INITIAL_CONSENT_STATE,
+  isConsentComplete,
+} from "@/components/legal/consent-checkboxes";
 
 interface Props {
   locale: "ja" | "en" | "tl";
@@ -31,15 +36,13 @@ export function OnboardingForm({
   labels,
 }: Props) {
   const router = useRouter();
-  const [terms, setTerms] = useState(false);
-  const [privacy, setPrivacy] = useState(false);
-  const [age, setAge] = useState(false);
+  const [consent, setConsent] = useState(INITIAL_CONSENT_STATE);
   const [prefectureCode, setPrefectureCode] = useState("");
   const [cityName, setCityName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const ready = terms && privacy && age && prefectureCode !== "";
+  const ready = isConsentComplete(consent) && prefectureCode !== "";
 
   async function handleSubmit() {
     if (!ready || submitting) return;
@@ -53,6 +56,8 @@ export function OnboardingForm({
           terms_version: termsVersion,
           privacy_version: privacyVersion,
           age_verified: true,
+          terms_opened: consent.termsOpened,
+          privacy_opened: consent.privacyOpened,
           preferred_language: locale,
           prefecture_code: prefectureCode,
           city_name: cityName.trim(),
@@ -72,23 +77,12 @@ export function OnboardingForm({
 
   return (
     <div className="space-y-6">
-      <div className="space-y-3 rounded-md border border-neutral-200 dark:border-neutral-800 p-4">
-        <Checkbox
-          id="agree-terms"
-          checked={terms}
-          onChange={setTerms}
-          label={labels.terms}
-          link={{ href: `/${locale}/legal/terms`, text: labels.viewTerms }}
-        />
-        <Checkbox
-          id="agree-privacy"
-          checked={privacy}
-          onChange={setPrivacy}
-          label={labels.privacy}
-          link={{ href: `/${locale}/legal/privacy`, text: labels.viewPrivacy }}
-        />
-        <Checkbox id="agree-age" checked={age} onChange={setAge} label={labels.age} />
-      </div>
+      <ConsentCheckboxes
+        locale={locale}
+        value={consent}
+        onChange={setConsent}
+        labels={labels}
+      />
 
       <fieldset className="space-y-3 rounded-md border border-neutral-200 dark:border-neutral-800 p-4">
         <legend className="text-sm font-semibold px-1">
@@ -148,48 +142,5 @@ export function OnboardingForm({
         {labels.submit}
       </button>
     </div>
-  );
-}
-
-function Checkbox({
-  id,
-  checked,
-  onChange,
-  label,
-  link,
-}: {
-  id: string;
-  checked: boolean;
-  onChange: (next: boolean) => void;
-  label: string;
-  link?: { href: string; text: string };
-}) {
-  return (
-    <label htmlFor={id} className="flex items-start gap-3 cursor-pointer">
-      <input
-        id={id}
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        className="mt-1"
-      />
-      <span className="text-sm leading-relaxed">
-        {label}
-        {link && (
-          <>
-            {" — "}
-            <a
-              href={link.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline text-blue-700 hover:text-blue-900"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {link.text}
-            </a>
-          </>
-        )}
-      </span>
-    </label>
   );
 }
