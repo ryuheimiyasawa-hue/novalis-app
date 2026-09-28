@@ -208,8 +208,21 @@ def main():
     table("3. 企業別", by(rows, lambda r: r["co"]), ["企業"], total=rows)
     table("4. 職種の大分類別", by(rows, lambda r: r["fam"]), ["大分類"],
           "職種カテゴリをまとめたもの。分類のルールはスクリプトの family() を参照。", total=rows)
-    table("5. 職種カテゴリ別（全件・費用降順）", by(rows, lambda r: r["cat"]), ["職種カテゴリ"],
-          "Indeed の「職種」列の先頭値。1求人に複数カテゴリが付くため先頭のみ採用している。")
+    # 5. 職種カテゴリ別は CPA を先頭に置き、CPA の安い順に並べる
+    print("\n### 5. 職種カテゴリ別（CPA が安い順）\n")
+    print("Indeed の「職種」列の先頭値。1求人に複数カテゴリが付くため先頭のみ採用している。")
+    print("応募0の括りは最下段。**応募数が少ない行のCPAは不安定なので、応募数を必ず併せて見ること。**\n")
+    print("| 順 | 職種カテゴリ | **CPA** | 応募 | 費用 | クリック | CPC | 応募率 | 表示 | CTR | 行数 |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|")
+    for i, (cat, b) in enumerate(by(rows, lambda r: r["cat"], sort="cpa"), 1):
+        a = agg(b)
+        print(f"| {i} | {cat} | **{f(a['CPA'],'円',dash='応募0')}** | {f(a['app'])} | {f(a['cost'],'円')} | "
+              f"{f(a['clk'])} | {f(a['CPC'],'円')} | {f(a['CVR'],pct=True)} | {f(a['imp'])} | "
+              f"{f(a['CTR'],pct=True)} | {a['n']} |")
+    mm = agg(rows)
+    print(f"| | **全体** | **{f(mm['CPA'],'円')}** | **{f(mm['app'])}** | **{f(mm['cost'],'円')}** | "
+          f"**{f(mm['clk'])}** | **{f(mm['CPC'],'円')}** | **{f(mm['CVR'],pct=True)}** | "
+          f"**{f(mm['imp'])}** | **{f(mm['CTR'],pct=True)}** | **{mm['n']}** |")
     table("6. 都道府県別", by(rows, lambda r: r["pref"]), ["都道府県"], total=rows)
     table("7. 市区町村別（費用が発生した全エリア）",
           by([r for r in rows if r["cost"] > 0], lambda r: (r["pref"], r["city"])), ["都道府県", "市区町村"])
