@@ -172,7 +172,7 @@ def main():
     print("- ファネルは4段: **表示 → クリック → 応募開始 → 応募完了（＝応募数）**。")
     print("  Indeedは「応募開始」と「完了」を分けて出すので、フォーム離脱が測れる。")
     print("- 費用が少額の括りのCPAは不安定（応募1件でCPAが決まる）。**母数を必ず見ること**。")
-    print("  比較の主役は §5（求人別）。母数を絞って見たいときは §8。")
+    print("  **§5 は母数フィルタ（表示1,000以上 または 応募10件以上）をかけてある。**全件は付録A。")
     print("- 採用数はレポートに含まれないため、**採用単価は算出できない**。応募単価までが範囲。\n")
 
     # ───────── 1. データ概要
@@ -209,46 +209,43 @@ def main():
     table("4. 職種の大分類別（参考）", by(rows, lambda r: r["fam"]), ["大分類"],
           "**参考値。**Indeed の職種カテゴリ（先頭値）をさらにまとめたもので、丸めが二重に入っている。"
           "判断は §5 の求人別で行うこと。分類ルールはスクリプトの family() を参照。", total=rows)
-    # 5. 求人別（CPA 安い順・全件）— カテゴリで丸めず、求人ごとに1行
-    print("\n### 5. 求人別（CPA が安い順・全件）\n")
+    # 5. 求人別（母数フィルタ、CPA 昇順）— カテゴリで丸めず求人ごとに1行
+    JOBS = by(rows, lambda r: (r["co"], r["job"]), sort="cpa")
+    IMP_MIN, APP_MIN = 1000, 10
+    keep = [(k, b) for k, b in JOBS if agg(b)["imp"] >= IMP_MIN or agg(b)["app"] >= APP_MIN]
+    drop = [(k, b) for k, b in JOBS if (k, b) not in keep]
+    kept_cost = sum(agg(b)["cost"] for _, b in keep)
+    drop_cost = sum(agg(b)["cost"] for _, b in drop)
+
+    print("\n### 5. 求人別 ★メイン（表示1,000回以上 または 応募10件以上／CPA が安い順）\n")
     print("**Indeed の「職種」カテゴリでは丸めていない。**1求人に複数カテゴリが付くうえ、")
-    print("違う仕事が同じカテゴリに入ってしまうため、求人（掲載原稿）ごとに1行にしている。")
-    print("同じ求人名を複数エリア・複数期間に出しているぶんはその求人の行としてまとめている。")
-    print("応募0の求人は最下段。**応募数の少ない行のCPAは不安定なので応募数を併せて見ること。**\n")
+    print("違う仕事が同じカテゴリに入ってしまうため（例: キャリアアドバイザーと法人営業）、")
+    print("求人（掲載原稿）ごとに1行にしている。同じ求人名の複数エリア・複数期間はまとめている。\n")
+    print(f"**母数フィルタ: 表示1,000回以上 または 応募10件以上。**")
+    print(f"{len(JOBS)}求人のうち **{len(keep)}求人** が該当（費用 {f(kept_cost,'円')}、全費用の {kept_cost/cost*100:.1f}%）。")
+    print(f"除外は {len(drop)}求人（費用 {f(drop_cost,'円')}、{drop_cost/cost*100:.1f}%）で、")
+    print(f"全件は巻末の付録Aに載せている。除外分の内訳は §9（応募0）も参照。\n")
     print("| 順 | **CPA** | 企業 | 求人名 | 応募 | 費用 | クリック | CPC | 応募率 | 表示 | CTR | 掲載行数 |")
     print("|---|---|---|---|---|---|---|---|---|---|---|---|")
-    for i, ((co, job), b) in enumerate(by(rows, lambda r: (r["co"], r["job"]), sort="cpa"), 1):
+    for i, ((co, job), b) in enumerate(keep, 1):
         a = agg(b)
         print(f"| {i} | **{f(a['CPA'],'円',dash='応募0')}** | {co} | {job} | {f(a['app'])} | "
               f"{f(a['cost'],'円')} | {f(a['clk'])} | {f(a['CPC'],'円')} | {f(a['CVR'],pct=True)} | "
               f"{f(a['imp'])} | {f(a['CTR'],pct=True)} | {a['n']} |")
-    mm = agg(rows)
-    print(f"| | **{f(mm['CPA'],'円')}** | **全体** | | **{f(mm['app'])}** | **{f(mm['cost'],'円')}** | "
-          f"**{f(mm['clk'])}** | **{f(mm['CPC'],'円')}** | **{f(mm['CVR'],pct=True)}** | "
-          f"**{f(mm['imp'])}** | **{f(mm['CTR'],pct=True)}** | **{mm['n']}** |")
+    km = agg([r for _, b in keep for r in b])
+    print(f"| | **{f(km['CPA'],'円')}** | **該当分 計** | | **{f(km['app'])}** | **{f(km['cost'],'円')}** | "
+          f"**{f(km['clk'])}** | **{f(km['CPC'],'円')}** | **{f(km['CVR'],pct=True)}** | "
+          f"**{f(km['imp'])}** | **{f(km['CTR'],pct=True)}** | **{km['n']}** |")
+    kf = [agg(b)["CPA"] for _, b in keep if agg(b)["CPA"]]
+    print(f"\n→ 最安 **{f(min(kf),'円')}** ／ 最高 **{f(max(kf),'円')}** ／ "
+          f"**{max(kf)/min(kf):.0f}倍のひらき**（該当 {len(keep)} 求人、うち応募0が {len(keep)-len(kf)} 件）")
 
     table("6. 都道府県別", by(rows, lambda r: r["pref"]), ["都道府県"], total=rows)
     table("7. 市区町村別（費用が発生した全エリア）",
           by([r for r in rows if r["cost"] > 0], lambda r: (r["pref"], r["city"])), ["都道府県", "市区町村"])
 
-    # ───────── 9. 母数を確保したCPAランキング
-    solid = by(rows, lambda r: (r["co"], r["job"]), sort="cpa", min_cost=10000)
-    print("\n### 8. 費用1万円以上を使った求人だけに絞った場合\n")
-    print("§5 から費用1万円未満の求人を落としたもの。母数が確保された求人だけのCPAのひらきを見る。\n")
-    print("| 順 | CPA | 企業 | 求人名 | 費用 | 応募 | クリック | CPC | 応募率 |")
-    print("|---|---|---|---|---|---|---|---|---|")
-    fin = []
-    for i, ((co, job), b) in enumerate(solid, 1):
-        a = agg(b)
-        if a["CPA"]:
-            fin.append(a["CPA"])
-        print(f"| {i} | **{f(a['CPA'],'円',dash='応募0')}** | {co} | {job} | "
-              f"{f(a['cost'],'円')} | {f(a['app'])} | {f(a['clk'])} | {f(a['CPC'],'円')} | {f(a['CVR'],pct=True)} |")
-    print(f"\n→ 最安 **{f(min(fin),'円')}** ／ 最高 **{f(max(fin),'円')}** ／ "
-          f"**{max(fin)/min(fin):.0f}倍のひらき**（対象 {len(solid)} 求人、うち応募0が {len(solid)-len(fin)} 件）")
-
     # ───────── 10. 同一求人のエリア差
-    print("\n### 9. 同一求人の中で、エリアによって CPA がどれだけひらくか\n")
+    print("\n### 8. 同一求人の中で、エリアによって CPA がどれだけひらくか\n")
     print("同じ求人原稿を複数エリアに配信しているケース。原稿は同じなので、"
           "差は**エリア選定と配信の差**として読める。応募が出たエリアが2つ以上あるものだけ。\n")
     print("| 企業 | 求人名 | 配信エリア数 | 応募が出たエリア数 | 最安 CPA | 最高 CPA | 倍率 | 総費用 |")
@@ -268,7 +265,7 @@ def main():
     # ───────── 11. 無駄打ち
     waste = [r for r in rows if r["app"] == 0 and r["cost"] > 0]
     wc = sum(r["cost"] for r in waste)
-    print(f"\n### 10. 応募0のまま費用が出た行\n")
+    print(f"\n### 9. 応募0のまま費用が出た行\n")
     print(f"**{len(waste)}行 / {f(wc,'円')} ＝ 全費用の {wc/cost*100:.1f}%**\n")
     tot = defaultdict(float)
     for r in rows:
@@ -293,7 +290,7 @@ def main():
               f"{f(r['clk'])} | {f(cpc,'円')} | {f(r['cost'],'円')} |")
 
     # ───────── 12. フォーム離脱
-    print("\n### 11. 応募フォームの離脱（応募開始したのに完了していない）\n")
+    print("\n### 10. 応募フォームの離脱（応募開始したのに完了していない）\n")
     print("| 企業 | 応募開始 | 応募完了 | 完了率 | 離脱人数 |")
     print("|---|---|---|---|---|")
     for co, b in by(rows, lambda r: r["co"]):
@@ -314,14 +311,14 @@ def main():
         print(f"| {co} | {job} | {f(a['start'])} | {f(a['app'])} | {f(a['COMP'],pct=True)} | "
               f"**{f(a['start']-a['app'])}** |")
 
-    table("12. 求人作成月別", by(rows, lambda r: r["month"], sort="key"), ["作成月"],
+    table("11. 求人作成月別", by(rows, lambda r: r["month"], sort="key"), ["作成月"],
           "行の「作成日」ベース。掲載開始のタイミングを表すもので、費用の発生月とは厳密には一致しない。",
           total=rows)
-    table("13. 雇用形態別", by(rows, lambda r: r["emp"]), ["雇用形態"], total=rows)
-    table("14. 掲載ステータス別", by(rows, lambda r: r["status"]), ["ステータス"], total=rows)
+    table("12. 雇用形態別", by(rows, lambda r: r["emp"]), ["雇用形態"], total=rows)
+    table("13. 掲載ステータス別", by(rows, lambda r: r["status"]), ["ステータス"], total=rows)
 
     # ───────── 16. 注意点
-    print("\n## 15. この数字を扱うときの注意\n")
+    print("\n## 14. この数字を扱うときの注意\n")
     print("1. **掲載期間の長さが行ごとに違う**。1日だけ配信した行と2ヶ月配信した行が同じ1行として並ぶ。")
     print("   月次の正確な推移を出すには、期間で按分したデータが別途必要。")
     print("2. **応募の質は測れていない**。CPAが安い＝良いとは限らない。面接実施率・採用数が無いため、")
@@ -330,6 +327,23 @@ def main():
     print("4. **職種カテゴリは先頭値のみ採用**。1求人に3カテゴリ付いている行が多く、")
     print("   カテゴリ別集計は目安。求人別（§8, §9）のほうが実態に近い。")
     print("5. **CPAは自前計算**。レポートのCPA列と一致しない箇所があるのは意図的（§0参照）。")
+
+    # ───────── 付録A: 全件
+    print("\n---\n")
+    print("## 付録A. 求人別・全件（フィルタなし・CPA が安い順）\n")
+    print("§5 の母数フィルタで落としたものも含む全求人。**応募数の少ない行のCPAは読まないこと。**\n")
+    print("| 順 | **CPA** | 企業 | 求人名 | 応募 | 費用 | クリック | CPC | 応募率 | 表示 | CTR | 掲載行数 | §5対象 |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+    keepset = {k for k, _ in keep}
+    for i, ((co, job), b) in enumerate(JOBS, 1):
+        a = agg(b)
+        mark = "○" if (co, job) in keepset else ""
+        print(f"| {i} | **{f(a['CPA'],'円',dash='応募0')}** | {co} | {job} | {f(a['app'])} | "
+              f"{f(a['cost'],'円')} | {f(a['clk'])} | {f(a['CPC'],'円')} | {f(a['CVR'],pct=True)} | "
+              f"{f(a['imp'])} | {f(a['CTR'],pct=True)} | {a['n']} | {mark} |")
+    print(f"| | **{f(m['CPA'],'円')}** | **全体** | | **{f(m['app'])}** | **{f(m['cost'],'円')}** | "
+          f"**{f(m['clk'])}** | **{f(m['CPC'],'円')}** | **{f(m['CVR'],pct=True)}** | "
+          f"**{f(m['imp'])}** | **{f(m['CTR'],pct=True)}** | **{m['n']}** | |")
 
 
 if __name__ == "__main__":
