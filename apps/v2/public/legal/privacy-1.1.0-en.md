@@ -125,5 +125,5 @@ Email: ryuhei.miyasawa@novalisgroup.biz
 Version: 1.1.0
 Enacted: May 8, 2026
 Last revised: August 20, 2026
-Effective: September 1, 2026
+Effective: September 28, 2026
 Novalis Inc.

@@ -14,12 +14,9 @@ import {
 const LOCALES = ["ja", "en", "tl"] as const;
 const LEGAL_DIR = path.join(process.cwd(), "public", "legal");
 
-// The lawyer-revised documents are written to disk and guarded here, but
-// they are NOT live yet: CURRENT_*_VERSION still points at 1.0.0. Flipping
-// the constants publishes a privacy policy whose Article 5 says the user
-// consented to cross-border transfer at registration, which is only true
-// once the re-consent gate ships. Bump the constants and this line
-// together, never separately.
+// The lawyer-revised documents (2026-08-10 review). Live since the
+// constants were bumped; the checks below keep pinning this revision's
+// content even after a later version supersedes it.
 const PENDING_VERSION = "1.1.0";
 
 function read(type: "terms" | "privacy", version: string, locale: string) {
@@ -42,6 +39,18 @@ describe("legal documents ship for every locale at the current version", () => {
   it.each(LOCALES)("the staged %s documents are complete too", async (locale) => {
     await expect(read("terms", PENDING_VERSION, locale)).resolves.toMatch(/.+/);
     await expect(read("privacy", PENDING_VERSION, locale)).resolves.toMatch(/.+/);
+  });
+
+  // The effective date is what the advance notice to users promised. A
+  // document still carrying the placeholder date would claim to have been
+  // in force before anyone was told.
+  it.each(LOCALES)("current documents state an effective date that is not the old placeholder (%s)", async (locale) => {
+    for (const type of ["terms", "privacy"] as const) {
+      const version = type === "terms" ? CURRENT_TERMS_VERSION : CURRENT_PRIVACY_VERSION;
+      const body = await read(type, version, locale);
+      expect(body).toMatch(/施行日: |Effective: |Bisa mula: /);
+      expect(body).not.toMatch(/2026年9月1日|September 1, 2026|Setyembre 1, 2026/);
+    }
   });
 
   it("getLegalDocumentPath points at a file that is actually on disk", async () => {
