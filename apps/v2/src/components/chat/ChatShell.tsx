@@ -104,6 +104,23 @@ export function ChatShell({
   // remember the turn at which the last full EscalationCard was shown.
   const userTurnsRef = useRef(0);
   const lastCardTurnRef = useRef<number | null>(null);
+  // One send = one request. `abortRef` cancels the in-flight one;
+  // `generationRef` is bumped whenever the thread that request belongs to
+  // stops being the thread on screen (reset, unmount). Late meta/token/done
+  // events carry no conversation of their own, so without the generation
+  // check they would write the abandoned thread's answer and conversation
+  // id into the fresh one.
+  const abortRef = useRef<AbortController | null>(null);
+  const generationRef = useRef(0);
+
+  // Leaving the page must not leave a request writing into a gone view.
+  useEffect(() => {
+    return () => {
+      generationRef.current += 1;
+      abortRef.current?.abort();
+      abortRef.current = null;
+    };
+  }, []);
 
   // Auto-scroll on new content.
   useEffect(() => {
@@ -214,6 +231,11 @@ export function ChatShell({
   }, [conversationId]);
 
   function resetConversation() {
+    // Abort first: the reply for the thread being cleared must not land in
+    // the empty one, and its request must stop costing anything.
+    generationRef.current += 1;
+    abortRef.current?.abort();
+    abortRef.current = null;
     setMessages([]);
     setConversationId(null);
     setStreamingText("");
@@ -241,6 +263,13 @@ export function ChatShell({
     // we need to refresh the parent server tree after the stream ends
     // so the new row appears in the past-conversations sidebar.
     const wasNewConversation = conversationId === null;
+    const generation = generationRef.current;
+    const controller = new AbortController();
+    abortRef.current?.abort();
+    abortRef.current = controller;
+    // True once this send's thread has been abandoned: its events and its
+    // final commit must not touch the state of the conversation on screen.
+    const isStale = () => generation !== generationRef.current;
 
     userTurnsRef.current += 1;
     setMessages((prev) => [
@@ -261,65 +290,90 @@ export function ChatShell({
     let operatorPendingText: string | null = null;
     let errored = false;
 
-    await consumeChatStream(
-      {
-        message,
-        locale,
-        ...(conversationId ? { conversationId } : {}),
-      },
-      {
-        onEvent: (e: ChatStreamEvent) => {
-          if (e.type === "meta") {
-            if (!conversationId) setConversationId(e.conversationId);
-          } else if (e.type === "token") {
-            accumulated += e.text;
-            setStreamingText(accumulated);
-          } else if (e.type === "done") {
-            if (e.kind === "answer") {
-              finalCitations = e.citations;
-              finalDisclaimer = e.disclaimer;
-              // Replace streamed text with PII-masked final text.
-              finalText = e.text;
-            } else if (e.kind === "escalate") {
-              escalationText = e.text;
-            } else if (e.kind === "smalltalk") {
-              smalltalkText = e.text;
-            } else if (e.kind === "blocked") {
-              blockedText = e.text;
-            } else if (e.kind === "operator_pending") {
-              // Staff hold this thread. Learn the mode immediately so the
-              // banner appears and polling tightens without waiting for
-              // the next auto-interval poll.
-              operatorPendingText = e.text;
-              modeRef.current = "operator";
-              setMode("operator");
-            } else if (e.kind === "error") {
-              errored = true;
+    try {
+      await consumeChatStream(
+        {
+          message,
+          locale,
+          ...(conversationId ? { conversationId } : {}),
+        },
+        {
+          signal: controller.signal,
+          onEvent: (e: ChatStreamEvent) => {
+            if (isStale()) return;
+            if (e.type === "meta") {
+              if (!conversationId) setConversationId(e.conversationId);
+            } else if (e.type === "token") {
+              accumulated += e.text;
+              setStreamingText(accumulated);
+            } else if (e.type === "done") {
+              if (e.kind === "answer") {
+                finalCitations = e.citations;
+                finalDisclaimer = e.disclaimer;
+                // Replace streamed text with PII-masked final text.
+                finalText = e.text;
+              } else if (e.kind === "escalate") {
+                escalationText = e.text;
+              } else if (e.kind === "smalltalk") {
+                smalltalkText = e.text;
+              } else if (e.kind === "blocked") {
+                blockedText = e.text;
+              } else if (e.kind === "operator_pending") {
+                // Staff hold this thread. Learn the mode immediately so the
+                // banner appears and polling tightens without waiting for
+                // the next auto-interval poll.
+                operatorPendingText = e.text;
+                modeRef.current = "operator";
+                setMode("operator");
+              } else if (e.kind === "error") {
+                errored = true;
+              }
             }
-          }
+          },
+          onHttpError: (status, payload) => {
+            if (isStale()) return;
+            errored = true;
+            if (status === 401) {
+              toast.error(labels.errorAuth);
+            } else if (status === 429) {
+              toast.error(labels.errorQuota);
+            } else if (
+              (payload as { error?: { code?: string } } | null)?.error?.code ===
+              "CONSENT_REQUIRED"
+            ) {
+              // Terms changed while this tab was open. Client navigation still
+              // goes through the proxy, which re-evaluates the gate on arrival.
+              router.push(`/${locale}/consent`);
+            } else {
+              const code =
+                (payload as { error?: { code?: string } } | null)?.error?.code ??
+                "INTERNAL_ERROR";
+              toast.error(`${labels.errorGeneric} (${code})`);
+            }
+          },
         },
-        onHttpError: (status, payload) => {
-          errored = true;
-          if (status === 401) {
-            toast.error(labels.errorAuth);
-          } else if (status === 429) {
-            toast.error(labels.errorQuota);
-          } else if (
-            (payload as { error?: { code?: string } } | null)?.error?.code ===
-            "CONSENT_REQUIRED"
-          ) {
-            // Terms changed while this tab was open. Client navigation still
-            // goes through the proxy, which re-evaluates the gate on arrival.
-            router.push(`/${locale}/consent`);
-          } else {
-            const code =
-              (payload as { error?: { code?: string } } | null)?.error?.code ??
-              "INTERNAL_ERROR";
-            toast.error(`${labels.errorGeneric} (${code})`);
-          }
-        },
-      },
-    );
+      );
+    } catch (err) {
+      // fetch refused (offline, DNS, TLS) or the stream broke mid-read.
+      // Without this the rejection propagated out of send() and left
+      // isStreaming true, locking the composer until a reload. An
+      // AbortError is our own cancel, which resetConversation already
+      // cleaned up after, so it is not reported as a failure.
+      const aborted =
+        (err as { name?: string } | null)?.name === "AbortError" ||
+        controller.signal.aborted;
+      if (!aborted && !isStale()) {
+        errored = true;
+        toast.error(labels.errorGeneric);
+      }
+    } finally {
+      if (abortRef.current === controller) abortRef.current = null;
+    }
+
+    // The thread this reply belongs to is gone: resetConversation already
+    // cleared the messages, the composer and the streaming flag for the new
+    // one, and must not be undone here.
+    if (isStale() || controller.signal.aborted) return;
 
     // Commit the final state into messages array.
     setMessages((prev) => {
