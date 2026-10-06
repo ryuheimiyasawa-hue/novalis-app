@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 import { routing } from "@/lib/i18n/routing";
 import { gateDecision } from "@/lib/legal/consent";
+import { QA_HARNESS_ENABLED } from "@/lib/qa/harness-flag";
 import { NextResponse, type NextRequest } from "next/server";
 
 const intl = createIntlMiddleware(routing);
@@ -42,6 +43,13 @@ const PUBLIC_UI_PATTERNS: RegExp[] = [
   // gates on getUser() and redirects to /login when no session, so
   // it's safe to allow through here.
   new RegExp(`^/${LOCALE_RE}/reset-password(/.*)?$`),
+  // Preview-only manual QA page for the chat stream fixes. It has no
+  // session and talks to an in-page stand-in for /api/chat/send, so it
+  // must bypass the auth gate — and it only exists where the flag is set
+  // (never production, where the page itself 404s).
+  ...(QA_HARNESS_ENABLED
+    ? [new RegExp(`^/${LOCALE_RE}/qa-chat(/.*)?$`)]
+    : []),
 ];
 
 // Authenticated paths that must remain reachable while onboarded_at IS NULL.

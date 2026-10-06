@@ -33,6 +33,12 @@ interface Props {
    *  hydrates with them on mount. Omit for a fresh conversation. */
   initialConversationId?: string;
   initialMessages?: UiMessage[];
+  /** Where "new conversation" goes after the thread is cleared.
+   *  Production leaves this out and the shell navigates to
+   *  `/{locale}/chat`; the preview-only QA harness passes a handler so
+   *  the reset can be exercised without leaving its own page. The reset
+   *  itself (abort, state clear) is identical either way. */
+  onReset?: () => void;
   labels: {
     title: string;
     subtitle: string;
@@ -77,6 +83,7 @@ export function ChatShell({
   locale,
   initialConversationId,
   initialMessages,
+  onReset,
   labels,
 }: Props) {
   const router = useRouter();
@@ -250,7 +257,8 @@ export function ChatShell({
     // Strip the ?conversation_id=... query so a reload doesn't put us
     // back into the now-cleared conversation. router.replace keeps the
     // navigation out of history.
-    router.replace(`/${locale}/chat`);
+    if (onReset) onReset();
+    else router.replace(`/${locale}/chat`);
     inputRef.current?.focus();
   }
 

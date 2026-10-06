@@ -230,6 +230,26 @@ describe("ChatShell: starting a new conversation discards the pending one", () =
     expect(input().disabled).toBe(false);
   });
 
+  it("hands the reset to onReset when one is given, without navigating", async () => {
+    const onReset = vi.fn();
+    const f = vi.fn().mockResolvedValue(sseResponse("synthetic answer"));
+    vi.stubGlobal("fetch", f);
+    h.cursor = 0;
+    const withReset = () => {
+      h.cursor = 0;
+      return nodes(ChatShell({ locale: "ja", labels, onReset }));
+    };
+    withReset().find((n) => n.props.placeholder === "input")!.props.onChange!({
+      target: { value: "question" },
+    });
+    await withReset().find((n) => n.props.children === "send" && n.props.onClick)!.props.onClick!();
+    withReset().find((n) => n.props.children === "new" && n.props.onClick)!.props.onClick!();
+
+    expect(onReset).toHaveBeenCalledOnce();
+    expect(h.replace).not.toHaveBeenCalled();
+    expect(withReset().some((n) => n.props.content === "synthetic answer")).toBe(false);
+  });
+
   it("aborts the request it abandons", async () => {
     const signals: AbortSignal[] = [];
     const f = vi.fn((_url: string, init: { signal?: AbortSignal }) => {
