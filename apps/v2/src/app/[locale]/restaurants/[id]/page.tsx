@@ -5,6 +5,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { routing } from "@/lib/i18n/routing";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPrefectureLabel } from "@/lib/i18n/prefectures";
+import { getCuisineLabel } from "@/lib/i18n/cuisines";
 import {
   ArrowLeftIcon,
   ClockIcon,
@@ -125,7 +126,7 @@ export default async function RestaurantDetailPage({ params }: PageProps) {
       <header className="mt-8 space-y-3">
         {r.cuisine_type && (
           <span className="inline-flex rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">
-            {r.cuisine_type}
+            {getCuisineLabel(r.cuisine_type, safeLocale)}
           </span>
         )}
         <h1 className="text-2xl font-bold md:text-3xl">{r.name}</h1>
