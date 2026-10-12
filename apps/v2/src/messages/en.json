@@ -64,8 +64,8 @@
     "trustLead": "Questions about your status and your family involve important personal information. Here is how we protect it.",
     "trust": {
       "pii": {
-        "title": "Personal details are blocked before sending",
-        "body": "Questions that contain a residence card number, passport number, phone number, email address or similar are not sent, and you are asked to rewrite them."
+        "title": "Personal details are checked before they reach the AI",
+        "body": "If we detect a number in a fixed format, such as a residence card number, My Number, a Japanese passport number, a Japanese phone number or an email address, your message is not sent to the AI or saved, and you are asked to rewrite it. We cannot detect everything, so please do not enter information that identifies you."
       },
       "languages": {
         "title": "Three languages",
@@ -274,7 +274,8 @@
     "loading": "Loading...",
     "error": "An error occurred",
     "language": "Language",
-    "reload": "Reload"
+    "reload": "Reload",
+    "close": "Close"
   },
   "chat": {
     "disclaimer": "I am an AI and may present inaccurate information, so please verify my responses yourself. This is general information only; for final decisions or matters specific to your situation, please consult a professional.",
@@ -334,5 +335,11 @@
     "serviceHeading": "Service",
     "legalHeading": "Policies",
     "note": "AI answers are general information. Please consult a professional about decisions on your own situation."
+  },
+  "notFound": {
+    "title": "We could not find this page",
+    "body": "The page may have moved or been removed, or the URL may be incorrect. Please look for it from the home page or the article list.",
+    "home": "Back to home",
+    "articles": "See all articles"
   }
 }

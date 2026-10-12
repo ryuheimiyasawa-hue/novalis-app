@@ -11,7 +11,7 @@ export async function SiteFooter({ locale }: { locale: "ja" | "en" | "tl" }) {
   const tDash = await getTranslations({ locale, namespace: "dashboard" });
 
   const linkClass =
-    "inline-flex min-h-11 items-center text-sm text-muted-foreground transition-colors hover:text-foreground hover:underline md:min-h-8";
+    "inline-flex min-h-11 items-center text-sm text-muted-foreground transition-colors hover:text-foreground hover:underline lg:min-h-8";
 
   return (
     <footer className="mt-auto border-t border-border bg-card">

@@ -97,7 +97,7 @@ export async function ConversationsSidebar({ locale }: Props) {
   });
 
   const footLink =
-    "inline-flex min-h-11 items-center text-xs text-muted-foreground hover:text-foreground hover:underline md:min-h-8";
+    "inline-flex min-h-11 items-center text-xs text-muted-foreground hover:text-foreground hover:underline lg:min-h-8";
 
   return (
     <aside className="flex h-full w-full flex-col border-r border-border bg-sidebar">
@@ -112,7 +112,7 @@ export async function ConversationsSidebar({ locale }: Props) {
         </Link>
         <NewConversationLink
           locale={locale}
-          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary-hover"
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-primary/25 bg-primary-soft px-3 text-sm font-medium text-primary transition-colors hover:border-primary/40 hover:bg-primary/10"
         >
           <PlusIcon className="size-4" strokeWidth={1.75} aria-hidden />
           {t("newButton")}

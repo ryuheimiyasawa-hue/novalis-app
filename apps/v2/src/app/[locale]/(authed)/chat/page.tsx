@@ -169,14 +169,16 @@ export default async function ChatPage({ params, searchParams }: Props) {
             </div>
           )}
           <div className="flex items-center gap-2 border-b border-border bg-card px-3 py-2 md:hidden">
-            <MobileSidebar label={tConv("title")}>{sidebar}</MobileSidebar>
-            <span className="min-w-0 flex-1 text-base leading-tight font-bold">{t("title")}</span>
+            <MobileSidebar label={tConv("title")} closeLabel={tCommon("close")}>
+              {sidebar}
+            </MobileSidebar>
+            <h1 className="min-w-0 flex-1 text-base leading-tight font-bold">{t("title")}</h1>
             {/* Mobile back-to-dashboard link on the right of the header.
                 The icon alone read as decoration, so the label rides with
                 it — the desktop header shows the same wording. */}
             <Link
               href={`/${safeLocale}/dashboard`}
-              className="inline-flex min-h-11 max-w-[11rem] shrink-0 items-center gap-1.5 rounded-md border border-input bg-card px-3 text-left text-sm leading-tight font-medium text-foreground shadow-xs hover:bg-accent"
+              className="inline-flex min-h-11 max-w-[11rem] shrink-0 items-center gap-1.5 rounded-md border border-input bg-card px-3 text-left text-sm leading-tight font-medium text-foreground hover:bg-accent"
               aria-label={t("backToDashboard")}
               title={t("backToDashboard")}
             >

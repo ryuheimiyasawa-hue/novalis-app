@@ -50,7 +50,7 @@ export default async function MessengerLinkPage({ params }: PageProps) {
       <div className="mb-6">
         <Link
           href={`/${safeLocale}/dashboard`}
-          className="inline-flex min-h-11 items-center gap-2 rounded-md border border-input bg-card px-3.5 text-sm font-medium text-foreground shadow-xs transition-colors hover:border-primary/40 hover:bg-accent md:min-h-9"
+          className="inline-flex min-h-11 items-center gap-2 rounded-md border border-input bg-card px-3.5 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-accent lg:min-h-9"
         >
           <HomeIcon className="size-4" strokeWidth={1.75} aria-hidden />
           {t("backToDashboard")}

@@ -12,7 +12,10 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#fbf8f2",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fbf8f2" },
+    { media: "(prefers-color-scheme: dark)", color: "#121821" },
+  ],
 };
 
 // Next.js 16 requires <html> and <body> to live in the root layout.

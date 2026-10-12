@@ -498,27 +498,32 @@ export function ChatShell({
     <div className="mx-auto flex h-full max-w-3xl flex-col">
       {/* Header — title + subtitle only on desktop; the mobile chat
           page renders its own header with the hamburger trigger. */}
-      <header className="hidden items-end justify-between gap-4 border-b border-border px-6 pt-6 pb-4 md:flex">
-        <div className="min-w-0">
+      <header className="hidden border-b border-border px-6 pt-5 pb-4 md:block">
+        {/* Row 1: the way home on the left, page tools on the right. Row 2:
+            the title and its explanation across the full width, so long
+            Tagalog / English titles are never squeezed beside the tools. */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
           {/* Leading the heading, in a bordered control: as a quiet link on
               the far right it was read as part of the toolbar and missed. */}
-          <Button asChild variant="outline" size="sm" className="mb-3">
+          <Button asChild variant="outline" size="sm">
             <Link href={`/${locale}/dashboard`}>
               <HomeIcon className="size-4" aria-hidden />
               {labels.backToDashboard}
             </Link>
           </Button>
-          <h1 className="text-2xl font-bold">{labels.title}</h1>
-          <p className="text-sm text-muted-foreground">{labels.subtitle}</p>
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            <LocaleSwitcher
+              currentLocale={locale}
+              label={labels.languageLabel}
+            />
+            <Button variant="outline" size="sm" onClick={resetConversation}>
+              {labels.newConversation}
+            </Button>
+          </div>
         </div>
-        <div className="flex shrink-0 flex-col items-end gap-3 lg:flex-row lg:items-center">
-          <LocaleSwitcher
-            currentLocale={locale}
-            label={labels.languageLabel}
-          />
-          <Button variant="outline" size="sm" onClick={resetConversation}>
-            {labels.newConversation}
-          </Button>
+        <div className="mt-4 max-w-[680px]">
+          <h1 className="text-2xl font-bold">{labels.title}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{labels.subtitle}</p>
         </div>
       </header>
 
@@ -634,7 +639,7 @@ export function ChatShell({
       {/* Composer. Stays at the bottom of the column and clears the iPhone
           home indicator through the safe-area inset. */}
       <div className="border-t border-border bg-background px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:px-6 md:pb-5">
-        <div className="flex items-end gap-2 rounded-lg border border-input bg-card p-2 shadow-card focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/20">
+        <div className="flex items-end gap-2 rounded-lg border border-input bg-card p-2 shadow-card focus-within:border-ring focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ring">
           <Textarea
             ref={inputRef}
             rows={2}
@@ -644,7 +649,7 @@ export function ChatShell({
             onKeyDown={onInputKeyDown}
             placeholder={labels.inputPlaceholder}
             aria-label={labels.inputPlaceholder}
-            className="max-h-48 min-h-12 flex-1 resize-none border-0 bg-transparent px-2 py-2 shadow-none focus-visible:ring-0"
+            className="max-h-48 min-h-12 flex-1 resize-none border-0 bg-transparent px-2 py-2 shadow-none focus-visible:outline-none"
           />
           <Button
             onClick={send}

@@ -109,14 +109,14 @@ export default async function ArticleDetailPage({ params }: PageProps) {
         <HomeLink locale={safeLocale} />
         <Link
           href={`/${safeLocale}/articles`}
-          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline md:min-h-9"
+          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline lg:min-h-9"
         >
           <ArrowLeftIcon className="size-4" strokeWidth={1.75} aria-hidden />
           {tArticles("title")}
         </Link>
         <Link
           href={`/${safeLocale}/chat`}
-          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline md:min-h-9"
+          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline lg:min-h-9"
         >
           <MessagesSquareIcon className="size-4" strokeWidth={1.75} aria-hidden />
           {safeLocale === "ja" ? "チャットに戻る" : safeLocale === "tl" ? "Bumalik sa chat" : "Back to chat"}

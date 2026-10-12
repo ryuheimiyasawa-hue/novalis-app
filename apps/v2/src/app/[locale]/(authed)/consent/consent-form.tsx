@@ -78,7 +78,7 @@ export function ConsentForm({ locale, termsVersion, privacyVersion, labels }: Pr
         onClick={handleSubmit}
         disabled={!ready || submitting}
         aria-busy={submitting}
-        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-primary px-6 text-base font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-primary px-6 text-base font-medium text-primary-foreground transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
       >
         {submitting && (
           <Loader2Icon className="size-5 animate-spin" strokeWidth={1.75} aria-hidden />

@@ -13,7 +13,7 @@ interface Props {
 export function CitationLink({ citation, index, locale }: Props) {
   const label = `[${index + 1}]`;
   const inner = (
-    <span className="inline-flex min-h-9 max-w-full items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-sm transition-colors hover:border-primary/40 hover:bg-accent">
+    <span className="inline-flex min-h-11 lg:min-h-9 max-w-full items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-sm transition-colors hover:border-primary/40 hover:bg-accent">
       <span className="font-mono text-xs text-primary">{label}</span>
       <span className="min-w-0 text-left break-words text-foreground">{citation.title}</span>
     </span>

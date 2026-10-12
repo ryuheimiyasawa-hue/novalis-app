@@ -5,7 +5,7 @@ import { CircleAlertIcon, CircleCheckIcon, InfoIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const FIELD_CLASS =
-  "h-12 w-full rounded-md border border-input bg-card px-4 text-base text-foreground shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25 focus-visible:outline-none disabled:opacity-60";
+  "h-12 w-full rounded-md border border-input bg-card px-4 text-base text-foreground placeholder:text-muted-foreground focus-visible:border-ring disabled:opacity-60";
 const BUTTON_STRONG =
   "inline-flex min-h-12 items-center justify-center rounded-md border border-primary bg-card px-5 text-sm font-medium text-primary transition-colors hover:bg-primary-soft disabled:pointer-events-none disabled:opacity-60";
 const BUTTON_QUIET =
@@ -336,7 +336,7 @@ export function EmailPasswordForm({ locale, redirect, labels }: Props) {
                 setState({ kind: "idle" });
               }}
               disabled={isLoading}
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground disabled:opacity-60 md:min-h-8"
+              className="inline-flex min-h-11 items-center text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground disabled:opacity-60 lg:min-h-8"
             >
               {labels.forgotPassword}
             </button>

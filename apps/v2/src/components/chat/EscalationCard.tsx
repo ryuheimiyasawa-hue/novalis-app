@@ -189,7 +189,7 @@ export function EscalationCard({
             asChild
             size="sm"
             variant="secondary"
-            className="h-auto min-h-11 justify-start py-2 text-left whitespace-normal md:min-h-9"
+            className="h-auto min-h-11 justify-start py-2 text-left whitespace-normal lg:min-h-9"
           >
             <a
               href={`/${locale}/contact`}
@@ -204,7 +204,7 @@ export function EscalationCard({
             <Button
               size="sm"
               variant="ghost"
-              className="h-auto min-h-11 justify-start py-2 text-left whitespace-normal md:min-h-9"
+              className="h-auto min-h-11 justify-start py-2 text-left whitespace-normal lg:min-h-9"
               onClick={() => {
                 setMinimized(true);
                 onContinue?.();

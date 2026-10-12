@@ -48,7 +48,7 @@ export default async function LoginLayout({
                   aria-hidden
                   className="mt-1 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary"
                 >
-                  <CheckIcon className="size-3.5" strokeWidth={2.25} />
+                  <CheckIcon className="size-3.5" strokeWidth={1.75} />
                 </span>
                 <span>{tLanding(`heroPoints.${key}`)}</span>
               </li>

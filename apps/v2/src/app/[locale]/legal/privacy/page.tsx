@@ -48,7 +48,7 @@ export default async function PrivacyPage({
                 href={doc.href}
                 aria-current={doc.key === "privacy" ? "page" : undefined}
                 className={cn(
-                  "inline-flex min-h-11 items-center rounded-[8px] px-3 text-sm font-medium md:min-h-9",
+                  "inline-flex min-h-11 items-center rounded-[8px] px-3 text-sm font-medium lg:min-h-9",
                   doc.key === "privacy"
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-accent hover:text-foreground",

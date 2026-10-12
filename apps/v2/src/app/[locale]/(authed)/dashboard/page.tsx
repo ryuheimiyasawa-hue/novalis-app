@@ -106,7 +106,7 @@ export default async function DashboardPage({
           <div className="space-y-3">
             {!isPaymentEnabled() && (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-highlight-soft px-3 py-1 text-sm font-medium text-highlight-soft-foreground">
-                <CheckIcon className="size-4" strokeWidth={2} aria-hidden />
+                <CheckIcon className="size-4" strokeWidth={1.75} aria-hidden />
                 {t("freeBadge")}
               </span>
             )}

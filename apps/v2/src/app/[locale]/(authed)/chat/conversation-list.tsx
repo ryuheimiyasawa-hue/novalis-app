@@ -142,7 +142,7 @@ export function ConversationList({ locale, initialRows, labels }: Props) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={labels.searchPlaceholder}
-          className="h-11 pl-9 text-sm md:h-9"
+          className="h-11 pl-9 text-sm lg:h-9"
           aria-label={labels.searchPlaceholder}
         />
       </div>
@@ -167,20 +167,20 @@ export function ConversationList({ locale, initialRows, labels }: Props) {
                         if (e.key === "Enter") commitRename(row.id);
                         if (e.key === "Escape") setEditingId(null);
                       }}
-                      className="h-11 text-sm md:h-9"
+                      className="h-11 text-sm lg:h-9"
                       aria-label={labels.rename}
                     />
                     <button
                       type="button"
                       onClick={() => commitRename(row.id)}
-                      className="inline-flex min-h-11 shrink-0 items-center rounded-md bg-primary px-2.5 text-xs font-medium text-primary-foreground hover:bg-primary-hover md:min-h-9"
+                      className="inline-flex min-h-11 shrink-0 items-center rounded-md bg-primary px-2.5 text-xs font-medium text-primary-foreground hover:bg-primary-hover lg:min-h-9"
                     >
                       {labels.renameSave}
                     </button>
                     <button
                       type="button"
                       onClick={() => setEditingId(null)}
-                      className="inline-flex min-h-11 shrink-0 items-center rounded-md px-2 text-xs font-medium text-muted-foreground hover:bg-accent md:min-h-9"
+                      className="inline-flex min-h-11 shrink-0 items-center rounded-md px-2 text-xs font-medium text-muted-foreground hover:bg-accent lg:min-h-9"
                     >
                       {labels.renameCancel}
                     </button>
@@ -209,7 +209,7 @@ export function ConversationList({ locale, initialRows, labels }: Props) {
                       <DropdownMenuTrigger
                         disabled={busyId === row.id}
                         aria-label={labels.actionsLabel}
-                        className="inline-flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-card hover:text-foreground focus:opacity-100 disabled:opacity-40 md:mt-1 md:mr-1 md:size-8 md:opacity-0 md:group-hover:opacity-100"
+                        className="inline-flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-card hover:text-foreground reveal-on-hover disabled:opacity-40 lg:mt-1 lg:mr-1 lg:size-8"
                       >
                         <MoreHorizontalIcon className="size-4" strokeWidth={1.75} aria-hidden />
                       </DropdownMenuTrigger>

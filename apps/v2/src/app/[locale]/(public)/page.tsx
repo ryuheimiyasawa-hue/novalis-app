@@ -138,7 +138,7 @@ export default async function LandingPage({
               <p className="mt-4 flex flex-col gap-1 text-sm text-muted-foreground">
                 {!isPaymentEnabled() && (
                   <span className="inline-flex items-center gap-1 font-medium text-success">
-                    <CheckIcon className="size-4" strokeWidth={2} aria-hidden />
+                    <CheckIcon className="size-4" strokeWidth={1.75} aria-hidden />
                     {t("freeNote")}
                   </span>
                 )}
@@ -151,7 +151,7 @@ export default async function LandingPage({
                       aria-hidden
                       className="mt-1 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary"
                     >
-                      <CheckIcon className="size-3.5" strokeWidth={2.25} />
+                      <CheckIcon className="size-3.5" strokeWidth={1.75} />
                     </span>
                     <span>{t(`heroPoints.${key}`)}</span>
                   </li>
@@ -302,22 +302,22 @@ export default async function LandingPage({
             <li className="rounded-lg border border-border bg-card p-6 shadow-card">
               <IconTile icon={ShieldCheckIcon} />
               <h3 className="mt-4 text-xl font-bold">{t("trust.pii.title")}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{t("trust.pii.body")}</p>
+              <p className="mt-2 text-base text-muted-foreground">{t("trust.pii.body")}</p>
             </li>
             <li className="rounded-lg border border-border bg-card p-6 shadow-card">
               <IconTile icon={LanguagesIcon} />
               <h3 className="mt-4 text-xl font-bold">{t("trust.languages.title")}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{t("trust.languages.body")}</p>
+              <p className="mt-2 text-base text-muted-foreground">{t("trust.languages.body")}</p>
             </li>
             <li className="rounded-lg border border-border bg-card p-6 shadow-card">
               <IconTile icon={Building2Icon} />
               <h3 className="mt-4 text-xl font-bold">{t("trust.operator.title")}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{t("trust.operator.body")}</p>
+              <p className="mt-2 text-base text-muted-foreground">{t("trust.operator.body")}</p>
               <ul className="mt-3 flex flex-wrap gap-x-4">
                 <li>
                   <Link
                     href={`/${safeLocale}/contact`}
-                    className="inline-flex min-h-11 items-center text-sm font-medium text-primary underline-offset-4 hover:underline md:min-h-8"
+                    className="inline-flex min-h-11 items-center text-sm font-medium text-primary underline-offset-4 hover:underline lg:min-h-8"
                   >
                     {tNav("contact")}
                   </Link>
@@ -325,7 +325,7 @@ export default async function LandingPage({
                 <li>
                   <Link
                     href={`/${safeLocale}/legal/terms`}
-                    className="inline-flex min-h-11 items-center text-sm font-medium text-primary underline-offset-4 hover:underline md:min-h-8"
+                    className="inline-flex min-h-11 items-center text-sm font-medium text-primary underline-offset-4 hover:underline lg:min-h-8"
                   >
                     {tLegal("termsTitle")}
                   </Link>
@@ -333,7 +333,7 @@ export default async function LandingPage({
                 <li>
                   <Link
                     href={`/${safeLocale}/legal/privacy`}
-                    className="inline-flex min-h-11 items-center text-sm font-medium text-primary underline-offset-4 hover:underline md:min-h-8"
+                    className="inline-flex min-h-11 items-center text-sm font-medium text-primary underline-offset-4 hover:underline lg:min-h-8"
                   >
                     {tLegal("privacyTitle")}
                   </Link>
@@ -414,7 +414,7 @@ export default async function LandingPage({
             <Button
               asChild
               size="lg"
-              className="w-full bg-card text-primary shadow-none hover:bg-primary-soft md:w-auto"
+              className="w-full bg-card text-primary shadow-none hover:bg-primary-soft focus-visible:outline-primary-foreground md:w-auto"
             >
               <Link href={`/${safeLocale}/login`}>
                 <FacebookIcon aria-hidden />

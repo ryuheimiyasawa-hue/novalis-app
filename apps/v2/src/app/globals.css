@@ -47,7 +47,7 @@
   --destructive: #b42318;
   --destructive-foreground: #ffffff;
   --border: #e7e1d5;
-  --input: #d9d2c4;
+  --input: #948d80; /* field outline: 3.3:1 on white, 3.1:1 on cream (WCAG 1.4.11) */
   --ring: #1e3a5f;
   --chart-1: #1e3a5f;
   --chart-2: #e8a33d;
@@ -94,7 +94,7 @@
   --destructive: #f97066;
   --destructive-foreground: #121821;
   --border: #2a3444;
-  --input: #364256;
+  --input: #66738a; /* 3.3:1 on the dark card */
   --ring: #8db4e2;
   --chart-1: #8db4e2;
   --chart-2: #f0b65a;
@@ -271,4 +271,17 @@ html {
 }
 .typing-dot:nth-child(3) {
   animation-delay: 0.3s;
+}
+
+/* Row actions (conversation menu) fade in on hover only where a real pointer
+   can hover and the layout is desktop-wide. Touch tablets always see them;
+   keyboard focus and an open menu keep them visible. */
+@media (hover: hover) and (min-width: 64rem) {
+  .reveal-on-hover:not(:focus-visible):not([data-state="open"]) {
+    opacity: 0;
+  }
+  .group:hover .reveal-on-hover,
+  .group:focus-within .reveal-on-hover {
+    opacity: 1;
+  }
 }

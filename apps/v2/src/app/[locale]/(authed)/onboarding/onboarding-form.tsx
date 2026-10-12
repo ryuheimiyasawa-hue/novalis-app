@@ -99,7 +99,7 @@ export function OnboardingForm({
             id="pref-select"
             value={prefectureCode}
             onChange={(e) => setPrefectureCode(e.target.value)}
-            className={"h-12 w-full rounded-md border border-input bg-card px-3.5 text-base text-foreground shadow-xs focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25 focus-visible:outline-none"}
+            className={"h-12 w-full rounded-md border border-input bg-card px-3.5 text-base text-foreground focus-visible:border-ring"}
           >
             <option value="">{labels.prefectureSelectPlaceholder}</option>
             {PREFECTURES.map((p) => (
@@ -121,7 +121,7 @@ export function OnboardingForm({
             onChange={(e) => setCityName(e.target.value)}
             placeholder={labels.cityPlaceholder}
             maxLength={100}
-            className={"h-12 w-full rounded-md border border-input bg-card px-3.5 text-base text-foreground shadow-xs focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25 focus-visible:outline-none"}
+            className={"h-12 w-full rounded-md border border-input bg-card px-3.5 text-base text-foreground focus-visible:border-ring"}
           />
         </div>
       </fieldset>
@@ -141,7 +141,7 @@ export function OnboardingForm({
         onClick={handleSubmit}
         disabled={!ready || submitting}
         aria-busy={submitting}
-        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-primary px-6 text-base font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-primary px-6 text-base font-medium text-primary-foreground transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
       >
         {submitting && (
           <Loader2Icon className="size-5 animate-spin" strokeWidth={1.75} aria-hidden />

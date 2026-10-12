@@ -64,8 +64,8 @@
     "trustLead": "Mahalagang personal na impormasyon ang tungkol sa inyong status at pamilya. Ganito namin ito pinoprotektahan.",
     "trust": {
       "pii": {
-        "title": "Hinaharang ang personal na detalye bago maipadala",
-        "body": "Hindi ipinapadala ang tanong na may residence card number, passport number, phone number, email address at iba pa, at hihilingin na isulat ito muli."
+        "title": "Sinusuri ang personal na detalye bago umabot sa AI",
+        "body": "Kapag may nakita kaming numerong may tiyak na format, gaya ng residence card number, My Number, Japanese passport number, Japanese phone number o email address, hindi ito ipinapadala sa AI at hindi rin sine-save, at hihilingin na isulat muli ang mensahe. Hindi namin kayang makita ang lahat, kaya huwag po ninyong ilagay ang impormasyong makapagpapakilala sa inyo."
       },
       "languages": {
         "title": "Tatlong wika",
@@ -274,7 +274,8 @@
     "loading": "Naglo-load...",
     "error": "May naganap na error",
     "language": "Wika",
-    "reload": "I-reload"
+    "reload": "I-reload",
+    "close": "Isara"
   },
   "chat": {
     "disclaimer": "Ako ay isang AI at maaaring magpakita ng hindi tumpak na impormasyon, kaya mangyaring suriin ninyong muli ang aking mga sagot. Pangkalahatang impormasyon lamang din ito; para sa panghuling pasya o sa mga bagay na partikular sa inyong sitwasyon, mangyaring kumonsulta sa isang propesyonal.",
@@ -334,5 +335,11 @@
     "serviceHeading": "Serbisyo",
     "legalHeading": "Mga Patakaran",
     "note": "Pangkalahatang impormasyon lamang ang sagot ng AI. Para sa pasya tungkol sa sarili ninyong sitwasyon, kumonsulta po sa propesyonal."
+  },
+  "notFound": {
+    "title": "Hindi namin mahanap ang pahinang ito",
+    "body": "Maaaring inilipat o tinanggal na ang pahina, o mali ang URL. Pakihanap po ito mula sa home page o sa listahan ng mga artikulo.",
+    "home": "Bumalik sa home",
+    "articles": "Tingnan ang mga artikulo"
   }
 }

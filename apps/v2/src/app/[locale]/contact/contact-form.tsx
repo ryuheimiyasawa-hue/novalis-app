@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
-import { CircleAlertIcon, CircleCheckIcon, Loader2Icon, SendIcon } from "lucide-react";
+import { CircleAlertIcon, CircleCheckIcon, HomeIcon, Loader2Icon, SendIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,14 +20,18 @@ export interface ContactFormLabels {
   success: string;
   errorInvalid: string;
   errorGeneric: string;
+  /** Next step shown after a successful send. */
+  doneLinkLabel?: string;
 }
 
 interface Props {
   labels: ContactFormLabels;
   defaultEmail?: string;
+  /** Where the post-send button leads (the dashboard for signed-in users). */
+  doneHref?: string;
 }
 
-export function ContactForm({ labels, defaultEmail }: Props) {
+export function ContactForm({ labels, defaultEmail, doneHref }: Props) {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState(defaultEmail ?? "");
@@ -82,6 +87,14 @@ export function ContactForm({ labels, defaultEmail }: Props) {
           <CircleCheckIcon className="size-6" strokeWidth={1.75} />
         </span>
         <p className="text-base font-medium text-foreground">{labels.success}</p>
+        {doneHref && labels.doneLinkLabel && (
+          <Button asChild variant="outline" className="mt-2">
+            <Link href={doneHref}>
+              <HomeIcon aria-hidden />
+              {labels.doneLinkLabel}
+            </Link>
+          </Button>
+        )}
       </div>
     );
   }

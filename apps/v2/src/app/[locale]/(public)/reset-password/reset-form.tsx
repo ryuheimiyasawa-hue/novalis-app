@@ -97,7 +97,7 @@ export function ResetPasswordForm({ locale, labels }: Props) {
         disabled={submitting}
         autoComplete="new-password"
         minLength={MIN_PASSWORD_LENGTH}
-        className="h-12 w-full rounded-md border border-input bg-card px-4 text-base text-foreground shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25 focus-visible:outline-none disabled:opacity-60"
+        className="h-12 w-full rounded-md border border-input bg-card px-4 text-base text-foreground placeholder:text-muted-foreground focus-visible:border-ring disabled:opacity-60"
       />
       <input
         type="password"
@@ -109,12 +109,12 @@ export function ResetPasswordForm({ locale, labels }: Props) {
         disabled={submitting}
         autoComplete="new-password"
         minLength={MIN_PASSWORD_LENGTH}
-        className="h-12 w-full rounded-md border border-input bg-card px-4 text-base text-foreground shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25 focus-visible:outline-none disabled:opacity-60"
+        className="h-12 w-full rounded-md border border-input bg-card px-4 text-base text-foreground placeholder:text-muted-foreground focus-visible:border-ring disabled:opacity-60"
       />
       <button
         type="submit"
         disabled={submitting || !newPassword || !confirm}
-        className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-primary px-6 text-base font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary-hover disabled:pointer-events-none disabled:opacity-60"
+        className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-primary px-6 text-base font-medium text-primary-foreground transition-colors hover:bg-primary-hover disabled:pointer-events-none disabled:opacity-60"
       >
         {submitting ? labels.submitting : labels.submit}
       </button>
