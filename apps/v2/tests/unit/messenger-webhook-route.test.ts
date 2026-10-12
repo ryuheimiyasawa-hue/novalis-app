@@ -32,9 +32,17 @@ vi.mock("@/lib/chat/escalation-notify", () => ({
 }));
 
 vi.mock("@/lib/legal/consent", () => ({ checkConsent: vi.fn() }));
+// The reply builder itself is covered in messenger-escalation-reply.test.ts;
+// here only the lookup is stubbed, so the webhook is asserted to send what
+// the builder produces.
+vi.mock("@/lib/messenger/escalation-reply", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/messenger/escalation-reply")>()),
+  loadActiveExperts: vi.fn(async () => []),
+}));
 
 import { GET, POST } from "@/app/api/messenger/webhook/route";
 import { checkConsent } from "@/lib/legal/consent";
+import { loadActiveExperts } from "@/lib/messenger/escalation-reply";
 import { computeSignature } from "@/lib/messenger/signature";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { sendMessengerText } from "@/lib/messenger/graph";
@@ -332,6 +340,40 @@ describe("POST — linked sender, normal flow", () => {
     mockPersistResult.mockRejectedValue(new Error("db down"));
     await POST(postReq(messageEvent("hi")));
     expect(mockSend).toHaveBeenCalledOnce();
+  });
+
+  it("sends the experts and the support link with an escalation", async () => {
+    process.env.NEXT_PUBLIC_APP_URL = "https://app.example.test";
+    vi.mocked(loadActiveExperts).mockResolvedValueOnce([
+      {
+        name: "佐藤 花子",
+        title: "弁護士",
+        specialty_ja: "家族法",
+        specialty_en: null,
+        specialty_tl: null,
+        calendar_url: null,
+      },
+    ]);
+    mockProcessChat.mockResolvedValue({
+      kind: "escalate",
+      text: "専門的な判断が必要なため、お答えすることができません。",
+      reason: "individual",
+      decision: buildDecision({
+        stage: "keyword",
+        outcome: "escalate",
+        category: "individual",
+        reason: "individual",
+      }),
+      meta: {},
+    } as never);
+
+    await POST(postReq(messageEvent("会社から解雇されました")));
+
+    const sent = mockSend.mock.calls[0]![1];
+    expect(sent).toContain("専門的な判断が必要なため");
+    expect(sent).toContain("おすすめの専門家");
+    expect(sent).toContain("佐藤 花子（弁護士／家族法）");
+    expect(sent).toContain("https://app.example.test/ja/contact");
   });
 
   it("alerts staff when the conversation escalates", async () => {
