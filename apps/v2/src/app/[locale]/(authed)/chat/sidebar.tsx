@@ -97,7 +97,7 @@ export async function ConversationsSidebar({ locale }: Props) {
   });
 
   const footLink =
-    "inline-flex min-h-11 items-center text-xs text-muted-foreground hover:text-foreground hover:underline lg:min-h-8";
+    "inline-flex min-h-11 min-w-11 items-center text-xs text-muted-foreground hover:text-foreground hover:underline lg:min-h-8 lg:min-w-0";
 
   return (
     <aside className="flex h-full w-full flex-col border-r border-border bg-sidebar">

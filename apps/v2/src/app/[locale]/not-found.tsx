@@ -21,7 +21,7 @@ export default async function LocaleNotFound() {
     <SiteFrame locale={locale}>
       <main
         id="main-content"
-        className="mx-auto flex w-full max-w-[1120px] flex-1 flex-col justify-center px-4 py-16 md:px-6 md:py-24"
+        className="mx-auto w-full max-w-[728px] flex-1 px-4 py-16 md:px-6 md:py-24"
       >
         <EmptyState
           icon={CompassIcon}

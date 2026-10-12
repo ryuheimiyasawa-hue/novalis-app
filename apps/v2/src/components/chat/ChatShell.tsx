@@ -511,7 +511,7 @@ export function ChatShell({
               {labels.backToDashboard}
             </Link>
           </Button>
-          <div className="flex flex-wrap items-center justify-end gap-3">
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-3">
             <LocaleSwitcher
               currentLocale={locale}
               label={labels.languageLabel}
