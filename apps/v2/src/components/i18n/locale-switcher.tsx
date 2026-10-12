@@ -1,11 +1,10 @@
 "use client";
 
 import { Suspense } from "react";
-import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { routing } from "@/lib/i18n/routing";
-import { localeLabels } from "@/lib/i18n/config";
 import { setPreferredLanguageCookie } from "@/lib/i18n/preferred-language-cookie";
+import { LocalePills } from "./locale-pills";
 
 // Shared locale switcher used on every page that doesn't already have a
 // custom one (dashboard / login still use their page-specific variants).
@@ -26,8 +25,8 @@ interface Props {
   currentLocale: string;
   /** Localised "Language:" / "言語:" / "Wika:" label. Pass via i18n. */
   label: string;
-  /** Tailwind class overrides for the wrapper. Default mirrors the
-   *  dashboard switcher's text-sm muted look. */
+  /** Extra classes for the wrapper (layout only — the look is shared
+   *  through LocalePills). */
   className?: string;
 }
 
@@ -53,25 +52,13 @@ function LocaleSwitcherInner({ currentLocale, label, className }: Props) {
   }
 
   return (
-    <span className={className ?? "text-sm"}>
-      <span className="mr-2 text-neutral-500">{label}:</span>
-      {routing.locales.map((loc, i) => (
-        <span key={loc}>
-          {i > 0 && <span className="mx-1 text-neutral-400">·</span>}
-          {loc === currentLocale ? (
-            <span className="font-medium underline">{localeLabels[loc]}</span>
-          ) : (
-            <Link
-              href={buildHref(loc)}
-              onClick={() => rememberChoice(loc)}
-              className="hover:underline"
-            >
-              {localeLabels[loc]}
-            </Link>
-          )}
-        </span>
-      ))}
-    </span>
+    <LocalePills
+      currentLocale={currentLocale}
+      label={label}
+      hrefFor={buildHref}
+      onPick={rememberChoice}
+      className={className}
+    />
   );
 }
 

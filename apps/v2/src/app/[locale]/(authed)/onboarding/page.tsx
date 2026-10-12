@@ -10,7 +10,11 @@ import {
   PREFERRED_LANGUAGE_COOKIE,
   parsePreferredLanguage,
 } from "@/lib/i18n/preferred-language-cookie";
+import { HandHeartIcon } from "lucide-react";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
+import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { IconTile } from "@/components/layout/icon-tile";
 import { OnboardingForm } from "./onboarding-form";
 import { WelcomeModal } from "./welcome-modal";
 
@@ -41,41 +45,49 @@ export default async function OnboardingPage({
   const showWelcomeModal = stored === null;
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
-      <WelcomeModal currentLocale={safeLocale} initialShow={showWelcomeModal} />
-      <div className="max-w-xl w-full space-y-6">
-        <div className="flex justify-end">
+    <div className="flex min-h-dvh flex-col">
+      <SiteHeader
+        locale={safeLocale}
+        showNav={false}
+        switcher={
           <LocaleSwitcher
             currentLocale={safeLocale}
             label={tCommon("language")}
           />
+        }
+      />
+      <main id="main-content" className="flex flex-1 justify-center px-4 py-10 md:px-6 md:py-16">
+        <WelcomeModal currentLocale={safeLocale} initialShow={showWelcomeModal} />
+        <div className="w-full max-w-[640px] space-y-8">
+          <div className="space-y-3">
+            <IconTile icon={HandHeartIcon} size="lg" tone="highlight" />
+            <h1 className="text-2xl font-bold md:text-3xl">{t("heading")}</h1>
+            <p className="text-base text-muted-foreground">
+              {t("subheading")}
+            </p>
+          </div>
+          <OnboardingForm
+            locale={safeLocale}
+            termsVersion={CURRENT_TERMS_VERSION}
+            privacyVersion={CURRENT_PRIVACY_VERSION}
+            labels={{
+              terms: t("termsLabel"),
+              privacy: t("privacyLabel"),
+              age: t("ageLabel"),
+              viewTerms: t("viewTerms"),
+              viewPrivacy: t("viewPrivacy"),
+              submit: t("submit"),
+              error: t("error"),
+              locationHeading: t("locationHeading"),
+              prefectureLabel: t("prefectureLabel"),
+              prefectureSelectPlaceholder: t("prefectureSelectPlaceholder"),
+              cityLabel: t("cityLabel"),
+              cityPlaceholder: t("cityPlaceholder"),
+            }}
+          />
         </div>
-        <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-bold">{t("heading")}</h1>
-          <p className="text-neutral-600 dark:text-neutral-300">
-            {t("subheading")}
-          </p>
-        </div>
-        <OnboardingForm
-          locale={safeLocale}
-          termsVersion={CURRENT_TERMS_VERSION}
-          privacyVersion={CURRENT_PRIVACY_VERSION}
-          labels={{
-            terms: t("termsLabel"),
-            privacy: t("privacyLabel"),
-            age: t("ageLabel"),
-            viewTerms: t("viewTerms"),
-            viewPrivacy: t("viewPrivacy"),
-            submit: t("submit"),
-            error: t("error"),
-            locationHeading: t("locationHeading"),
-            prefectureLabel: t("prefectureLabel"),
-            prefectureSelectPlaceholder: t("prefectureSelectPlaceholder"),
-            cityLabel: t("cityLabel"),
-            cityPlaceholder: t("cityPlaceholder"),
-          }}
-        />
-      </div>
-    </main>
+      </main>
+      <SiteFooter locale={safeLocale} />
+    </div>
   );
 }

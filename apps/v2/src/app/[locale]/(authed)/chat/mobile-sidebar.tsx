@@ -49,35 +49,35 @@ export function MobileSidebar({ label, children }: Props) {
   return (
     <>
       <Button
-        variant="ghost"
-        size="sm"
-        className="md:hidden"
+        variant="outline"
+        size="icon"
+        className="shrink-0 md:hidden"
         onClick={() => setOpen(true)}
         aria-label={label}
         aria-expanded={open}
       >
-        <MenuIcon className="size-5" aria-hidden />
+        <MenuIcon className="size-5" strokeWidth={1.75} aria-hidden />
       </Button>
 
       {open && (
         <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
           {/* Backdrop — click to close */}
           <div
-            className="absolute inset-0 bg-black/50"
+            className="absolute inset-0 bg-foreground/40"
             onClick={() => setOpen(false)}
             aria-hidden
           />
           {/* Drawer — left slide-in, 80vw wide capped at 320px */}
-          <div className="absolute inset-y-0 left-0 flex w-[80vw] max-w-[320px] flex-col bg-background shadow-xl">
+          <div className="absolute inset-y-0 left-0 flex w-[85vw] max-w-[320px] flex-col bg-sidebar shadow-card pb-[env(safe-area-inset-bottom)]">
             <div className="flex items-center justify-between border-b border-border px-3 py-2">
-              <span className="text-sm font-semibold">{label}</span>
+              <span className="text-base font-bold">{label}</span>
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
                 onClick={() => setOpen(false)}
                 aria-label="Close"
               >
-                <XIcon className="size-5" aria-hidden />
+                <XIcon className="size-5" strokeWidth={1.75} aria-hidden />
               </Button>
             </div>
             {/* The server-rendered sidebar is inserted as children so

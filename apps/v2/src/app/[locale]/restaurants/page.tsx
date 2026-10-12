@@ -4,8 +4,16 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { routing } from "@/lib/i18n/routing";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPrefectureLabel } from "@/lib/i18n/prefectures";
-import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
+import {
+  MapPinIcon,
+  RefreshCwIcon,
+  TriangleAlertIcon,
+  UtensilsCrossedIcon,
+} from "lucide-react";
 import { HomeLink } from "@/components/layout/home-link";
+import { PageHeader } from "@/components/layout/page-header";
+import { EmptyState } from "@/components/layout/empty-state";
+import { Button } from "@/components/ui/button";
 
 // Public Filipino-restaurant catalog (P2-J). Operator-curated, no user
 // submissions. ISR-cached 10 min. prefecture / cuisine filters are URL-driven
@@ -75,32 +83,44 @@ export default async function RestaurantsListPage({
   if (error) {
     console.error("[restaurants list] fetch failed:", error.message);
     return (
-      <div className="mx-auto max-w-3xl px-4 py-12">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
-        <p className="mt-4 text-sm text-destructive">{t("loadError")}</p>
-      </div>
+      <main id="main-content" className="mx-auto w-full max-w-[1120px] flex-1 px-4 py-10 md:px-6 md:py-16">
+        <HomeLink locale={safeLocale} className="mb-8" />
+        <PageHeader icon={UtensilsCrossedIcon} title={t("title")} description={t("subtitle")} />
+        <EmptyState
+          role="alert"
+          icon={TriangleAlertIcon}
+          tone="caution"
+          title={t("loadError")}
+          action={
+            <Button asChild variant="outline">
+              <Link href={`/${safeLocale}/restaurants`}>
+                <RefreshCwIcon aria-hidden />
+                {tCommon("reload")}
+              </Link>
+            </Button>
+          }
+        />
+      </main>
     );
   }
 
   const rows = (data ?? []) as RestaurantRow[];
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
-      <HomeLink locale={safeLocale} className="mb-4" />
-      <div className="mb-3 flex justify-end">
-        <LocaleSwitcher currentLocale={safeLocale} label={tCommon("language")} />
-      </div>
-      <header className="mb-6 border-b border-border pb-4">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
-      </header>
+    <main id="main-content" className="mx-auto w-full max-w-[1120px] flex-1 px-4 py-10 md:px-6 md:py-16">
+      <HomeLink locale={safeLocale} className="mb-8" />
+      <PageHeader icon={UtensilsCrossedIcon} title={t("title")} description={t("subtitle")} />
 
       {rows.length === 0 ? (
-        <p className="rounded-md border border-dashed border-border px-6 py-12 text-center text-sm text-muted-foreground">
-          {t("empty")}
-        </p>
+        <EmptyState
+          role="status"
+          icon={UtensilsCrossedIcon}
+          tone="highlight"
+          title={t("empty")}
+          action={<HomeLink locale={safeLocale} />}
+        />
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2">
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {rows.map((row) => {
             const pref = getPrefectureLabel(row.prefecture_code, safeLocale);
             const desc = pickDescription(row, safeLocale);
@@ -108,29 +128,35 @@ export default async function RestaurantsListPage({
               <li key={row.id}>
                 <Link
                   href={`/${safeLocale}/restaurants/${row.id}`}
-                  className="block h-full overflow-hidden rounded-md border border-border bg-card hover:border-primary/40 hover:bg-accent/30"
+                  className="group flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card transition-colors hover:border-primary/40"
                 >
-                  {row.photo_url && (
+                  {row.photo_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={row.photo_url}
                       alt={row.name}
                       loading="lazy"
-                      className="h-40 w-full object-cover"
+                      className="aspect-[16/10] w-full object-cover"
                     />
-                  )}
-                  <div className="space-y-1 px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      {row.cuisine_type && (
-                        <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                          {row.cuisine_type}
-                        </span>
-                      )}
+                  ) : (
+                    <div
+                      aria-hidden
+                      className="flex aspect-[16/10] w-full items-center justify-center bg-highlight-soft text-highlight-soft-foreground"
+                    >
+                      <UtensilsCrossedIcon className="size-10" strokeWidth={1.75} />
                     </div>
-                    <h2 className="text-base font-semibold leading-snug">
+                  )}
+                  <div className="flex flex-1 flex-col gap-2 p-5">
+                    {row.cuisine_type && (
+                      <span className="w-fit rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">
+                        {row.cuisine_type}
+                      </span>
+                    )}
+                    <h2 className="text-xl font-bold group-hover:text-primary">
                       {row.name}
                     </h2>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <MapPinIcon className="size-4 shrink-0" strokeWidth={1.75} aria-hidden />
                       {[pref, row.city_name].filter(Boolean).join(" ")}
                     </p>
                     {desc && (

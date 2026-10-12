@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { CircleAlertIcon, CircleCheckIcon, InfoIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+
+const FIELD_CLASS =
+  "h-12 w-full rounded-md border border-input bg-card px-4 text-base text-foreground shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25 focus-visible:outline-none disabled:opacity-60";
+const BUTTON_STRONG =
+  "inline-flex min-h-12 items-center justify-center rounded-md border border-primary bg-card px-5 text-sm font-medium text-primary transition-colors hover:bg-primary-soft disabled:pointer-events-none disabled:opacity-60";
+const BUTTON_QUIET =
+  "inline-flex min-h-12 items-center justify-center rounded-md border border-input bg-card px-5 text-sm font-medium text-foreground transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-60";
 
 // Email + password authentication. Replaces the magic-link form.
 // Three actions on one screen:
@@ -217,8 +225,12 @@ export function EmailPasswordForm({ locale, redirect, labels }: Props) {
   // They can refresh the page to try again.
   if (state.kind === "success") {
     return (
-      <p className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
-        {state.message}
+      <p
+        role="status"
+        className="flex items-start gap-2.5 rounded-md border border-success/30 bg-success/10 px-4 py-3 text-sm text-foreground"
+      >
+        <CircleCheckIcon className="mt-0.5 size-4 shrink-0 text-success" strokeWidth={1.75} aria-hidden />
+        <span>{state.message}</span>
       </p>
     );
   }
@@ -238,8 +250,9 @@ export function EmailPasswordForm({ locale, redirect, labels }: Props) {
       className="space-y-3"
     >
       {isReset && (
-        <p className="rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-800 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200">
-          {labels.resetTitle}
+        <p className="flex items-start gap-2.5 rounded-md bg-primary-soft px-3.5 py-3 text-sm text-foreground">
+          <InfoIcon className="mt-0.5 size-4 shrink-0 text-primary" strokeWidth={1.75} aria-hidden />
+          <span>{labels.resetTitle}</span>
         </p>
       )}
 
@@ -251,7 +264,8 @@ export function EmailPasswordForm({ locale, redirect, labels }: Props) {
         placeholder={labels.emailPlaceholder}
         disabled={isLoading}
         autoComplete="email"
-        className="w-full rounded-md border border-neutral-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900"
+        aria-label={labels.emailPlaceholder}
+        className={FIELD_CLASS}
       />
 
       {!isReset && (
@@ -264,7 +278,8 @@ export function EmailPasswordForm({ locale, redirect, labels }: Props) {
           disabled={isLoading}
           autoComplete="current-password"
           minLength={MIN_PASSWORD_LENGTH}
-          className="w-full rounded-md border border-neutral-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900"
+          aria-label={labels.passwordPlaceholder}
+          className={FIELD_CLASS}
         />
       )}
 
@@ -273,7 +288,7 @@ export function EmailPasswordForm({ locale, redirect, labels }: Props) {
           <button
             type="submit"
             disabled={isLoading || email.trim().length === 0}
-            className="flex-1 rounded-md bg-neutral-900 px-6 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
+            className={`flex-1 ${BUTTON_STRONG}`}
           >
             {isLoading ? labels.signingIn : labels.resetSubmit}
           </button>
@@ -284,7 +299,7 @@ export function EmailPasswordForm({ locale, redirect, labels }: Props) {
               setState({ kind: "idle" });
             }}
             disabled={isLoading}
-            className="rounded-md border border-neutral-300 px-4 py-2.5 text-sm font-medium hover:bg-neutral-100 disabled:opacity-60 dark:border-neutral-700 dark:hover:bg-neutral-800"
+            className={BUTTON_QUIET}
           >
             {labels.resetCancel}
           </button>
@@ -296,7 +311,7 @@ export function EmailPasswordForm({ locale, redirect, labels }: Props) {
               type="button"
               onClick={handleSignIn}
               disabled={isLoading || !email.trim() || !password}
-              className="flex-1 rounded-md bg-neutral-900 px-6 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
+              className={`flex-1 ${BUTTON_STRONG}`}
             >
               {state.kind === "loading" && state.action === "signin"
                 ? labels.signingIn
@@ -306,7 +321,7 @@ export function EmailPasswordForm({ locale, redirect, labels }: Props) {
               type="button"
               onClick={handleSignUp}
               disabled={isLoading || !email.trim() || !password}
-              className="flex-1 rounded-md border border-neutral-300 px-6 py-2.5 text-sm font-medium hover:bg-neutral-100 disabled:opacity-60 dark:border-neutral-700 dark:hover:bg-neutral-800"
+              className={`flex-1 ${BUTTON_QUIET}`}
             >
               {state.kind === "loading" && state.action === "signup"
                 ? labels.signingUp
@@ -321,7 +336,7 @@ export function EmailPasswordForm({ locale, redirect, labels }: Props) {
                 setState({ kind: "idle" });
               }}
               disabled={isLoading}
-              className="text-xs text-neutral-500 underline hover:text-neutral-700 disabled:opacity-60 dark:hover:text-neutral-300"
+              className="inline-flex min-h-11 items-center text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground disabled:opacity-60 md:min-h-8"
             >
               {labels.forgotPassword}
             </button>
@@ -330,7 +345,13 @@ export function EmailPasswordForm({ locale, redirect, labels }: Props) {
       )}
 
       {state.kind === "error" && (
-        <p className="text-xs text-red-600 dark:text-red-400">{state.message}</p>
+        <p
+          role="alert"
+          className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3.5 py-3 text-sm text-destructive"
+        >
+          <CircleAlertIcon className="mt-0.5 size-4 shrink-0" strokeWidth={1.75} aria-hidden />
+          <span>{state.message}</span>
+        </p>
       )}
     </form>
   );

@@ -3,8 +3,19 @@ import { hasLocale } from "next-intl";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { routing } from "@/lib/i18n/routing";
 import { getAdminClient } from "@/lib/supabase/admin";
-import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
+import {
+  ArrowRightIcon,
+  BookOpenIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  MessagesSquareIcon,
+  RefreshCwIcon,
+  TriangleAlertIcon,
+} from "lucide-react";
 import { HomeLink } from "@/components/layout/home-link";
+import { PageHeader } from "@/components/layout/page-header";
+import { EmptyState } from "@/components/layout/empty-state";
+import { Button } from "@/components/ui/button";
 
 // Public articles list (C). ISR-cached for 10 min so dashboard CTAs
 // can hammer the route without burning DB requests. Filters by
@@ -101,14 +112,32 @@ export default async function ArticlesListPage({
     locale: safeLocale,
     namespace: "common",
   });
+  const tDashboard = await getTranslations({
+    locale: safeLocale,
+    namespace: "dashboard",
+  });
 
   if (error) {
     console.error("[articles list] fetch failed:", error.message);
     return (
-      <div className="mx-auto max-w-3xl px-4 py-12">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
-        <p className="mt-4 text-sm text-destructive">{t("loadError")}</p>
-      </div>
+      <main id="main-content" className="mx-auto w-full max-w-[1120px] flex-1 px-4 py-10 md:px-6 md:py-16">
+        <HomeLink locale={safeLocale} className="mb-8" />
+        <PageHeader icon={BookOpenIcon} title={t("title")} description={t("subtitle")} />
+        <EmptyState
+          role="alert"
+          icon={TriangleAlertIcon}
+          tone="caution"
+          title={t("loadError")}
+          action={
+            <Button asChild variant="outline">
+              <Link href={`/${safeLocale}/articles`}>
+                <RefreshCwIcon aria-hidden />
+                {tCommon("reload")}
+              </Link>
+            </Button>
+          }
+        />
+      </main>
     );
   }
 
@@ -119,25 +148,27 @@ export default async function ArticlesListPage({
   const hasNext = page < totalPages;
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
-      <HomeLink locale={safeLocale} className="mb-4" />
-      <div className="mb-3 flex justify-end">
-        <LocaleSwitcher
-          currentLocale={safeLocale}
-          label={tCommon("language")}
-        />
-      </div>
-      <header className="mb-6 border-b border-border pb-4">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
-      </header>
+    <main id="main-content" className="mx-auto w-full max-w-[1120px] flex-1 px-4 py-10 md:px-6 md:py-16">
+      <HomeLink locale={safeLocale} className="mb-8" />
+      <PageHeader icon={BookOpenIcon} title={t("title")} description={t("subtitle")} />
 
       {rows.length === 0 ? (
-        <p className="rounded-md border border-dashed border-border px-6 py-12 text-center text-sm text-muted-foreground">
-          {t("empty")}
-        </p>
+        <EmptyState
+          role="status"
+          icon={BookOpenIcon}
+          title={t("empty")}
+          description={tDashboard("chatCtaBody")}
+          action={
+            <Button asChild>
+              <Link href={`/${safeLocale}/chat`}>
+                <MessagesSquareIcon aria-hidden />
+                {tDashboard("chatCtaButton")}
+              </Link>
+            </Button>
+          }
+        />
       ) : (
-        <ul className="space-y-3">
+        <ul className="grid gap-4 md:grid-cols-2">
           {rows.map((row) => {
             const title = pickTitle(row, safeLocale);
             const body = pickBody(row, safeLocale);
@@ -156,28 +187,33 @@ export default async function ArticlesListPage({
               <li key={row.id}>
                 <Link
                   href={`/${safeLocale}/articles/${row.slug}`}
-                  className="block rounded-md border border-border bg-card px-4 py-4 hover:border-primary/40 hover:bg-accent/30"
+                  className="group flex h-full flex-col rounded-lg border border-border bg-card p-6 shadow-card transition-colors hover:border-primary/40"
                 >
-                  <div className="flex items-baseline justify-between gap-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
                     {category && (
-                      <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">
                         {category}
                       </span>
                     )}
                     {dateLabel && (
-                      <span className="shrink-0 text-xs text-muted-foreground">
+                      <span className="text-xs text-muted-foreground">
                         {dateLabel}
                       </span>
                     )}
                   </div>
-                  <h2 className="mt-2 text-base font-semibold leading-snug">
+                  <h2 className="mt-3 text-xl font-bold group-hover:text-primary">
                     {title}
                   </h2>
                   {preview && (
-                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                    <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
                       {preview}
                     </p>
                   )}
+                  <ArrowRightIcon
+                    className="mt-auto size-5 self-end pt-1 text-primary"
+                    strokeWidth={1.75}
+                    aria-hidden
+                  />
                 </Link>
               </li>
             );
@@ -186,27 +222,27 @@ export default async function ArticlesListPage({
       )}
 
       {totalPages > 1 && (
-        <nav className="mt-8 flex items-center justify-between border-t border-border pt-4 text-sm">
+        <nav className="mt-10 flex items-center justify-between gap-3 border-t border-border pt-6">
           {hasPrev ? (
-            <Link
-              href={`/${safeLocale}/articles?page=${page - 1}`}
-              className="text-primary hover:underline"
-            >
-              ← {t("prev")}
-            </Link>
+            <Button asChild variant="outline">
+              <Link href={`/${safeLocale}/articles?page=${page - 1}`}>
+                <ChevronLeftIcon aria-hidden />
+                {t("prev")}
+              </Link>
+            </Button>
           ) : (
             <span />
           )}
-          <span className="text-xs text-muted-foreground">
+          <span className="text-sm text-muted-foreground">
             {t("pageOf", { page, total: totalPages })}
           </span>
           {hasNext ? (
-            <Link
-              href={`/${safeLocale}/articles?page=${page + 1}`}
-              className="text-primary hover:underline"
-            >
-              {t("next")} →
-            </Link>
+            <Button asChild variant="outline">
+              <Link href={`/${safeLocale}/articles?page=${page + 1}`}>
+                {t("next")}
+                <ChevronRightIcon aria-hidden />
+              </Link>
+            </Button>
           ) : (
             <span />
           )}

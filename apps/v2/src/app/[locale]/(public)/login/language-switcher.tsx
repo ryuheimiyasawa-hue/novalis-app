@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { routing } from "@/lib/i18n/routing";
-import { localeLabels } from "@/lib/i18n/config";
+import { LocalePills } from "@/components/i18n/locale-pills";
 
 interface Props {
   currentLocale: string;
@@ -29,20 +28,10 @@ export function LanguageSwitcher({ currentLocale, label }: Props) {
   }
 
   return (
-    <p>
-      <span className="mr-2 text-neutral-500">{label}:</span>
-      {routing.locales.map((loc, i) => (
-        <span key={loc}>
-          {i > 0 && <span className="mx-1 text-neutral-400">·</span>}
-          {loc === currentLocale ? (
-            <span className="font-medium underline">{localeLabels[loc]}</span>
-          ) : (
-            <Link href={buildHref(loc)} className="hover:underline">
-              {localeLabels[loc]}
-            </Link>
-          )}
-        </span>
-      ))}
-    </p>
+    <LocalePills
+      currentLocale={currentLocale}
+      label={label}
+      hrefFor={buildHref}
+    />
   );
 }

@@ -20,9 +20,9 @@ export async function HomeLink({
   return (
     <Link
       href={`/${locale}/dashboard`}
-      className={`inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-accent/40 ${className}`}
+      className={`inline-flex min-h-11 items-center gap-2 rounded-md border border-input bg-card px-3.5 text-sm font-medium text-foreground shadow-xs transition-colors hover:border-primary/40 hover:bg-accent md:min-h-9 ${className}`}
     >
-      <HomeIcon className="size-4" aria-hidden />
+      <HomeIcon className="size-4" strokeWidth={1.75} aria-hidden />
       {t("backToDashboard")}
     </Link>
   );

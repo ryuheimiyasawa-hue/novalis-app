@@ -1,5 +1,6 @@
 "use client";
 
+import { CircleAlertIcon, ExternalLinkIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -74,20 +75,23 @@ export function MessengerLinkClient({ labels, pageUrl }: Props) {
     }
   }
 
+  const stepClass =
+    "space-y-3 rounded-lg border border-border border-l-[3px] border-l-highlight bg-card p-5 shadow-card md:p-6";
+
   return (
-    <div className="space-y-8">
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">{labels.step1Title}</h2>
-        <p className="text-sm text-muted-foreground">{labels.step1Body}</p>
+    <ol className="space-y-4">
+      <li className={stepClass}>
+        <h2 className="text-xl font-bold">{labels.step1Title}</h2>
+        <p className="text-base text-muted-foreground">{labels.step1Body}</p>
 
         {issued && (
-          <div className="rounded-md border bg-muted/30 p-6 text-center">
-            <p className="font-mono text-4xl font-bold tracking-[0.3em]">
+          <div className="rounded-md bg-primary-soft p-6 text-center" aria-live="polite">
+            <p className="font-mono text-4xl font-bold tracking-[0.3em] text-primary">
               {issued.code}
             </p>
             <p
-              className={`mt-2 text-xs ${
-                isExpired ? "text-destructive" : "text-muted-foreground"
+              className={`mt-2 text-sm ${
+                isExpired ? "font-medium text-destructive" : "text-muted-foreground"
               }`}
             >
               {isExpired
@@ -100,33 +104,42 @@ export function MessengerLinkClient({ labels, pageUrl }: Props) {
           </div>
         )}
 
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && (
+          <p
+            role="alert"
+            className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3.5 py-3 text-sm text-destructive"
+          >
+            <CircleAlertIcon className="mt-0.5 size-4 shrink-0" strokeWidth={1.75} aria-hidden />
+            <span>{error}</span>
+          </p>
+        )}
 
-        <Button onClick={issue} disabled={pending} className="w-full">
+        <Button onClick={issue} disabled={pending} aria-busy={pending} size="lg" className="w-full">
           {pending
             ? labels.issuing
             : issued
               ? labels.reissueButton
               : labels.issueButton}
         </Button>
-      </section>
+      </li>
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">{labels.step2Title}</h2>
-        <p className="text-sm text-muted-foreground">{labels.step2Body}</p>
+      <li className={stepClass}>
+        <h2 className="text-xl font-bold">{labels.step2Title}</h2>
+        <p className="text-base text-muted-foreground">{labels.step2Body}</p>
         {pageUrl && (
-          <Button asChild variant="outline" className="w-full">
+          <Button asChild variant="outline" size="lg" className="w-full">
             <a href={pageUrl} target="_blank" rel="noopener noreferrer">
               {labels.openMessenger}
+              <ExternalLinkIcon aria-hidden />
             </a>
           </Button>
         )}
-      </section>
+      </li>
 
-      <section className="space-y-2">
-        <h2 className="text-lg font-semibold">{labels.step3Title}</h2>
-        <p className="text-sm text-muted-foreground">{labels.step3Body}</p>
-      </section>
-    </div>
+      <li className={stepClass}>
+        <h2 className="text-xl font-bold">{labels.step3Title}</h2>
+        <p className="text-base text-muted-foreground">{labels.step3Body}</p>
+      </li>
+    </ol>
   );
 }

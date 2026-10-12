@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CircleAlertIcon, CircleCheckIcon, Loader2Icon, SendIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -70,15 +71,24 @@ export function ContactForm({ labels, defaultEmail }: Props) {
 
   if (state === "done") {
     return (
-      <div className="rounded-md border border-green-600/40 bg-green-50 p-6 text-center text-sm text-green-800 dark:bg-green-950/30 dark:text-green-300">
-        {labels.success}
+      <div
+        role="status"
+        className="flex flex-col items-center gap-3 py-6 text-center"
+      >
+        <span
+          aria-hidden
+          className="inline-flex size-12 items-center justify-center rounded-md bg-success/10 text-success"
+        >
+          <CircleCheckIcon className="size-6" strokeWidth={1.75} />
+        </span>
+        <p className="text-base font-medium text-foreground">{labels.success}</p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={submit} className="space-y-4">
-      <div className="space-y-1.5">
+    <form onSubmit={submit} className="space-y-5">
+      <div className="space-y-2">
         <Label htmlFor="subject">{labels.subjectLabel}</Label>
         <Input
           id="subject"
@@ -89,7 +99,7 @@ export function ContactForm({ labels, defaultEmail }: Props) {
           placeholder={labels.subjectPlaceholder}
         />
       </div>
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         <Label htmlFor="message">{labels.messageLabel}</Label>
         <Textarea
           id="message"
@@ -101,7 +111,7 @@ export function ContactForm({ labels, defaultEmail }: Props) {
           placeholder={labels.messagePlaceholder}
         />
       </div>
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         <Label htmlFor="contact_email">{labels.emailLabel}</Label>
         <Input
           id="contact_email"
@@ -114,9 +124,28 @@ export function ContactForm({ labels, defaultEmail }: Props) {
         />
       </div>
 
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && (
+        <p
+          role="alert"
+          className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3.5 py-3 text-sm text-destructive"
+        >
+          <CircleAlertIcon className="mt-0.5 size-4 shrink-0" strokeWidth={1.75} aria-hidden />
+          <span>{error}</span>
+        </p>
+      )}
 
-      <Button type="submit" disabled={state === "submitting"} className="w-full">
+      <Button
+        type="submit"
+        size="lg"
+        disabled={state === "submitting"}
+        aria-busy={state === "submitting"}
+        className="w-full"
+      >
+        {state === "submitting" ? (
+          <Loader2Icon className="animate-spin" aria-hidden />
+        ) : (
+          <SendIcon aria-hidden />
+        )}
         {state === "submitting" ? labels.submitting : labels.submit}
       </Button>
     </form>

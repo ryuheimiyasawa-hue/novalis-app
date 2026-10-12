@@ -8,7 +8,11 @@ import {
 } from "@/lib/legal/versions";
 import { gateDecision } from "@/lib/legal/consent";
 import { createClient } from "@/lib/supabase/server";
+import { FileTextIcon } from "lucide-react";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
+import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { IconTile } from "@/components/layout/icon-tile";
 import { ConsentForm } from "./consent-form";
 
 // Re-consent after a terms / privacy revision. The proxy sends onboarded
@@ -40,31 +44,37 @@ export default async function ConsentPage({
   const tCommon = await getTranslations({ locale: safeLocale, namespace: "common" });
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
-      <div className="max-w-xl w-full space-y-6">
-        <div className="flex justify-end">
-          <LocaleSwitcher currentLocale={safeLocale} label={tCommon("language")} />
+    <div className="flex min-h-dvh flex-col">
+      <SiteHeader
+        locale={safeLocale}
+        showNav={false}
+        switcher={<LocaleSwitcher currentLocale={safeLocale} label={tCommon("language")} />}
+      />
+      <main id="main-content" className="flex flex-1 justify-center px-4 py-10 md:px-6 md:py-16">
+        <div className="w-full max-w-[640px] space-y-8">
+          <div className="space-y-3">
+            <IconTile icon={FileTextIcon} size="lg" />
+            <h1 className="text-2xl font-bold md:text-3xl">{t("heading")}</h1>
+            <p className="text-base text-muted-foreground">{t("subheading")}</p>
+          </div>
+          <ConsentForm
+            locale={safeLocale}
+            termsVersion={CURRENT_TERMS_VERSION}
+            privacyVersion={CURRENT_PRIVACY_VERSION}
+            labels={{
+              terms: tOnboarding("termsLabel"),
+              privacy: tOnboarding("privacyLabel"),
+              age: tOnboarding("ageLabel"),
+              viewTerms: tOnboarding("viewTerms"),
+              viewPrivacy: tOnboarding("viewPrivacy"),
+              submit: t("submit"),
+              error: t("error"),
+              errorVersion: t("errorVersion"),
+            }}
+          />
         </div>
-        <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-bold">{t("heading")}</h1>
-          <p className="text-neutral-600 dark:text-neutral-300">{t("subheading")}</p>
-        </div>
-        <ConsentForm
-          locale={safeLocale}
-          termsVersion={CURRENT_TERMS_VERSION}
-          privacyVersion={CURRENT_PRIVACY_VERSION}
-          labels={{
-            terms: tOnboarding("termsLabel"),
-            privacy: tOnboarding("privacyLabel"),
-            age: tOnboarding("ageLabel"),
-            viewTerms: tOnboarding("viewTerms"),
-            viewPrivacy: tOnboarding("viewPrivacy"),
-            submit: t("submit"),
-            error: t("error"),
-            errorVersion: t("errorVersion"),
-          }}
-        />
-      </div>
-    </main>
+      </main>
+      <SiteFooter locale={safeLocale} />
+    </div>
   );
 }

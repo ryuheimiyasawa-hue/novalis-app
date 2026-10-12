@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
-import { HomeIcon } from "lucide-react";
+import { FlaskConicalIcon, HomeIcon } from "lucide-react";
 import { z } from "zod";
 import { routing } from "@/lib/i18n/routing";
 import { ChatShell } from "@/components/chat/ChatShell";
@@ -146,9 +146,9 @@ export default async function ChatPage({ params, searchParams }: Props) {
 
   return (
     <ChatConversationActionsProvider>
-      <div className="flex h-[calc(100vh-4rem)]">
-        {/* Desktop sidebar — fixed 260px column, hidden on mobile. */}
-        <div className="hidden w-[260px] shrink-0 md:flex md:flex-col">
+      <div className="flex h-dvh bg-background">
+        {/* Desktop sidebar — fixed 288px column, hidden on mobile. */}
+        <div className="hidden w-[288px] shrink-0 md:flex md:flex-col">
           {sidebar}
         </div>
 
@@ -156,25 +156,31 @@ export default async function ChatPage({ params, searchParams }: Props) {
             and opens the same sidebar in a drawer. */}
         <div className="flex min-w-0 flex-1 flex-col">
           {isAnon && (
-            <div className="border-b border-amber-300 bg-amber-50 px-4 py-2 text-xs text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100">
-              <span className="font-semibold">{tAnon("label")}</span>
-              <span className="mx-2">·</span>
-              <span>{tAnon("body")}</span>
+            <div
+              role="status"
+              className="flex items-start gap-2 border-b border-highlight/40 bg-highlight-soft px-4 py-2 text-sm text-foreground"
+            >
+              <FlaskConicalIcon className="mt-1 size-4 shrink-0 text-highlight-soft-foreground" strokeWidth={1.75} aria-hidden />
+              <p>
+                <span className="font-bold text-highlight-soft-foreground">{tAnon("label")}</span>
+                <span className="mx-2" aria-hidden>·</span>
+                <span>{tAnon("body")}</span>
+              </p>
             </div>
           )}
-          <div className="flex items-center gap-2 border-b border-border px-3 py-2 md:hidden">
+          <div className="flex items-center gap-2 border-b border-border bg-card px-3 py-2 md:hidden">
             <MobileSidebar label={tConv("title")}>{sidebar}</MobileSidebar>
-            <span className="text-sm font-semibold">{t("title")}</span>
+            <span className="min-w-0 flex-1 text-base leading-tight font-bold">{t("title")}</span>
             {/* Mobile back-to-dashboard link on the right of the header.
                 The icon alone read as decoration, so the label rides with
                 it — the desktop header shows the same wording. */}
             <Link
               href={`/${safeLocale}/dashboard`}
-              className="ml-auto inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-accent/40"
+              className="inline-flex min-h-11 max-w-[11rem] shrink-0 items-center gap-1.5 rounded-md border border-input bg-card px-3 text-left text-sm leading-tight font-medium text-foreground shadow-xs hover:bg-accent"
               aria-label={t("backToDashboard")}
               title={t("backToDashboard")}
             >
-              <HomeIcon className="size-4" aria-hidden />
+              <HomeIcon className="size-4 shrink-0" strokeWidth={1.75} aria-hidden />
               {t("backToDashboard")}
             </Link>
           </div>
@@ -213,6 +219,11 @@ export default async function ChatPage({ params, searchParams }: Props) {
                 operatorLabel: t("operatorLabel"),
                 operatorBanner: t("operatorBanner"),
                 pollError: t("pollError"),
+                emptyTitle: t("emptyTitle"),
+                emptyBody: t("emptyBody"),
+                emptyPrivacyHint: t("emptyPrivacyHint"),
+                composerHint: t("composerHint"),
+                escalationTitle: t("escalationTitle"),
               }}
             />
           </div>

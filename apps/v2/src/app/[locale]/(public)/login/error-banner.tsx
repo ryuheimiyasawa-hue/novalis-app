@@ -1,3 +1,4 @@
+import { CircleAlertIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 const MESSAGE_KEY: Record<string, "fbDenied" | "fbFailed" | "callbackFailed"> = {
@@ -24,8 +25,13 @@ export async function ErrorBanner({ errorCode, failureCount, locale }: Props) {
   const exceeded = failureCount >= MAX_BEFORE_SUPPORT;
 
   return (
-    <div className="rounded-md border border-red-300 bg-red-50 p-4 text-sm text-red-800 dark:bg-red-950 dark:border-red-800 dark:text-red-200">
-      <p>{t(messageKey)}</p>
+    <div
+      role="alert"
+      className="flex items-start gap-3 rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-foreground"
+    >
+      <CircleAlertIcon className="mt-0.5 size-5 shrink-0 text-destructive" strokeWidth={1.75} aria-hidden />
+      <div>
+      <p className="font-medium text-destructive">{t(messageKey)}</p>
       {exceeded && (
         <p className="mt-2">
           {t("tooManyAttempts")}{" "}
@@ -37,6 +43,7 @@ export async function ErrorBanner({ errorCode, failureCount, locale }: Props) {
           </a>
         </p>
       )}
+      </div>
     </div>
   );
 }

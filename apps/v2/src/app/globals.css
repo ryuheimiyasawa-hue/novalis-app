@@ -3,79 +3,119 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Brand tokens — "a trustworthy help desk with a family's warmth".
+ *
+ *   cream     #FBF8F2  page background
+ *   indigo    #1E3A5F  primary (buttons, heading accents), hover #16304F
+ *   mango     #E8A33D  highlight: badges, underlines, step numbers, icon
+ *                      tiles only. Never carries white text (2.2:1).
+ *   terracotta#C2573A  hand-off to professionals / caution headings.
+ *                      Text uses the darker #A8462C (5.9:1 on white).
+ *   green     #2F7D6D  success          red #B42318  error
+ *   soft surfaces: indigo #EAF0F7 and mango #FDF3E1 — the only two tints.
+ *
+ * Components consume these through the shadcn names (--primary, --accent,
+ * --muted …) or the brand extras below (--highlight, --caution, --success);
+ * no page should hard-code a palette class such as blue-600 or neutral-500.
+ */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-  --radius: 0.625rem;
+  --background: #fbf8f2;
+  --foreground: #1f2430;
+  --card: #ffffff;
+  --card-foreground: #1f2430;
+  --popover: #ffffff;
+  --popover-foreground: #1f2430;
+  --primary: #1e3a5f;
+  --primary-hover: #16304f;
+  --primary-foreground: #ffffff;
+  --primary-soft: #eaf0f7;
+  --secondary: #eaf0f7;
+  --secondary-foreground: #1e3a5f;
+  --muted: #eaf0f7;
+  --muted-foreground: #5b6475;
+  --accent: #eaf0f7;
+  --accent-foreground: #1e3a5f;
+  --highlight: #e8a33d;
+  --highlight-foreground: #1f2430;
+  --highlight-soft: #fdf3e1;
+  --highlight-soft-foreground: #7a4e0e;
+  --caution: #c2573a;
+  --caution-foreground: #a8462c;
+  --success: #2f7d6d;
+  --success-foreground: #ffffff;
+  --destructive: #b42318;
+  --destructive-foreground: #ffffff;
+  --border: #e7e1d5;
+  --input: #d9d2c4;
+  --ring: #1e3a5f;
+  --chart-1: #1e3a5f;
+  --chart-2: #e8a33d;
+  --chart-3: #c2573a;
+  --chart-4: #2f7d6d;
+  --chart-5: #5b6475;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1f2430;
+  --sidebar-primary: #1e3a5f;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eaf0f7;
+  --sidebar-accent-foreground: #1e3a5f;
+  --sidebar-border: #e7e1d5;
+  --sidebar-ring: #1e3a5f;
+  --radius: 12px;
+  --shadow-color: 31 36 48;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #121821;
+  --foreground: #e8eaee;
+  --card: #1a2230;
+  --card-foreground: #e8eaee;
+  --popover: #1a2230;
+  --popover-foreground: #e8eaee;
+  --primary: #8db4e2;
+  --primary-hover: #a6c5ea;
+  --primary-foreground: #121821;
+  --primary-soft: #223047;
+  --secondary: #223047;
+  --secondary-foreground: #e8eaee;
+  --muted: #223047;
+  --muted-foreground: #a3acba;
+  --accent: #223047;
+  --accent-foreground: #e8eaee;
+  --highlight: #f0b65a;
+  --highlight-foreground: #121821;
+  --highlight-soft: #2a2418;
+  --highlight-soft-foreground: #f0b65a;
+  --caution: #e59a80;
+  --caution-foreground: #e59a80;
+  --success: #5fb3a1;
+  --success-foreground: #121821;
+  --destructive: #f97066;
+  --destructive-foreground: #121821;
+  --border: #2a3444;
+  --input: #364256;
+  --ring: #8db4e2;
+  --chart-1: #8db4e2;
+  --chart-2: #f0b65a;
+  --chart-3: #e59a80;
+  --chart-4: #5fb3a1;
+  --chart-5: #a3acba;
+  --sidebar: #1a2230;
+  --sidebar-foreground: #e8eaee;
+  --sidebar-primary: #8db4e2;
+  --sidebar-primary-foreground: #121821;
+  --sidebar-accent: #223047;
+  --sidebar-accent-foreground: #e8eaee;
+  --sidebar-border: #2a3444;
+  --sidebar-ring: #8db4e2;
+  --shadow-color: 0 0 0;
 }
 
 @theme inline {
-  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  /* System fonts only — no web font download. */
+  --font-sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI",
+    "Meiryo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -84,13 +124,23 @@
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-highlight-soft: var(--highlight-soft);
+  --color-highlight-soft-foreground: var(--highlight-soft-foreground);
+  --color-caution: var(--caution);
+  --color-caution-foreground: var(--caution-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -110,17 +160,113 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
+  /* Radii: card 12px (rounded-lg), button / input 10px (rounded-md). */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* One elevation step only. */
+  --shadow-card: 0 1px 2px rgb(var(--shadow-color) / 0.06),
+    0 4px 16px rgb(var(--shadow-color) / 0.06);
+}
+
+/*
+ * Type scale fixed to 12 / 14 / 16 / 20 / 24 / 32 / 40px. text-lg is pulled
+ * up to 20px and text-3xl / text-4xl / text-5xl down so no utility can fall
+ * outside the scale. Body copy reads at 1.75 (Japanese); headings at 1.25.
+ */
+@theme {
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.6;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.7;
+  --text-base: 1rem;
+  --text-base--line-height: 1.75;
+  --text-lg: 1.25rem;
+  --text-lg--line-height: 1.4;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.4;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 1.35;
+  --text-3xl: 2rem;
+  --text-3xl--line-height: 1.25;
+  --text-4xl: 2.5rem;
+  --text-4xl--line-height: 1.25;
+  --text-5xl: 2.5rem;
+  --text-5xl--line-height: 1.25;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
+  body {
+    @apply bg-background font-sans text-base text-foreground antialiased;
+    line-height: 1.75;
+    /* Landscape phones with a notch: keep content off the sensor housing. */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 700;
+    text-wrap: pretty;
+  }
+  /* A visible ring on every keyboard-focused control, page-wide. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--primary-soft);
+    color: var(--foreground);
+  }
+}
+
+/* Japanese headings need a little more air than Latin ones. */
+html:lang(ja) :is(h1, h2, h3) {
+  line-height: 1.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Typing indicator for a pending AI reply. Stopped by reduced motion above. */
+@keyframes typing-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+.typing-dot {
+  animation: typing-dot 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.typing-dot:nth-child(3) {
+  animation-delay: 0.3s;
 }

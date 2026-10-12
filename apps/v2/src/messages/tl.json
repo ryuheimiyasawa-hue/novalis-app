@@ -9,7 +9,75 @@
     "ctaPrimary": "Mag-login gamit ang Facebook",
     "ctaSecondary": "Alamin pa",
     "restaurantsHeading": "Mga restawran para sa Pilipino",
-    "restaurantsViewAll": "Tingnan lahat"
+    "restaurantsViewAll": "Tingnan lahat",
+    "heroEyebrow": "Help desk para sa mga Pilipinong nakatira sa Japan at sa kanilang pamilya",
+    "heroPoints": {
+      "general": "Agad na sumasagot ang AI ng pangkalahatang impormasyon tungkol sa residence status, social insurance, mga proseso sa gobyerno at usaping pampamilya",
+      "experts": "Kapag kailangan ng pasya para sa inyong sitwasyon, ipinapakita namin kung saan maaaring kumonsulta sa abogado o gyoseishoshi",
+      "languages": "Magtanong sa 日本語, English o Tagalog"
+    },
+    "freeNote": "Libre itong gamitin sa ngayon",
+    "startNote": "Magsimula gamit ang inyong Facebook account, o mag-sign up gamit ang email address.",
+    "mockCaption": "Halimbawa ng screen ng konsultasyon",
+    "mockQuestion": "Saan ako magre-renew ng residence card?",
+    "mockAnswer": "Ang pag-renew ng period of stay ay inihahain sa regional immigration services bureau na sumasaklaw sa inyong tinitirhan. Nakadepende sa inyong status of residence ang mga kailangang dokumento.",
+    "mockNote": "Pangkalahatang impormasyon. Kumpirmahin po sa propesyonal ang huling pasya.",
+    "mockEscalation": "Para sa tanong na kailangan ng pasya sa inyong sitwasyon, ipinapakita namin kung saan kumonsulta sa propesyonal",
+    "featuresHeading": "Saan kami makakatulong",
+    "featuresLead": "Malinaw at pangkalahatang impormasyon sa apat na bagay na madalas nakalilito sa buhay sa Japan.",
+    "features": {
+      "visa": {
+        "title": "Residence status",
+        "body": "Paano karaniwang ginagawa ang renewal at pagpapalit, at anong mga dokumento ang ihahanda"
+      },
+      "insurance": {
+        "title": "Social insurance",
+        "body": "Mga pangunahing kaalaman sa pagsali sa health insurance at pension"
+      },
+      "procedures": {
+        "title": "Mga proseso sa gobyerno",
+        "body": "Mga proseso sa city hall gaya ng pagpaparehistro ng address, buwis at paaralan ng anak"
+      },
+      "family": {
+        "title": "Usaping pampamilya",
+        "body": "Mga tanong tungkol sa kasal, paghihiwalay, pagpapalaki ng anak at iba pang usaping pampamilya"
+      }
+    },
+    "stepsHeading": "Paano ito gumagana",
+    "stepsLead": "Tatlong hakbang ang isang konsultasyon.",
+    "steps": {
+      "ask": {
+        "title": "Magtanong",
+        "body": "I-type ang inyong tanong sa 日本語, English o Tagalog."
+      },
+      "answer": {
+        "title": "Sumasagot ang AI ng pangkalahatang impormasyon",
+        "body": "Ipinapaliwanag namin kung paano karaniwang gumagana ang mga sistema at proseso, at ipinapakita ang mga artikulong ginamit kung mayroon."
+      },
+      "experts": {
+        "title": "Kung kailangan, ipinapakita namin kung saan kumonsulta sa propesyonal",
+        "body": "Hindi sinasagot ng AI ang mga tanong na kailangan ng pasya para sa inyong sitwasyon. Sa halip, inililista namin bilang sanggunian ang mga abogado, gyoseishoshi at iba pang mapagkokonsultahan. Kayo ang magpapasya kung kokonsulta kayo at kanino."
+      }
+    },
+    "stepsNote": "Pangkalahatang impormasyon ang sagot ng AI, hindi legal na payo.",
+    "trustHeading": "Para sa ligtas na paggamit",
+    "trustLead": "Mahalagang personal na impormasyon ang tungkol sa inyong status at pamilya. Ganito namin ito pinoprotektahan.",
+    "trust": {
+      "pii": {
+        "title": "Hinaharang ang personal na detalye bago maipadala",
+        "body": "Hindi ipinapadala ang tanong na may residence card number, passport number, phone number, email address at iba pa, at hihilingin na isulat ito muli."
+      },
+      "languages": {
+        "title": "Tatlong wika",
+        "body": "Lumipat sa 日本語, English o Tagalog anumang oras mula sa menu ng wika sa itaas ng screen."
+      },
+      "operator": {
+        "title": "Malinaw kung sino ang nagpapatakbo",
+        "body": "Ang Novalis Inc. ang nagpapatakbo ng serbisyong ito. Kung may hindi malinaw, makipag-ugnayan po sa amin sa contact page."
+      }
+    },
+    "closingTitle": "Magsimula sa isang simpleng tanong",
+    "closingBody": "Hindi ninyo kailangang harapin nang mag-isa ang mga tanong tungkol sa buhay sa Japan."
   },
   "login": {
     "heading": "Mag-sign in",
@@ -40,7 +108,8 @@
     "supportText": "May problema sa pag-sign in?",
     "tryWithoutLogin": "Subukan nang hindi nagsa-sign in (beta test)",
     "tryWithoutLoginLoading": "Inihahanda ang iyong session...",
-    "tryWithoutLoginFailed": "Hindi makagawa ng guest session."
+    "tryWithoutLoginFailed": "Hindi makagawa ng guest session.",
+    "panelTitle": "Ang maiaalok ng Novalis"
   },
   "resetPassword": {
     "title": "Magtakda ng bagong password",
@@ -112,7 +181,10 @@
     "messengerCtaButton": "Ikonekta ang Messenger",
     "footerTerms": "Tuntunin",
     "footerPrivacy": "Privacy",
-    "footerLanguage": "Wika"
+    "footerLanguage": "Wika",
+    "lead": "Magtanong tungkol sa buhay sa Japan anumang oras.",
+    "nextStep": "Magsimula rito",
+    "moreHeading": "Iba pang paraan"
   },
   "conversations": {
     "title": "Mga nakaraang konsultasyon",
@@ -201,7 +273,8 @@
   "common": {
     "loading": "Naglo-load...",
     "error": "May naganap na error",
-    "language": "Wika"
+    "language": "Wika",
+    "reload": "I-reload"
   },
   "chat": {
     "disclaimer": "Ako ay isang AI at maaaring magpakita ng hindi tumpak na impormasyon, kaya mangyaring suriin ninyong muli ang aking mga sagot. Pangkalahatang impormasyon lamang din ito; para sa panghuling pasya o sa mga bagay na partikular sa inyong sitwasyon, mangyaring kumonsulta sa isang propesyonal.",
@@ -235,8 +308,31 @@
       "systemLabel": "Sistema",
       "operatorLabel": "Kawani ng Novalis",
       "operatorBanner": "May kawani na tumutugon sa usapang ito. Nakahinto muna ang awtomatikong sagot ng AI.",
-      "pollError": "Hindi maabot ang server. Pakisariwa (reload) ang pahina."
+      "pollError": "Hindi maabot ang server. Pakisariwa (reload) ang pahina.",
+      "emptyTitle": "Magtanong tungkol sa anumang hindi ninyo sigurado",
+      "emptyBody": "Sumasagot kami ng pangkalahatang impormasyon sa mga tanong tungkol sa buhay sa Japan, gaya ng residence status, social insurance, mga proseso sa gobyerno at usaping pampamilya.",
+      "emptyPrivacyHint": "Huwag pong isama ang personal na detalye gaya ng residence card number o phone number.",
+      "escalationTitle": "Mga mapagkokonsultahang propesyonal",
+      "composerHint": "Enter para ipadala, Shift + Enter para sa bagong linya"
     },
     "consentRequired": "Binago ang aming Mga Tuntunin ng Serbisyo at Patakaran sa Privacy. Upang patuloy na gamitin ang Novalis, kailangan ang iyong pagsang-ayon.\nMangyaring buksan ang {url} sa iyong browser, suriin ang mga dokumento, at sumang-ayon."
+  },
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "articles": "Mga Artikulo",
+    "restaurants": "Mga Restawran",
+    "contact": "Makipag-ugnayan",
+    "login": "Mag-login",
+    "mainLabel": "Pangunahing menu",
+    "homeLabel": "Home ng Novalis",
+    "skipToContent": "Lumaktaw sa pangunahing nilalaman"
+  },
+  "footer": {
+    "operator": "Pinapatakbo ng Novalis Inc.",
+    "languages": "Mayroon sa 日本語, English at Tagalog",
+    "serviceHeading": "Serbisyo",
+    "legalHeading": "Mga Patakaran",
+    "note": "Pangkalahatang impormasyon lamang ang sagot ng AI. Para sa pasya tungkol sa sarili ninyong sitwasyon, kumonsulta po sa propesyonal."
   }
 }
