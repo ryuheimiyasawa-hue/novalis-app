@@ -69,7 +69,7 @@ export default async function TermsPage({
           </p>
         </div>
       </header>
-      <article className="max-w-[680px] space-y-4 text-base [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_h2]:mt-10 [&_h2]:border-l-[3px] [&_h2]:border-highlight [&_h2]:pl-3 [&_h2]:text-xl [&_h2]:font-bold [&_h3]:mt-6 [&_h3]:text-base [&_h3]:font-bold [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-6 [&_strong]:font-bold [&_table]:block [&_table]:w-full [&_table]:overflow-x-auto [&_table]:border-collapse [&_table]:text-sm [&_td]:border [&_td]:border-border [&_td]:bg-card [&_td]:p-2 [&_td]:align-top [&_th]:border [&_th]:border-border [&_th]:bg-muted [&_th]:p-2 [&_th]:text-left [&_th]:align-top [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-6">
+      <article className="max-w-[680px] space-y-4 text-base [&_a]:font-medium [&_a]:break-all [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_h2]:mt-10 [&_h2]:border-l-[3px] [&_h2]:border-highlight [&_h2]:pl-3 [&_h2]:text-xl [&_h2]:font-bold [&_h3]:mt-6 [&_h3]:text-base [&_h3]:font-bold [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-6 [&_strong]:font-bold [&_table]:block [&_table]:w-full [&_table]:overflow-x-auto [&_table]:border-collapse [&_table]:text-sm [&_td]:border [&_td]:border-border [&_td]:bg-card [&_td]:p-2 [&_td]:align-top [&_th]:border [&_th]:border-border [&_th]:bg-muted [&_th]:p-2 [&_th]:text-left [&_th]:align-top [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-6">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           skipHtml

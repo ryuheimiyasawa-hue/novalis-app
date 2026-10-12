@@ -81,13 +81,13 @@ export default async function DashboardPage({
             label={t("footerLanguage")}
           />
         }
-        actions={<div className="hidden md:block">{account}</div>}
+        actions={<div className="hidden lg:block">{account}</div>}
       />
 
       <main id="main-content" className="flex-1 px-4 py-10 md:px-6 md:py-16">
         <section className="mx-auto max-w-[1120px] space-y-10">
           {/* Account row for phones — the header has no room for it there. */}
-          <div className="flex justify-end md:hidden">{account}</div>
+          <div className="flex justify-end lg:hidden">{account}</div>
 
           {isAnon && (
             <div

@@ -192,7 +192,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
             a: ({ href, children }) => (
               <a
                 href={href}
-                className="font-medium text-primary underline underline-offset-4 hover:text-primary-hover"
+                className="font-medium break-words text-primary underline underline-offset-4 hover:text-primary-hover [overflow-wrap:anywhere]"
                 target={href?.startsWith("http") ? "_blank" : undefined}
                 rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
               >

@@ -108,7 +108,7 @@ export default async function LandingPage({
       <main id="main-content" className="flex-1">
         {/* Hero: who it is for, what it does, how to start — all above the fold. */}
         <section className="border-b border-border">
-          <div className="mx-auto grid max-w-[1120px] gap-12 px-4 pt-10 pb-16 md:px-6 md:pt-16 md:pb-24 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:gap-16">
+          <div className="mx-auto grid max-w-[1120px] grid-cols-1 gap-12 px-4 pt-10 pb-16 md:px-6 md:pt-16 md:pb-24 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:gap-16">
             <div>
               <p className="inline-flex items-start gap-2 rounded-md bg-highlight-soft px-3 py-1.5 text-sm font-medium text-highlight-soft-foreground">
                 <UsersIcon className="mt-0.5 size-4 shrink-0" strokeWidth={1.75} aria-hidden />
@@ -164,7 +164,7 @@ export default async function LandingPage({
               <div className="relative">
                 <div
                   aria-hidden
-                  className="absolute inset-0 translate-x-3 translate-y-3 rounded-lg bg-primary-soft"
+                  className="absolute inset-0 translate-x-2 translate-y-2 rounded-lg bg-primary-soft sm:translate-x-3 sm:translate-y-3"
                 />
                 <div
                   aria-hidden

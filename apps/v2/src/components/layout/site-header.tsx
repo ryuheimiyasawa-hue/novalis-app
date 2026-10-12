@@ -91,7 +91,7 @@ export async function SiteHeader({
         </Link>
 
         {showNav && (
-        <nav aria-label={t("mainLabel")} className="hidden md:block">
+        <nav aria-label={t("mainLabel")} className="hidden lg:block">
           <ul className="flex items-center gap-1">
             {items.map((item) => {
               const isActive = item.key === active;
@@ -123,7 +123,7 @@ export async function SiteHeader({
       </div>
 
       {showNav && mobileNav && (
-        <nav aria-label={t("mainLabel")} className="border-t border-border md:hidden">
+        <nav aria-label={t("mainLabel")} className="border-t border-border lg:hidden">
           <ul
             className={cn(
               "mx-auto grid max-w-[1120px] px-2",
