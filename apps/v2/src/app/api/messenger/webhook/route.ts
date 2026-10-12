@@ -22,6 +22,7 @@ import { isLinkCodeShape, normalizeLinkCode } from "@/lib/messenger/link-code";
 import { linkMessengerAccount } from "@/lib/messenger/link-account";
 import type { WhitelistLocale } from "@/lib/ai/whitelist-keywords";
 import { checkConsent } from "@/lib/legal/consent";
+import { buildEscalationReply, loadActiveExperts } from "@/lib/messenger/escalation-reply";
 
 // Facebook Messenger webhook (P2-K).
 //   GET  — one-time verification handshake (echo hub.challenge).
@@ -309,8 +310,15 @@ async function handleEvent(
     });
   }
 
-  // 8. Reply.
-  const out = await send(replyText(result));
+  // 8. Reply. An escalation carries the expert list and the support link
+  // too, the way the web card shows them — on Messenger the reply is the
+  // only surface the user gets.
+  let reply = replyText(result);
+  if (result.kind === "escalate") {
+    const experts = await loadActiveExperts(admin);
+    reply = buildEscalationReply(result.text, experts, locale, cfg.appUrl);
+  }
+  const out = await send(reply);
   if (!out.ok) {
     console.warn(`[messenger] send failed mid=${ev.mid}: ${out.error}`);
   }
