@@ -109,7 +109,7 @@
     "tryWithoutLogin": "Subukan nang hindi nagsa-sign in (beta test)",
     "tryWithoutLoginLoading": "Inihahanda ang iyong session...",
     "tryWithoutLoginFailed": "Hindi makagawa ng guest session.",
-    "panelTitle": "Ang maiaalok ng Novalis"
+    "panelTitle": "Ang maiaalok ng MORITA"
   },
   "resetPassword": {
     "title": "Magtakda ng bagong password",
@@ -130,7 +130,7 @@
     "tooManyAttempts": "Maraming beses na nabigo ang sign-in. Pakikontak ang suporta."
   },
   "onboarding": {
-    "heading": "Maligayang pagdating sa Novalis",
+    "heading": "Maligayang pagdating sa MORITA",
     "subheading": "Mangyaring sumang-ayon sa sumusunod bago magpatuloy.",
     "termsLabel": "Sumasang-ayon ako sa Mga Tuntunin ng Serbisyo",
     "privacyLabel": "Sumasang-ayon ako sa Patakaran sa Privacy",
@@ -147,7 +147,7 @@
   },
   "consent": {
     "heading": "Binagong Mga Tuntunin ng Serbisyo at Patakaran sa Privacy",
-    "subheading": "Upang patuloy na gamitin ang Novalis, mangyaring suriin ang mga binagong dokumento at sumang-ayon sa mga ito.",
+    "subheading": "Upang patuloy na gamitin ang MORITA, mangyaring suriin ang mga binagong dokumento at sumang-ayon sa mga ito.",
     "submit": "Sumang-ayon at magpatuloy",
     "error": "Hindi naitala ang iyong pagsang-ayon. Pakisubukang muli.",
     "errorVersion": "Na-update ang mga dokumento habang nakabukas ang pahinang ito. Mangyaring i-reload ang pahina."
@@ -165,7 +165,7 @@
     "body": "Pansamantalang beta session. Hindi tutuloy ang datos kapag nagpalit ka ng browser."
   },
   "dashboard": {
-    "headerLogo": "Novalis",
+    "headerLogo": "MORITA",
     "signOut": "Mag-sign out",
     "signingOut": "Nagsa-sign out...",
     "greeting": "Maligayang pagdating, {name}",
@@ -226,7 +226,7 @@
     "viewOnMap": "Tingnan sa mapa"
   },
   "contact": {
-    "title": "Makipag-ugnayan sa Novalis",
+    "title": "Makipag-ugnayan sa MORITA",
     "subtitle": "Magpadala ng tanong, kahilingan, o feedback. May tutugon mula sa aming team.",
     "backToDashboard": "Bumalik sa dashboard",
     "loading": "Naglo-load ng form...",
@@ -257,7 +257,7 @@
     "issuing": "Ginagawa...",
     "reissueButton": "Kumuha ng bagong code",
     "step2Title": "2. Ipadala ang code sa Messenger",
-    "step2Body": "Buksan ang Novalis Facebook Page sa Messenger at ipadala ang code na ito bilang mensahe.",
+    "step2Body": "Buksan ang MORITA Facebook Page sa Messenger at ipadala ang code na ito bilang mensahe.",
     "openMessenger": "Buksan ang Messenger",
     "expiresIn": "Wasto sa loob ng humigit-kumulang {minutes} minuto",
     "expired": "Expired na ang code na ito. Kumuha po ng bago.",
@@ -283,7 +283,7 @@
     "piiBlock": "Hindi maaaring ipadala sa chat ang personal na impormasyon (residence card number, passport number, phone number, email, atbp.). Mangyaring isulat muli ang inyong tanong nang walang kasamang personal na impormasyon.",
     "tooLong": "Masyadong mahaba ang inyong mensahe. Mangyaring panatilihin itong wala pang 2000 karakter.",
     "smalltalkReply": "Maaari akong tumulong sa mga pangkalahatang tanong tungkol sa buhay sa Japan — visa, health insurance, paaralan ng inyong anak, mga pamamaraan ng gobyerno, at iba pang katulad. Magtanong nang malaya.",
-    "operatorPending": "May kawani ng Novalis na tumitingin sa usapang ito. Sasagot po sila sa lalong madaling panahon — maghintay lamang sandali.",
+    "operatorPending": "May kawani ng MORITA na tumitingin sa usapang ito. Sasagot po sila sa lalong madaling panahon — maghintay lamang sandali.",
     "ui": {
       "title": "AI Konsultasyon",
       "subtitle": "Pangkalahatang tanong tungkol sa visa, social insurance, mga pamamaraan ng gobyerno, at iba pa.",
@@ -299,7 +299,7 @@
       "expertHeading": "Mga inirerekomendang eksperto",
       "expertSchedule": "Mag-book",
       "noExperts": "Walang available na eksperto sa ngayon. Subukan muli mamaya.",
-      "contactCta": "Makipag-ugnayan sa Novalis support",
+      "contactCta": "Makipag-ugnayan sa MORITA support",
       "escalationContinue": "Magpatuloy pa rin sa pagtatanong",
       "escalationRecommend": "Inirerekomenda naming kumonsulta sa isang eksperto",
       "citationsHeading": "Mga Sanggunian",
@@ -307,7 +307,7 @@
       "youLabel": "Ikaw",
       "assistantLabel": "AI Assistant",
       "systemLabel": "Sistema",
-      "operatorLabel": "Kawani ng Novalis",
+      "operatorLabel": "Kawani ng MORITA",
       "operatorBanner": "May kawani na tumutugon sa usapang ito. Nakahinto muna ang awtomatikong sagot ng AI.",
       "pollError": "Hindi maabot ang server. Pakisariwa (reload) ang pahina.",
       "emptyTitle": "Magtanong tungkol sa anumang hindi ninyo sigurado",
@@ -316,7 +316,7 @@
       "escalationTitle": "Mga mapagkokonsultahang propesyonal",
       "composerHint": "Enter para ipadala, Shift + Enter para sa bagong linya"
     },
-    "consentRequired": "Binago ang aming Mga Tuntunin ng Serbisyo at Patakaran sa Privacy. Upang patuloy na gamitin ang Novalis, kailangan ang iyong pagsang-ayon.\nMangyaring buksan ang {url} sa iyong browser, suriin ang mga dokumento, at sumang-ayon."
+    "consentRequired": "Binago ang aming Mga Tuntunin ng Serbisyo at Patakaran sa Privacy. Upang patuloy na gamitin ang MORITA, kailangan ang iyong pagsang-ayon.\nMangyaring buksan ang {url} sa iyong browser, suriin ang mga dokumento, at sumang-ayon."
   },
   "nav": {
     "home": "Home",
@@ -326,7 +326,7 @@
     "contact": "Makipag-ugnayan",
     "login": "Mag-login",
     "mainLabel": "Pangunahing menu",
-    "homeLabel": "Home ng Novalis",
+    "homeLabel": "Home ng MORITA",
     "skipToContent": "Lumaktaw sa pangunahing nilalaman"
   },
   "footer": {

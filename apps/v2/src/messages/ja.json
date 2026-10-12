@@ -109,7 +109,7 @@
     "tryWithoutLogin": "ログインせずに試す（ベータテスト用）",
     "tryWithoutLoginLoading": "セッションを準備中...",
     "tryWithoutLoginFailed": "ゲストセッションの作成に失敗しました。",
-    "panelTitle": "Novalis でできること"
+    "panelTitle": "MORITA でできること"
   },
   "resetPassword": {
     "title": "新しいパスワードを設定",
@@ -130,7 +130,7 @@
     "tooManyAttempts": "ログインに連続して失敗しました。サポートにお問い合わせください。"
   },
   "onboarding": {
-    "heading": "ようこそ Novalis へ",
+    "heading": "ようこそ MORITA へ",
     "subheading": "ご利用前に以下にご同意ください。",
     "termsLabel": "利用規約に同意します",
     "privacyLabel": "プライバシーポリシーに同意します",
@@ -165,7 +165,7 @@
     "body": "ベータテスト中の一時セッションです。ブラウザを変えるとデータは引き継がれません。"
   },
   "dashboard": {
-    "headerLogo": "Novalis",
+    "headerLogo": "MORITA",
     "signOut": "ログアウト",
     "signingOut": "ログアウト中...",
     "greeting": "ようこそ {name} さん",
@@ -226,7 +226,7 @@
     "viewOnMap": "地図で見る"
   },
   "contact": {
-    "title": "Novalis お問い合わせ",
+    "title": "MORITA お問い合わせ",
     "subtitle": "ご相談・ご質問・サービスへのフィードバックなど、お気軽にお寄せください。担当者からご連絡いたします。",
     "backToDashboard": "ダッシュボードへ戻る",
     "loading": "フォーム読み込み中...",
@@ -257,7 +257,7 @@
     "issuing": "発行中...",
     "reissueButton": "コードを再発行",
     "step2Title": "2. Messenger でコードを送信",
-    "step2Body": "Novalis の Facebook ページを Messenger で開き、このコードをそのまま送信してください。",
+    "step2Body": "MORITA の Facebook ページを Messenger で開き、このコードをそのまま送信してください。",
     "openMessenger": "Messenger を開く",
     "expiresIn": "有効期限: 約{minutes}分",
     "expired": "このコードは期限切れです。再発行してください。",
@@ -299,7 +299,7 @@
       "expertHeading": "おすすめの専門家",
       "expertSchedule": "予約する",
       "noExperts": "現在ご紹介できる専門家がいません。後ほどお試しください。",
-      "contactCta": "Novalis サポートに問い合わせる",
+      "contactCta": "MORITA サポートに問い合わせる",
       "escalationContinue": "それでも質問を続ける",
       "escalationRecommend": "専門家への相談をおすすめします",
       "citationsHeading": "参考",
@@ -326,7 +326,7 @@
     "contact": "お問い合わせ",
     "login": "ログイン",
     "mainLabel": "メインメニュー",
-    "homeLabel": "Novalis ホームへ",
+    "homeLabel": "MORITA ホームへ",
     "skipToContent": "本文へ移動"
   },
   "footer": {

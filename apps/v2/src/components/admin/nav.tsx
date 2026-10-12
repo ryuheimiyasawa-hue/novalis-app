@@ -25,7 +25,7 @@ export function AdminNav({ role, displayName }: Props) {
     <aside className="w-60 shrink-0 border-r border-border bg-sidebar text-sidebar-foreground flex flex-col">
       <div className="px-4 py-5 border-b border-sidebar-border">
         <Link href="/admin" className="font-bold text-lg">
-          Novalis Admin
+          MORITA Admin
         </Link>
       </div>
       <nav className="flex-1 py-4">
