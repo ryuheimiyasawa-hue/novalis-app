@@ -482,7 +482,15 @@ export function ChatShell({
       {/* Header — title + subtitle only on desktop; the mobile chat
           page renders its own header with the hamburger trigger. */}
       <header className="hidden items-end justify-between gap-3 border-b border-border pb-3 md:flex">
-        <div>
+        <div className="min-w-0">
+          {/* Leading the heading, in a bordered control: as a quiet link on
+              the far right it was read as part of the toolbar and missed. */}
+          <Button asChild variant="outline" size="sm" className="mb-2">
+            <Link href={`/${locale}/dashboard`}>
+              <HomeIcon className="size-4" aria-hidden />
+              {labels.backToDashboard}
+            </Link>
+          </Button>
           <h1 className="text-xl font-bold">{labels.title}</h1>
           <p className="text-sm text-muted-foreground">{labels.subtitle}</p>
         </div>
@@ -491,12 +499,6 @@ export function ChatShell({
             currentLocale={locale}
             label={labels.languageLabel}
           />
-          <Button asChild variant="ghost" size="sm">
-            <Link href={`/${locale}/dashboard`}>
-              <HomeIcon className="size-4" aria-hidden />
-              {labels.backToDashboard}
-            </Link>
-          </Button>
           <Button variant="outline" size="sm" onClick={resetConversation}>
             {labels.newConversation}
           </Button>

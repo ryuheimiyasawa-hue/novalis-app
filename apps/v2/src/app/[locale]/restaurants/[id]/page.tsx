@@ -5,6 +5,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { routing } from "@/lib/i18n/routing";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPrefectureLabel } from "@/lib/i18n/prefectures";
+import { HomeLink } from "@/components/layout/home-link";
 
 export const revalidate = 600;
 
@@ -85,6 +86,7 @@ export default async function RestaurantDetailPage({ params }: PageProps) {
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
+      <HomeLink locale={safeLocale} className="mb-4" />
       <Link
         href={`/${safeLocale}/restaurants`}
         className="text-sm text-primary hover:underline"

@@ -5,6 +5,7 @@ import { routing } from "@/lib/i18n/routing";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPrefectureLabel } from "@/lib/i18n/prefectures";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
+import { HomeLink } from "@/components/layout/home-link";
 
 // Public Filipino-restaurant catalog (P2-J). Operator-curated, no user
 // submissions. ISR-cached 10 min. prefecture / cuisine filters are URL-driven
@@ -85,6 +86,7 @@ export default async function RestaurantsListPage({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
+      <HomeLink locale={safeLocale} className="mb-4" />
       <div className="mb-3 flex justify-end">
         <LocaleSwitcher currentLocale={safeLocale} label={tCommon("language")} />
       </div>

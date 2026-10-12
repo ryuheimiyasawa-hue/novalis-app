@@ -8,6 +8,7 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { routing } from "@/lib/i18n/routing";
 import { parseVideo, buildEmbedUrl } from "@/lib/articles/video";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
+import { HomeLink } from "@/components/layout/home-link";
 
 // Minimum-viable article detail page. Renders the markdown body of a
 // published article so chat citations like /[locale]/articles/<slug>
@@ -104,6 +105,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
+      <HomeLink locale={safeLocale} className="mb-4" />
       <div className="mb-3 flex items-center justify-between gap-3">
         <Link
           href={`/${safeLocale}/chat`}

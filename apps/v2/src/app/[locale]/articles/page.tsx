@@ -4,6 +4,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { routing } from "@/lib/i18n/routing";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
+import { HomeLink } from "@/components/layout/home-link";
 
 // Public articles list (C). ISR-cached for 10 min so dashboard CTAs
 // can hammer the route without burning DB requests. Filters by
@@ -119,6 +120,7 @@ export default async function ArticlesListPage({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
+      <HomeLink locale={safeLocale} className="mb-4" />
       <div className="mb-3 flex justify-end">
         <LocaleSwitcher
           currentLocale={safeLocale}
