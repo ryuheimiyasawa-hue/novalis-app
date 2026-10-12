@@ -55,15 +55,15 @@ export default async function LoginLayout({
             ))}
           </ul>
           <ul className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-            <li className="flex items-start gap-3 rounded-lg border border-border bg-card p-4">
+            <li className="flex items-center gap-3 rounded-lg border border-border bg-card p-4">
               <IconTile icon={ShieldCheckIcon} size="sm" />
               <span className="text-sm font-medium">{tLanding("trust.pii.title")}</span>
             </li>
-            <li className="flex items-start gap-3 rounded-lg border border-border bg-card p-4">
+            <li className="flex items-center gap-3 rounded-lg border border-border bg-card p-4">
               <IconTile icon={ScaleIcon} size="sm" tone="caution" />
               <span className="text-sm font-medium">{tLanding("stepsNote")}</span>
             </li>
-            <li className="flex items-start gap-3 rounded-lg border border-border bg-card p-4">
+            <li className="flex items-center gap-3 rounded-lg border border-border bg-card p-4">
               <IconTile icon={LanguagesIcon} size="sm" />
               <span className="text-sm font-medium">{tLanding("trust.languages.title")}</span>
             </li>

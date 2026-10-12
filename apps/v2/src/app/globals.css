@@ -230,9 +230,11 @@
   }
 }
 
-/* Japanese headings need a little more air than Latin ones. */
+/* Japanese headings need a little more air than Latin ones, and should
+   break between phrases rather than mid-word. */
 html:lang(ja) :is(h1, h2, h3) {
   line-height: 1.45;
+  word-break: auto-phrase;
 }
 
 @media (prefers-reduced-motion: reduce) {

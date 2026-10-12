@@ -135,14 +135,14 @@ export default async function LandingPage({
                   </a>
                 </Button>
               </div>
-              <p className="mt-4 text-sm text-muted-foreground">
+              <p className="mt-4 flex flex-col gap-1 text-sm text-muted-foreground">
                 {!isPaymentEnabled() && (
-                  <span className="mr-2 inline-flex items-center gap-1 font-medium text-success">
+                  <span className="inline-flex items-center gap-1 font-medium text-success">
                     <CheckIcon className="size-4" strokeWidth={2} aria-hidden />
                     {t("freeNote")}
                   </span>
                 )}
-                {t("startNote")}
+                <span>{t("startNote")}</span>
               </p>
               <ul className="mt-8 space-y-3 border-t border-border pt-6">
                 {(["general", "experts", "languages"] as const).map((key) => (
@@ -160,51 +160,53 @@ export default async function LandingPage({
             </div>
 
             {/* Illustration of the consultation screen, drawn with CSS. */}
-            <figure className="relative mx-auto w-full max-w-[480px]">
-              <div
-                aria-hidden
-                className="absolute inset-0 translate-x-3 translate-y-3 rounded-lg bg-primary-soft"
-              />
-              <div
-                aria-hidden
-                className="relative overflow-hidden rounded-lg border border-border bg-card shadow-card"
-              >
-                <div className="flex items-center gap-3 border-b border-border px-5 py-4">
-                  <IconTile icon={MessagesSquareIcon} size="sm" />
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold">{tChat("title")}</p>
-                    <p className="text-xs text-muted-foreground">日本語 · English · Tagalog</p>
-                  </div>
-                </div>
-                <div className="space-y-4 bg-background px-5 py-5">
-                  <div className="ml-auto max-w-[85%] rounded-lg rounded-br-[4px] bg-primary px-4 py-3 text-sm text-primary-foreground">
-                    {t("mockQuestion")}
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <IconTile icon={BotIcon} size="sm" />
-                    <div className="max-w-[85%] rounded-lg rounded-tl-[4px] border border-border bg-card px-4 py-3 text-sm">
-                      <p>{t("mockAnswer")}</p>
-                      <p className="mt-2 flex items-start gap-1.5 border-t border-border pt-2 text-xs text-muted-foreground">
-                        <InfoIcon className="mt-0.5 size-3.5 shrink-0" strokeWidth={1.75} />
-                        {t("mockNote")}
-                      </p>
+            <figure className="mx-auto w-full max-w-[480px]">
+              <div className="relative">
+                <div
+                  aria-hidden
+                  className="absolute inset-0 translate-x-3 translate-y-3 rounded-lg bg-primary-soft"
+                />
+                <div
+                  aria-hidden
+                  className="relative overflow-hidden rounded-lg border border-border bg-card shadow-card"
+                >
+                  <div className="flex items-center gap-3 border-b border-border px-5 py-4">
+                    <IconTile icon={MessagesSquareIcon} size="sm" />
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold">{tChat("title")}</p>
+                      <p className="text-xs text-muted-foreground">日本語 · English · Tagalog</p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-3 rounded-md border border-border border-l-[3px] border-l-caution bg-card px-4 py-3">
-                    <ScaleIcon className="mt-0.5 size-4 shrink-0 text-caution" strokeWidth={1.75} />
-                    <p className="text-sm font-medium text-caution-foreground">{t("mockEscalation")}</p>
+                  <div className="space-y-4 bg-background px-5 py-5">
+                    <div className="ml-auto max-w-[85%] rounded-lg rounded-br-[4px] bg-primary px-4 py-3 text-sm text-primary-foreground">
+                      {t("mockQuestion")}
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <IconTile icon={BotIcon} size="sm" />
+                      <div className="max-w-[85%] rounded-lg rounded-tl-[4px] border border-border bg-card px-4 py-3 text-sm">
+                        <p>{t("mockAnswer")}</p>
+                        <p className="mt-2 flex items-start gap-1.5 border-t border-border pt-2 text-xs text-muted-foreground">
+                          <InfoIcon className="mt-0.5 size-3.5 shrink-0" strokeWidth={1.75} />
+                          {t("mockNote")}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 rounded-md border border-border border-l-[3px] border-l-caution bg-card px-4 py-3">
+                      <ScaleIcon className="mt-0.5 size-4 shrink-0 text-caution" strokeWidth={1.75} />
+                      <p className="text-sm font-medium text-caution-foreground">{t("mockEscalation")}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2 border-t border-border px-5 py-4">
-                  <div className="flex h-11 min-w-0 flex-1 items-center rounded-md border border-input bg-card px-3 text-sm text-muted-foreground">
-                    <span className="truncate">{tChat("inputPlaceholder")}</span>
+                  <div className="flex items-center gap-2 border-t border-border px-5 py-4">
+                    <div className="flex h-11 min-w-0 flex-1 items-center rounded-md border border-input bg-card px-3 text-sm text-muted-foreground">
+                      <span className="truncate">{tChat("inputPlaceholder")}</span>
+                    </div>
+                    <span className="inline-flex h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground">
+                      {tChat("send")}
+                    </span>
                   </div>
-                  <span className="inline-flex h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground">
-                    {tChat("send")}
-                  </span>
                 </div>
               </div>
-              <figcaption className="relative mt-6 text-center text-xs text-muted-foreground">
+              <figcaption className="mt-6 text-center text-xs text-muted-foreground">
                 {t("mockCaption")}
               </figcaption>
             </figure>
