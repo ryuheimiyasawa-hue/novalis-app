@@ -1,13 +1,16 @@
 import { defineConfig, devices } from "@playwright/test";
+import { assertE2ETestTarget } from "./tests/e2e/safety";
 
 // MVP minimal: Chromium only, single test, no CI integration.
-// Spawns the Next.js dev server automatically against .env.local.
+// Starts only after the operator explicitly selects an isolated test DB.
+assertE2ETestTarget();
 
 export default defineConfig({
   testDir: "./tests/e2e",
   testMatch: /.*\.spec\.ts/,
   timeout: 60_000,
   fullyParallel: false, // chat send mutates DB; serialise to avoid noise
+  workers: 1,
   retries: 0,
   reporter: [["list"]],
   use: {
@@ -25,7 +28,7 @@ export default defineConfig({
   webServer: {
     command: "pnpm dev",
     url: "http://localhost:3000",
-    reuseExistingServer: true,
+    reuseExistingServer: false,
     timeout: 60_000,
   },
   globalSetup: "./tests/e2e/global-setup.ts",

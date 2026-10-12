@@ -44,7 +44,5 @@ test("ja chat: general question → streamed answer with citation", async ({
   // expected hit, but we tolerate any citation that appears so
   // the test stays stable across embedding model drift.
   const citation = page.locator("a[href^='/ja/articles/']").first();
-  if (await citation.count()) {
-    await expect(citation).toBeVisible();
-  }
+  await expect(citation).toBeVisible({ timeout: 30_000 });
 });

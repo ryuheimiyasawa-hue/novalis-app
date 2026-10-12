@@ -266,9 +266,23 @@ export async function POST(req: NextRequest) {
         // to run). The new title surfaces in the sidebar / metrics on
         // next load. Skipped for `blocked` (no user message was stored).
         if (conversationCreated && result.kind !== "blocked") {
-          const title = await generateConversationTitle(message, locale);
-          if (title) {
-            await updateConversationTitle(conversationId, title);
+          try {
+            const title = await generateConversationTitle(message, locale);
+            if (title) {
+              await updateConversationTitle(conversationId, title);
+            }
+          } catch (titleErr) {
+            // The successful terminal event has already been sent. A
+            // best-effort title write must not append a second done(error).
+            console.error(JSON.stringify({
+              event: "chat_title_update_failed",
+              conversationId,
+              error: titleErr instanceof Error ? titleErr.message : String(titleErr),
+            }));
+            Sentry.captureException(titleErr, {
+              tags: { area: "chat", op: "title" },
+              extra: { conversationId, userId, period },
+            });
           }
         }
 

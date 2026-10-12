@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { NewConversationLink } from "@/components/chat/NewConversationLink";
 import { getTranslations } from "next-intl/server";
 import { PlusIcon } from "lucide-react";
 import { requireAuth } from "@/lib/auth/require-auth";
@@ -95,13 +95,13 @@ export async function ConversationsSidebar({ locale }: Props) {
   return (
     <aside className="flex h-full w-full flex-col border-r border-border bg-muted/20">
       <div className="border-b border-border p-3">
-        <Link
-          href={`/${locale}/chat`}
+        <NewConversationLink
+          locale={locale}
           className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm font-medium hover:bg-accent/40"
         >
           <PlusIcon className="size-4" aria-hidden />
           {t("newButton")}
-        </Link>
+        </NewConversationLink>
       </div>
       {/* Locale switcher at the very top, before "+ new conversation".
           Always visible on desktop sidebar; reachable on mobile via the

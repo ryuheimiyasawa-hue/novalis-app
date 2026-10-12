@@ -5,6 +5,7 @@ import { HomeIcon } from "lucide-react";
 import { z } from "zod";
 import { routing } from "@/lib/i18n/routing";
 import { ChatShell } from "@/components/chat/ChatShell";
+import { ChatConversationActionsProvider } from "@/components/chat/conversation-actions";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { getAdminClient } from "@/lib/supabase/admin";
 import type { Citation } from "@/lib/ai/rag";
@@ -144,74 +145,76 @@ export default async function ChatPage({ params, searchParams }: Props) {
   const sidebar = <ConversationsSidebar locale={safeLocale} />;
 
   return (
-    <div className="flex h-[calc(100vh-4rem)]">
-      {/* Desktop sidebar — fixed 260px column, hidden on mobile. */}
-      <div className="hidden w-[260px] shrink-0 md:flex md:flex-col">
-        {sidebar}
-      </div>
+    <ChatConversationActionsProvider>
+      <div className="flex h-[calc(100vh-4rem)]">
+        {/* Desktop sidebar — fixed 260px column, hidden on mobile. */}
+        <div className="hidden w-[260px] shrink-0 md:flex md:flex-col">
+          {sidebar}
+        </div>
 
-      {/* Chat area. The mobile hamburger sits at the top of this column
-          and opens the same sidebar in a drawer. */}
-      <div className="flex min-w-0 flex-1 flex-col">
-        {isAnon && (
-          <div className="border-b border-amber-300 bg-amber-50 px-4 py-2 text-xs text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100">
-            <span className="font-semibold">{tAnon("label")}</span>
-            <span className="mx-2">·</span>
-            <span>{tAnon("body")}</span>
+        {/* Chat area. The mobile hamburger sits at the top of this column
+            and opens the same sidebar in a drawer. */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          {isAnon && (
+            <div className="border-b border-amber-300 bg-amber-50 px-4 py-2 text-xs text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100">
+              <span className="font-semibold">{tAnon("label")}</span>
+              <span className="mx-2">·</span>
+              <span>{tAnon("body")}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-2 border-b border-border px-3 py-2 md:hidden">
+            <MobileSidebar label={tConv("title")}>{sidebar}</MobileSidebar>
+            <span className="text-sm font-semibold">{t("title")}</span>
+            {/* Mobile back-to-dashboard link on the right of the header. */}
+            <Link
+              href={`/${safeLocale}/dashboard`}
+              className="ml-auto inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent/40 hover:text-foreground"
+              aria-label={t("backToDashboard")}
+              title={t("backToDashboard")}
+            >
+              <HomeIcon className="size-5" aria-hidden />
+            </Link>
           </div>
-        )}
-        <div className="flex items-center gap-2 border-b border-border px-3 py-2 md:hidden">
-          <MobileSidebar label={tConv("title")}>{sidebar}</MobileSidebar>
-          <span className="text-sm font-semibold">{t("title")}</span>
-          {/* Mobile back-to-dashboard link on the right of the header. */}
-          <Link
-            href={`/${safeLocale}/dashboard`}
-            className="ml-auto inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent/40 hover:text-foreground"
-            aria-label={t("backToDashboard")}
-            title={t("backToDashboard")}
-          >
-            <HomeIcon className="size-5" aria-hidden />
-          </Link>
-        </div>
-        <div className="min-h-0 flex-1">
-          <ChatShell
-            // key forces ChatShell to remount when the URL conversation
-            // switches — without this, switching threads in the sidebar
-            // would leave the previous conversation's messages on screen
-            // because ChatShell only seeds state from props on first mount.
-            key={initialConversationId ?? "new"}
-            locale={safeLocale}
-            initialConversationId={initialConversationId}
-            initialMessages={initialMessages}
-            labels={{
-              title: t("title"),
-              subtitle: t("subtitle"),
-              newConversation: t("newConversation"),
-              inputPlaceholder: t("inputPlaceholder"),
-              send: t("send"),
-              thinking: t("thinking"),
-              errorRetry: t("errorRetry"),
-              errorGeneric: t("errorGeneric"),
-              errorQuota: t("errorQuota"),
-              errorAuth: t("errorAuth"),
-              expertHeading: t("expertHeading"),
-              expertSchedule: t("expertSchedule"),
-              contactCta: t("contactCta"),
-              escalationContinue: t("escalationContinue"),
-              escalationRecommend: t("escalationRecommend"),
-              citationsHeading: t("citationsHeading"),
-              backToDashboard: t("backToDashboard"),
-              languageLabel: tCommon("language"),
-              youLabel: t("youLabel"),
-              assistantLabel: t("assistantLabel"),
-              systemLabel: t("systemLabel"),
-              operatorLabel: t("operatorLabel"),
-              operatorBanner: t("operatorBanner"),
-              pollError: t("pollError"),
-            }}
-          />
+          <div className="min-h-0 flex-1">
+            <ChatShell
+              // key forces ChatShell to remount when the URL conversation
+              // switches — without this, switching threads in the sidebar
+              // would leave the previous conversation's messages on screen
+              // because ChatShell only seeds state from props on first mount.
+              key={initialConversationId ?? "new"}
+              locale={safeLocale}
+              initialConversationId={initialConversationId}
+              initialMessages={initialMessages}
+              labels={{
+                title: t("title"),
+                subtitle: t("subtitle"),
+                newConversation: t("newConversation"),
+                inputPlaceholder: t("inputPlaceholder"),
+                send: t("send"),
+                thinking: t("thinking"),
+                errorRetry: t("errorRetry"),
+                errorGeneric: t("errorGeneric"),
+                errorQuota: t("errorQuota"),
+                errorAuth: t("errorAuth"),
+                expertHeading: t("expertHeading"),
+                expertSchedule: t("expertSchedule"),
+                contactCta: t("contactCta"),
+                escalationContinue: t("escalationContinue"),
+                escalationRecommend: t("escalationRecommend"),
+                citationsHeading: t("citationsHeading"),
+                backToDashboard: t("backToDashboard"),
+                languageLabel: tCommon("language"),
+                youLabel: t("youLabel"),
+                assistantLabel: t("assistantLabel"),
+                systemLabel: t("systemLabel"),
+                operatorLabel: t("operatorLabel"),
+                operatorBanner: t("operatorBanner"),
+                pollError: t("pollError"),
+              }}
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </ChatConversationActionsProvider>
   );
 }

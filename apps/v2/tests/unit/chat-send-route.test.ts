@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/auth/require-auth", () => ({
   requireAuth: vi.fn(),
 }));
+vi.mock("@sentry/nextjs", () => ({ captureException: vi.fn() }));
 vi.mock("@/lib/chat/trial-quota", () => ({
   checkChatQuota: vi.fn(),
 }));
@@ -21,6 +22,7 @@ vi.mock("@/lib/chat/persistence", async () => {
     resolveConversation: vi.fn(),
     persistResult: vi.fn(async () => ({})),
     persistUserMessage: vi.fn(async () => ({ id: "msg-user-1" })),
+    updateConversationTitle: vi.fn(),
   };
 });
 vi.mock("@/lib/ai/chat-pipeline", () => ({
@@ -48,6 +50,7 @@ vi.mock("@/lib/legal/consent", () => ({ checkConsent: vi.fn() }));
 vi.mock("@/lib/supabase/admin", () => ({ getAdminClient: vi.fn(() => ({})) }));
 
 import { POST } from "@/app/api/chat/send/route";
+import { captureException } from "@sentry/nextjs";
 import { checkConsent } from "@/lib/legal/consent";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { AuthError } from "@/lib/auth/errors";
@@ -58,7 +61,9 @@ import {
   persistResult,
   persistUserMessage,
   resolveConversation,
+  updateConversationTitle,
 } from "@/lib/chat/persistence";
+import { generateConversationTitle } from "@/lib/chat/title";
 import { processChatStream, screenUserInput } from "@/lib/ai/chat-pipeline";
 import { notifyEscalation } from "@/lib/chat/escalation-notify";
 import { buildDecision } from "@/lib/ai/whitelist-decision";
@@ -205,6 +210,24 @@ describe("POST /api/chat/send — pre-stream guards", () => {
 });
 
 describe("POST /api/chat/send — SSE happy path", () => {
+  it("keeps one successful terminal event when the subsequent title write fails", async () => {
+    mockProcessChatStream.mockResolvedValueOnce({
+      kind: "smalltalk", text: "synthetic answer", detail: "greeting",
+      decision: buildDecision({ stage: "llm_smalltalk", outcome: "smalltalk", category: "smalltalk", reason: "greeting" }),
+    });
+    vi.mocked(generateConversationTitle).mockResolvedValueOnce("synthetic title");
+    vi.mocked(updateConversationTitle).mockRejectedValueOnce(new Error("synthetic title write failure"));
+    const res = await POST(makeReq({ message: "synthetic greeting" }) as never);
+    const events = await readSSE(res);
+    expect(events.filter(e => e.type === "done")).toEqual([
+      expect.objectContaining({ kind: "smalltalk", text: "synthetic answer" }),
+    ]);
+    expect(captureException).toHaveBeenCalledWith(expect.any(Error), {
+      tags: { area: "chat", op: "title" },
+      extra: { conversationId: "conv-1", userId: "user-1", period: "2026-05" },
+    });
+  });
+
   it("emits meta → token+ → done(answer) when the pipeline returns an answer", async () => {
     mockProcessChatStream.mockImplementationOnce(async (_input, onEvent) => {
       onEvent({ type: "token", text: "Working " });
