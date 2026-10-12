@@ -7,7 +7,7 @@ import remarkGfm from "remark-gfm";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { routing } from "@/lib/i18n/routing";
 import { parseVideo, buildEmbedUrl } from "@/lib/articles/video";
-import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
+import { ArrowLeftIcon, CalendarIcon, MessagesSquareIcon } from "lucide-react";
 import { HomeLink } from "@/components/layout/home-link";
 
 // Minimum-viable article detail page. Renders the markdown body of a
@@ -98,35 +98,42 @@ export default async function ArticleDetailPage({ params }: PageProps) {
   // parse to a known shape. Editors might paste a broken URL — better
   // to silently drop than to surface a broken iframe.
   const video = parseVideo(article.video_provider, article.video_url);
-  const tCommon = await getTranslations({
+  const tArticles = await getTranslations({
     locale: safeLocale,
-    namespace: "common",
+    namespace: "articlesList",
   });
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
-      <HomeLink locale={safeLocale} className="mb-4" />
-      <div className="mb-3 flex items-center justify-between gap-3">
+    <main id="main-content" className="mx-auto w-full max-w-[728px] flex-1 px-4 py-10 md:px-6 md:py-16">
+      <div className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <HomeLink locale={safeLocale} />
+        <Link
+          href={`/${safeLocale}/articles`}
+          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline lg:min-h-9"
+        >
+          <ArrowLeftIcon className="size-4" strokeWidth={1.75} aria-hidden />
+          {tArticles("title")}
+        </Link>
         <Link
           href={`/${safeLocale}/chat`}
-          className="text-sm text-muted-foreground hover:text-foreground hover:underline"
+          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline lg:min-h-9"
         >
-          ← {safeLocale === "ja" ? "チャットに戻る" : safeLocale === "tl" ? "Bumalik sa chat" : "Back to chat"}
+          <MessagesSquareIcon className="size-4" strokeWidth={1.75} aria-hidden />
+          {safeLocale === "ja" ? "チャットに戻る" : safeLocale === "tl" ? "Bumalik sa chat" : "Back to chat"}
         </Link>
-        <LocaleSwitcher
-          currentLocale={safeLocale}
-          label={tCommon("language")}
-        />
       </div>
-      <header className="mb-6 space-y-2 border-b border-border pb-4">
+      <header className="mb-8 space-y-3 border-b border-border pb-6">
         {categoryName && (
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">
-            {categoryName}
+          <p>
+            <span className="inline-flex rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">
+              {categoryName}
+            </span>
           </p>
         )}
-        <h1 className="text-2xl font-bold leading-tight">{title}</h1>
+        <h1 className="text-2xl font-bold md:text-3xl">{title}</h1>
         {article.published_at && (
-          <p className="text-xs text-muted-foreground">
+          <p className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+            <CalendarIcon className="size-4" strokeWidth={1.75} aria-hidden />
             {new Date(article.published_at).toLocaleDateString(
               safeLocale === "ja" ? "ja-JP" : safeLocale === "tl" ? "tl-PH" : "en-US",
             )}
@@ -134,7 +141,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
         )}
       </header>
       {video && (
-        <div className="mb-6 aspect-video w-full overflow-hidden rounded-md border border-border bg-black">
+        <div className="mb-8 aspect-video w-full overflow-hidden rounded-lg border border-border bg-foreground">
           <iframe
             src={buildEmbedUrl(video)}
             title={title}
@@ -153,7 +160,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
         the base font. Switching to the typography plugin is a Phase 2
         cleanup once the public articles list lands.
       */}
-      <article className="space-y-4 text-sm leading-relaxed">
+      <article className="max-w-[680px] space-y-5 text-base [&_blockquote]:border-l-[3px] [&_blockquote]:border-highlight [&_blockquote]:pl-4 [&_blockquote]:text-muted-foreground [&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_code]:text-sm [&_hr]:border-border [&_strong]:font-bold [&_table]:block [&_table]:w-full [&_table]:overflow-x-auto [&_table]:text-sm [&_td]:border [&_td]:border-border [&_td]:p-2 [&_th]:border [&_th]:border-border [&_th]:bg-muted [&_th]:p-2 [&_th]:text-left">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           // No rehype-raw — we intentionally do NOT enable HTML
@@ -163,22 +170,29 @@ export default async function ArticleDetailPage({ params }: PageProps) {
           // code).
           skipHtml
           components={{
+            // The page title is the only h1; a "#" heading in the body is
+            // shown one level down so the outline stays in order.
+            h1: ({ children }) => (
+              <h2 className="mt-10 text-2xl font-bold">{children}</h2>
+            ),
             h2: ({ children }) => (
-              <h2 className="mt-6 text-lg font-semibold">{children}</h2>
+              <h2 className="mt-10 border-l-[3px] border-highlight pl-3 text-xl font-bold">
+                {children}
+              </h2>
             ),
             h3: ({ children }) => (
-              <h3 className="mt-4 text-base font-semibold">{children}</h3>
+              <h3 className="mt-6 text-base font-bold">{children}</h3>
             ),
             ul: ({ children }) => (
-              <ul className="list-disc space-y-1 pl-6">{children}</ul>
+              <ul className="list-disc space-y-2 pl-6 marker:text-primary">{children}</ul>
             ),
             ol: ({ children }) => (
-              <ol className="list-decimal space-y-1 pl-6">{children}</ol>
+              <ol className="list-decimal space-y-2 pl-6 marker:text-primary">{children}</ol>
             ),
             a: ({ href, children }) => (
               <a
                 href={href}
-                className="text-primary underline-offset-2 hover:underline"
+                className="font-medium break-words text-primary underline underline-offset-4 hover:text-primary-hover [overflow-wrap:anywhere]"
                 target={href?.startsWith("http") ? "_blank" : undefined}
                 rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
               >

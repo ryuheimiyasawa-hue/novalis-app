@@ -4,7 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { MoreHorizontalIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import {
+  MessagesSquareIcon,
+  MoreHorizontalIcon,
+  PencilIcon,
+  SearchIcon,
+  Trash2Icon,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -111,26 +117,41 @@ export function ConversationList({ locale, initialRows, labels }: Props) {
 
   if (rows.length === 0) {
     return (
-      <p className="px-2 py-4 text-xs text-muted-foreground">{labels.empty}</p>
+      <div className="mx-1 flex flex-col items-center gap-2 rounded-lg border border-dashed border-input px-4 py-6 text-center">
+        <span
+          aria-hidden
+          className="inline-flex size-10 items-center justify-center rounded-md bg-primary-soft text-primary"
+        >
+          <MessagesSquareIcon className="size-5" strokeWidth={1.75} />
+        </span>
+        <p className="text-sm text-muted-foreground">{labels.empty}</p>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-2">
-      <Input
-        type="search"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder={labels.searchPlaceholder}
-        className="h-8 text-xs"
-        aria-label={labels.searchPlaceholder}
-      />
+    <div className="space-y-3">
+      <div className="relative">
+        <SearchIcon
+          className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+          strokeWidth={1.75}
+          aria-hidden
+        />
+        <Input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={labels.searchPlaceholder}
+          className="h-11 pl-9 text-sm lg:h-9"
+          aria-label={labels.searchPlaceholder}
+        />
+      </div>
       {filtered.length === 0 ? (
-        <p className="px-2 py-4 text-xs text-muted-foreground">
+        <p role="status" className="px-2 py-4 text-sm text-muted-foreground">
           {labels.searchNoResults}
         </p>
       ) : (
-        <ul className="space-y-1">
+        <ul className="space-y-0.5">
           {filtered.map((row) => {
             const isActive = row.id === activeId;
             const isEditing = row.id === editingId;
@@ -146,41 +167,41 @@ export function ConversationList({ locale, initialRows, labels }: Props) {
                         if (e.key === "Enter") commitRename(row.id);
                         if (e.key === "Escape") setEditingId(null);
                       }}
-                      className="h-7 text-xs"
+                      className="h-11 text-sm lg:h-9"
                       aria-label={labels.rename}
                     />
                     <button
                       type="button"
                       onClick={() => commitRename(row.id)}
-                      className="shrink-0 rounded px-1.5 py-1 text-[10px] hover:bg-accent/40"
+                      className="inline-flex min-h-11 shrink-0 items-center rounded-md bg-primary px-2.5 text-xs font-medium text-primary-foreground hover:bg-primary-hover lg:min-h-9"
                     >
                       {labels.renameSave}
                     </button>
                     <button
                       type="button"
                       onClick={() => setEditingId(null)}
-                      className="shrink-0 rounded px-1.5 py-1 text-[10px] text-muted-foreground hover:bg-accent/40"
+                      className="inline-flex min-h-11 shrink-0 items-center rounded-md px-2 text-xs font-medium text-muted-foreground hover:bg-accent lg:min-h-9"
                     >
                       {labels.renameCancel}
                     </button>
                   </div>
                 ) : (
                   <div
-                    className={`flex items-start rounded-md transition-colors ${
+                    className={`relative flex items-start rounded-md transition-colors ${
                       isActive
-                        ? "bg-primary/10 text-foreground"
-                        : "text-muted-foreground hover:bg-accent/40 hover:text-foreground"
+                        ? "bg-primary-soft text-foreground before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-full before:bg-primary"
+                        : "text-foreground hover:bg-accent"
                     }`}
                   >
                     <Link
                       href={`/${locale}/chat?conversation_id=${row.id}`}
-                      className="block min-w-0 flex-1 px-2 py-2 text-xs leading-tight"
+                      className="block min-h-11 min-w-0 flex-1 rounded-md px-3 py-2 text-sm leading-snug"
                       aria-current={isActive ? "page" : undefined}
                     >
-                      <div className="line-clamp-2 font-medium">
+                      <div className={`line-clamp-2 ${isActive ? "font-bold" : "font-medium"}`}>
                         {row.displayTitle}
                       </div>
-                      <div className="mt-0.5 text-[10px] text-muted-foreground/70">
+                      <div className="mt-0.5 text-xs text-muted-foreground">
                         {row.relativeDate}
                       </div>
                     </Link>
@@ -188,9 +209,9 @@ export function ConversationList({ locale, initialRows, labels }: Props) {
                       <DropdownMenuTrigger
                         disabled={busyId === row.id}
                         aria-label={labels.actionsLabel}
-                        className="mr-1 mt-1 shrink-0 rounded p-1 text-muted-foreground opacity-0 hover:bg-accent/60 focus:opacity-100 group-hover:opacity-100 disabled:opacity-40"
+                        className="inline-flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-card hover:text-foreground reveal-on-hover disabled:opacity-40 lg:mt-1 lg:mr-1 lg:size-8"
                       >
-                        <MoreHorizontalIcon className="size-4" aria-hidden />
+                        <MoreHorizontalIcon className="size-4" strokeWidth={1.75} aria-hidden />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onSelect={() => startRename(row)}>

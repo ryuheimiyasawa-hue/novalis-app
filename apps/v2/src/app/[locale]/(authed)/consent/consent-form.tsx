@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { CircleAlertIcon, Loader2Icon } from "lucide-react";
 import {
   ConsentCheckboxes,
   INITIAL_CONSENT_STATE,
@@ -65,8 +66,9 @@ export function ConsentForm({ locale, termsVersion, privacyVersion, labels }: Pr
       {error && (
         <div
           role="alert"
-          className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:bg-red-950 dark:border-red-800 dark:text-red-200"
+          className="flex items-start gap-2.5 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
         >
+          <CircleAlertIcon className="mt-0.5 size-4 shrink-0" strokeWidth={1.75} aria-hidden />
           {error}
         </div>
       )}
@@ -75,8 +77,12 @@ export function ConsentForm({ locale, termsVersion, privacyVersion, labels }: Pr
         type="button"
         onClick={handleSubmit}
         disabled={!ready || submitting}
-        className="w-full px-6 py-3 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        aria-busy={submitting}
+        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-primary px-6 text-base font-medium text-primary-foreground transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
       >
+        {submitting && (
+          <Loader2Icon className="size-5 animate-spin" strokeWidth={1.75} aria-hidden />
+        )}
         {labels.submit}
       </button>
     </div>

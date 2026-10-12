@@ -3,7 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { HomeIcon } from "lucide-react";
+import {
+  BotIcon,
+  HeadsetIcon,
+  HomeIcon,
+  MessagesSquareIcon,
+  ShieldCheckIcon,
+  WifiOffIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -59,6 +66,14 @@ interface Props {
     operatorLabel: string;
     operatorBanner: string;
     pollError: string;
+    /** Optional copy for the empty conversation and the composer. Callers
+     *  without it (e.g. older harnesses) fall back to title / subtitle. */
+    emptyTitle?: string;
+    emptyBody?: string;
+    emptyPrivacyHint?: string;
+    composerHint?: string;
+    /** Heading shown at the top of the escalation card. */
+    escalationTitle?: string;
   };
 }
 
@@ -477,55 +492,93 @@ export function ChatShell({
     citations: labels.citationsHeading,
   };
 
+  const isEmpty = messages.length === 0 && !isStreaming;
+
   return (
-    <div className="mx-auto flex h-full max-w-3xl flex-col gap-3 p-4">
+    <div className="mx-auto flex h-full max-w-3xl flex-col">
       {/* Header — title + subtitle only on desktop; the mobile chat
           page renders its own header with the hamburger trigger. */}
-      <header className="hidden items-end justify-between gap-3 border-b border-border pb-3 md:flex">
-        <div className="min-w-0">
+      <header className="hidden border-b border-border px-6 pt-5 pb-4 md:block">
+        {/* Row 1: the way home on the left, page tools on the right. Row 2:
+            the title and its explanation across the full width, so long
+            Tagalog / English titles are never squeezed beside the tools. */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
           {/* Leading the heading, in a bordered control: as a quiet link on
               the far right it was read as part of the toolbar and missed. */}
-          <Button asChild variant="outline" size="sm" className="mb-2">
+          <Button asChild variant="outline" size="sm">
             <Link href={`/${locale}/dashboard`}>
               <HomeIcon className="size-4" aria-hidden />
               {labels.backToDashboard}
             </Link>
           </Button>
-          <h1 className="text-xl font-bold">{labels.title}</h1>
-          <p className="text-sm text-muted-foreground">{labels.subtitle}</p>
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-3">
+            <LocaleSwitcher
+              currentLocale={locale}
+              label={labels.languageLabel}
+            />
+            <Button variant="outline" size="sm" onClick={resetConversation}>
+              {labels.newConversation}
+            </Button>
+          </div>
         </div>
-        <div className="flex shrink-0 items-center gap-3">
-          <LocaleSwitcher
-            currentLocale={locale}
-            label={labels.languageLabel}
-          />
-          <Button variant="outline" size="sm" onClick={resetConversation}>
-            {labels.newConversation}
-          </Button>
+        <div className="mt-4 max-w-[680px]">
+          <h1 className="text-2xl font-bold">{labels.title}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{labels.subtitle}</p>
         </div>
       </header>
 
       {mode === "operator" && (
         <p
           role="status"
-          className="rounded-md border border-blue-500/30 bg-blue-500/10 px-3 py-2 text-sm text-blue-700 dark:text-blue-300"
+          className="mx-4 mt-3 flex items-start gap-2.5 rounded-md bg-primary-soft px-4 py-3 text-sm text-foreground md:mx-6"
         >
-          {labels.operatorBanner}
+          <HeadsetIcon className="mt-0.5 size-4 shrink-0 text-primary" strokeWidth={1.75} aria-hidden />
+          <span>{labels.operatorBanner}</span>
         </p>
       )}
       {pollStopped && (
         <p
           role="status"
-          className="rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground"
+          className="mx-4 mt-3 flex items-start gap-2.5 rounded-md border border-border bg-card px-4 py-3 text-sm text-muted-foreground md:mx-6"
         >
-          {labels.pollError}
+          <WifiOffIcon className="mt-0.5 size-4 shrink-0" strokeWidth={1.75} aria-hidden />
+          <span>{labels.pollError}</span>
         </p>
       )}
 
       <div
         ref={scrollRef}
-        className="flex-1 space-y-4 overflow-y-auto px-1 py-2"
+        aria-busy={isStreaming}
+        className="flex-1 space-y-5 overflow-y-auto px-4 py-6 md:px-6"
       >
+        {isEmpty && (
+          <div className="mx-auto flex max-w-md flex-col items-center gap-4 py-8 text-center md:py-12">
+            <span
+              aria-hidden
+              className="inline-flex size-14 items-center justify-center rounded-lg bg-primary-soft text-primary"
+            >
+              <MessagesSquareIcon className="size-7" strokeWidth={1.75} />
+            </span>
+            <div className="space-y-2">
+              <h2 className="text-xl font-bold">
+                {labels.emptyTitle ?? labels.title}
+              </h2>
+              <p className="text-base text-muted-foreground">
+                {labels.emptyBody ?? labels.subtitle}
+              </p>
+            </div>
+            {labels.emptyPrivacyHint && (
+              <p className="flex items-start gap-2 rounded-md bg-highlight-soft px-4 py-3 text-left text-sm text-foreground">
+                <ShieldCheckIcon
+                  className="mt-0.5 size-4 shrink-0 text-highlight-soft-foreground"
+                  strokeWidth={1.75}
+                  aria-hidden
+                />
+                <span>{labels.emptyPrivacyHint}</span>
+              </p>
+            )}
+          </div>
+        )}
         {messages.map((m) =>
           m.escalation ? (
             <EscalationCard
@@ -538,6 +591,7 @@ export function ChatShell({
                 contactCta: labels.contactCta,
                 continue: labels.escalationContinue,
                 recommend: labels.escalationRecommend,
+                title: labels.escalationTitle,
               }}
               showContinue={CONTINUE_ENABLED}
               onContinue={() => inputRef.current?.focus()}
@@ -563,28 +617,54 @@ export function ChatShell({
           />
         )}
         {isStreaming && !streamingText && (
-          <p className="text-xs text-muted-foreground">{labels.thinking}</p>
+          <div className="flex items-start gap-2.5" role="status">
+            <span
+              aria-hidden
+              className="inline-flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-primary-soft text-primary"
+            >
+              <BotIcon className="size-4" strokeWidth={1.75} />
+            </span>
+            <div className="inline-flex items-center gap-2.5 rounded-lg rounded-tl-[4px] border border-border bg-card px-4 py-3">
+              <span aria-hidden className="inline-flex gap-1">
+                <span className="typing-dot size-1.5 rounded-full bg-primary" />
+                <span className="typing-dot size-1.5 rounded-full bg-primary" />
+                <span className="typing-dot size-1.5 rounded-full bg-primary" />
+              </span>
+              <span className="text-sm text-muted-foreground">{labels.thinking}</span>
+            </div>
+          </div>
         )}
       </div>
 
-      <div className="flex items-end gap-2 border-t border-border pt-3">
-        <Textarea
-          ref={inputRef}
-          rows={2}
-          value={input}
-          disabled={isStreaming}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={onInputKeyDown}
-          placeholder={labels.inputPlaceholder}
-          className="flex-1 resize-none"
-        />
-        <Button
-          onClick={send}
-          disabled={isStreaming || !input.trim()}
-          className="shrink-0"
-        >
-          {labels.send}
-        </Button>
+      {/* Composer. Stays at the bottom of the column and clears the iPhone
+          home indicator through the safe-area inset. */}
+      <div className="border-t border-border bg-background px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:px-6 md:pb-5">
+        <div className="flex items-end gap-2 rounded-lg border border-input bg-card p-2 shadow-card focus-within:border-ring focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ring">
+          <Textarea
+            ref={inputRef}
+            rows={2}
+            value={input}
+            disabled={isStreaming}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={onInputKeyDown}
+            placeholder={labels.inputPlaceholder}
+            aria-label={labels.inputPlaceholder}
+            className="max-h-48 min-h-12 flex-1 resize-none border-0 bg-transparent px-2 py-2 shadow-none focus-visible:outline-none"
+          />
+          <Button
+            onClick={send}
+            disabled={isStreaming || !input.trim()}
+            aria-busy={isStreaming}
+            className="shrink-0"
+          >
+            {labels.send}
+          </Button>
+        </div>
+        {labels.composerHint && (
+          <p className="mt-2 hidden text-xs text-muted-foreground md:block">
+            {labels.composerHint}
+          </p>
+        )}
       </div>
     </div>
   );

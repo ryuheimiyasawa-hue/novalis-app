@@ -9,7 +9,75 @@
     "ctaPrimary": "Facebookでログイン",
     "ctaSecondary": "もっと詳しく",
     "restaurantsHeading": "フィリピン人向け飲食店",
-    "restaurantsViewAll": "すべて見る"
+    "restaurantsViewAll": "すべて見る",
+    "heroEyebrow": "日本で暮らすフィリピン人とご家族のための相談窓口",
+    "heroPoints": {
+      "general": "在留資格・社会保険・行政手続き・家族の悩みに、AIが一般的な情報ですぐにお答えします",
+      "experts": "個別の判断が必要なときは、参考情報として弁護士・行政書士などの相談先を掲載します",
+      "languages": "日本語・English・Tagalog のどれでもご相談いただけます"
+    },
+    "freeNote": "現在は無料でご利用いただけます",
+    "startNote": "Facebook アカウントで始められます。メールアドレスでも登録できます。",
+    "mockCaption": "相談画面のイメージ",
+    "mockQuestion": "在留カードの更新は、どこで手続きしますか？",
+    "mockAnswer": "在留期間の更新は、お住まいの地域を管轄する地方出入国在留管理局で申請します。必要な書類は在留資格によって異なります。",
+    "mockNote": "一般的な情報です。最終的な判断は専門家にご確認ください。",
+    "mockEscalation": "個別の判断が必要な内容には、参考情報として専門家の相談先を掲載します",
+    "featuresHeading": "できること",
+    "featuresLead": "日本での暮らしで迷いやすい4つの分野について、一般的な情報をわかりやすくお伝えします。",
+    "features": {
+      "visa": {
+        "title": "在留資格",
+        "body": "更新や変更の流れ、準備する書類についての一般的な情報"
+      },
+      "insurance": {
+        "title": "社会保険",
+        "body": "健康保険や年金の加入、手続きの基本"
+      },
+      "procedures": {
+        "title": "行政手続き",
+        "body": "住所の届出、税金、お子さんの学校など、役所での手続き"
+      },
+      "family": {
+        "title": "家族の悩み",
+        "body": "結婚・離婚や子育てなど、ご家族に関わるご相談"
+      }
+    },
+    "stepsHeading": "ご利用の流れ",
+    "stepsLead": "ご相談は3つのステップで進みます。",
+    "steps": {
+      "ask": {
+        "title": "質問する",
+        "body": "お困りのことを、日本語・English・Tagalog のいずれかで入力します。"
+      },
+      "answer": {
+        "title": "AIが一般的な情報でお答えします",
+        "body": "制度や手続きについて、一般的な内容をわかりやすくお伝えします。参考にした記事があれば一緒に表示します。"
+      },
+      "experts": {
+        "title": "必要なときは専門家の相談先を掲載",
+        "body": "個別の判断が必要な内容には、AIはお答えしません。弁護士・行政書士などの相談先を参考情報としてお示しします。相談するかどうか、どこに相談するかは、ご自身でお決めいただけます。"
+      }
+    },
+    "stepsNote": "AIの回答は一般的な情報提供であり、法的な助言ではありません。",
+    "trustHeading": "安心してご利用いただくために",
+    "trustLead": "在留やご家族のことは、大切な個人の情報です。次の仕組みで守っています。",
+    "trust": {
+      "pii": {
+        "title": "個人情報はAIに届く前にチェック",
+        "body": "在留カード番号・マイナンバー・日本のパスポート番号・日本の電話番号・メールアドレスなど、決まった形式の番号を検出した場合は、AIに送らず保存もせず、書き直しをお願いする表示が出ます。すべてを検出できるわけではないため、個人を特定できる情報は入力しないでください。"
+      },
+      "languages": {
+        "title": "3つの言語に対応",
+        "body": "日本語・English・Tagalog を、画面上部の言語メニューからいつでも切り替えられます。"
+      },
+      "operator": {
+        "title": "運営者を明示しています",
+        "body": "株式会社ノヴァリスが運営しています。ご不明な点は、お問い合わせからご連絡ください。"
+      }
+    },
+    "closingTitle": "まずは気軽にご質問ください",
+    "closingBody": "日本での暮らしの「わからない」を、ひとりで抱え込まなくて大丈夫です。"
   },
   "login": {
     "heading": "ログイン",
@@ -40,7 +108,8 @@
     "supportText": "ログインできない場合は",
     "tryWithoutLogin": "ログインせずに試す（ベータテスト用）",
     "tryWithoutLoginLoading": "セッションを準備中...",
-    "tryWithoutLoginFailed": "ゲストセッションの作成に失敗しました。"
+    "tryWithoutLoginFailed": "ゲストセッションの作成に失敗しました。",
+    "panelTitle": "Novalis でできること"
   },
   "resetPassword": {
     "title": "新しいパスワードを設定",
@@ -112,7 +181,10 @@
     "messengerCtaButton": "Messenger を連携する",
     "footerTerms": "利用規約",
     "footerPrivacy": "プライバシーポリシー",
-    "footerLanguage": "言語"
+    "footerLanguage": "言語",
+    "lead": "日本での暮らしで気になることを、いつでもご相談ください。",
+    "nextStep": "まずはこちらから",
+    "moreHeading": "ほかの使い方"
   },
   "conversations": {
     "title": "過去の相談",
@@ -201,7 +273,9 @@
   "common": {
     "loading": "読み込み中...",
     "error": "エラーが発生しました",
-    "language": "言語"
+    "language": "言語",
+    "reload": "再読み込み",
+    "close": "閉じる"
   },
   "chat": {
     "disclaimer": "私はAIであり、不正確な情報を表示する可能性があるため、ユーザーにおいて応答内容を再確認してください。また、これは一般的な情報提供であり、最終的な判断や個別具体的な判断については専門家にご相談ください。",
@@ -235,8 +309,37 @@
       "systemLabel": "システム",
       "operatorLabel": "運営担当",
       "operatorBanner": "運営の担当者が対応中です。AI の自動応答は停止しています。",
-      "pollError": "接続できません。ページを再読み込みしてください。"
+      "pollError": "接続できません。ページを再読み込みしてください。",
+      "emptyTitle": "どんなことでもお気軽にご質問ください",
+      "emptyBody": "在留資格・社会保険・行政手続き・ご家族のことなど、日本での暮らしの疑問に一般的な情報でお答えします。",
+      "emptyPrivacyHint": "在留カード番号・電話番号などの個人情報は入力しないでください。",
+      "escalationTitle": "参考情報：専門家の相談先",
+      "composerHint": "Enter で送信、Shift + Enter で改行"
     },
     "consentRequired": "利用規約とプライバシーポリシーが改定されました。引き続きご利用いただくには、同意が必要です。\n{url} をブラウザで開いて、内容をご確認のうえ同意してください。"
+  },
+  "nav": {
+    "home": "ホーム",
+    "dashboard": "ダッシュボード",
+    "articles": "記事",
+    "restaurants": "飲食店",
+    "contact": "お問い合わせ",
+    "login": "ログイン",
+    "mainLabel": "メインメニュー",
+    "homeLabel": "Novalis ホームへ",
+    "skipToContent": "本文へ移動"
+  },
+  "footer": {
+    "operator": "運営: 株式会社ノヴァリス",
+    "languages": "日本語・English・Tagalog に対応",
+    "serviceHeading": "サービス",
+    "legalHeading": "規約とポリシー",
+    "note": "AIの回答は一般的な情報提供です。個別の判断は専門家にご相談ください。"
+  },
+  "notFound": {
+    "title": "お探しのページが見つかりませんでした",
+    "body": "ページが移動または削除されたか、URLが間違っている可能性があります。ホームや記事一覧からお探しください。",
+    "home": "ホームへ戻る",
+    "articles": "記事一覧を見る"
   }
 }

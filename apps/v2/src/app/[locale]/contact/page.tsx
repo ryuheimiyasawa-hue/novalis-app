@@ -2,7 +2,8 @@ import Link from "next/link";
 import { hasLocale } from "next-intl";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { routing } from "@/lib/i18n/routing";
-import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
+import { HomeIcon, InfoIcon, MailIcon } from "lucide-react";
+import { PageHeader } from "@/components/layout/page-header";
 import { createClient } from "@/lib/supabase/server";
 import { ContactForm, type ContactFormLabels } from "./contact-form";
 
@@ -28,7 +29,6 @@ export default async function ContactPage({ params }: PageProps) {
   setRequestLocale(safeLocale);
 
   const t = await getTranslations({ locale: safeLocale, namespace: "contact" });
-  const tCommon = await getTranslations({ locale: safeLocale, namespace: "common" });
 
   const supabase = await createClient();
   const {
@@ -48,38 +48,46 @@ export default async function ContactPage({ params }: PageProps) {
     success: t("form.success"),
     errorInvalid: t("form.errorInvalid"),
     errorGeneric: t("form.errorGeneric"),
+    doneLinkLabel: t("backToDashboard"),
   };
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8">
-      <div className="mb-4 flex items-center justify-between gap-3">
+    <main id="main-content" className="mx-auto w-full max-w-[728px] flex-1 px-4 py-10 md:px-6 md:py-16">
+      <div className="mb-8">
         <Link
           href={`/${safeLocale}/dashboard`}
-          className="text-sm text-muted-foreground hover:text-foreground hover:underline"
+          className="inline-flex min-h-11 items-center gap-2 rounded-md border border-input bg-card px-3.5 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-accent lg:min-h-9"
         >
-          ← {t("backToDashboard")}
+          <HomeIcon className="size-4" strokeWidth={1.75} aria-hidden />
+          {t("backToDashboard")}
         </Link>
-        <LocaleSwitcher currentLocale={safeLocale} label={tCommon("language")} />
       </div>
-      <header className="mb-6 border-b border-border pb-4">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
-      </header>
+      <PageHeader icon={MailIcon} title={t("title")} description={t("subtitle")} />
 
       {canSubmit ? (
-        <ContactForm labels={labels} defaultEmail={user?.email ?? undefined} />
+        <div className="rounded-lg border border-border bg-card p-5 shadow-card md:p-8">
+          <ContactForm
+            labels={labels}
+            defaultEmail={user?.email ?? undefined}
+            doneHref={`/${safeLocale}/dashboard`}
+          />
+        </div>
       ) : (
-        <div className="rounded-md border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
-          {t("form.anonNotice")}
+        <div
+          role="status"
+          className="flex items-start gap-3 rounded-lg border border-highlight/40 bg-highlight-soft p-5 text-base text-foreground"
+        >
+          <InfoIcon className="mt-1 size-5 shrink-0 text-highlight-soft-foreground" strokeWidth={1.75} aria-hidden />
+          <p>{t("form.anonNotice")}</p>
         </div>
       )}
 
       {/* Email fallback, always available beneath the form. */}
-      <p className="mt-6 text-center text-sm text-muted-foreground">
+      <p className="mt-6 rounded-lg border border-border bg-card px-5 py-4 text-sm text-muted-foreground">
         {t("emailFallbackLabel")}{" "}
         <a
           href="mailto:ryuhei.miyasawa@novalisgroup.biz"
-          className="font-medium text-primary hover:underline"
+          className="font-medium break-all text-primary underline underline-offset-4 hover:text-primary-hover"
         >
           ryuhei.miyasawa@novalisgroup.biz
         </a>

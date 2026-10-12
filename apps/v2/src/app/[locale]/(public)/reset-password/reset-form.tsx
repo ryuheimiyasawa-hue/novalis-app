@@ -1,5 +1,6 @@
 "use client";
 
+import { CircleAlertIcon, CircleCheckIcon } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -74,8 +75,12 @@ export function ResetPasswordForm({ locale, labels }: Props) {
 
   if (success) {
     return (
-      <p className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
-        {labels.successMessage}
+      <p
+        role="status"
+        className="flex items-start gap-2.5 rounded-md border border-success/30 bg-success/10 px-4 py-3 text-sm text-foreground"
+      >
+        <CircleCheckIcon className="mt-0.5 size-4 shrink-0 text-success" strokeWidth={1.75} aria-hidden />
+        <span>{labels.successMessage}</span>
       </p>
     );
   }
@@ -88,10 +93,11 @@ export function ResetPasswordForm({ locale, labels }: Props) {
         value={newPassword}
         onChange={(e) => setNewPassword(e.target.value)}
         placeholder={labels.newPasswordPlaceholder}
+        aria-label={labels.newPasswordPlaceholder}
         disabled={submitting}
         autoComplete="new-password"
         minLength={MIN_PASSWORD_LENGTH}
-        className="w-full rounded-md border border-neutral-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900"
+        className="h-12 w-full rounded-md border border-input bg-card px-4 text-base text-foreground placeholder:text-muted-foreground focus-visible:border-ring disabled:opacity-60"
       />
       <input
         type="password"
@@ -99,20 +105,27 @@ export function ResetPasswordForm({ locale, labels }: Props) {
         value={confirm}
         onChange={(e) => setConfirm(e.target.value)}
         placeholder={labels.confirmPasswordPlaceholder}
+        aria-label={labels.confirmPasswordPlaceholder}
         disabled={submitting}
         autoComplete="new-password"
         minLength={MIN_PASSWORD_LENGTH}
-        className="w-full rounded-md border border-neutral-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900"
+        className="h-12 w-full rounded-md border border-input bg-card px-4 text-base text-foreground placeholder:text-muted-foreground focus-visible:border-ring disabled:opacity-60"
       />
       <button
         type="submit"
         disabled={submitting || !newPassword || !confirm}
-        className="w-full rounded-md bg-neutral-900 px-6 py-3 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
+        className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-primary px-6 text-base font-medium text-primary-foreground transition-colors hover:bg-primary-hover disabled:pointer-events-none disabled:opacity-60"
       >
         {submitting ? labels.submitting : labels.submit}
       </button>
       {errorMsg && (
-        <p className="text-xs text-red-600 dark:text-red-400">{errorMsg}</p>
+        <p
+          role="alert"
+          className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3.5 py-3 text-sm text-destructive"
+        >
+          <CircleAlertIcon className="mt-0.5 size-4 shrink-0" strokeWidth={1.75} aria-hidden />
+          <span>{errorMsg}</span>
+        </p>
       )}
     </form>
   );

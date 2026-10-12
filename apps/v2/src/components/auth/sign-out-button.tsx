@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { LogOutIcon } from "lucide-react";
 
 // Sign-out affordance. The app previously had none, which stranded anyone who
 // started an anonymous "try without signing in" session: every authed page
@@ -40,8 +41,10 @@ export function SignOutButton({ locale, label, pendingLabel }: Props) {
       type="button"
       onClick={signOut}
       disabled={pending}
-      className="text-sm text-neutral-500 hover:text-neutral-900 hover:underline disabled:opacity-50 dark:text-neutral-400 dark:hover:text-neutral-100"
+      aria-busy={pending}
+      className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md border border-input bg-card px-3 text-sm font-medium whitespace-nowrap text-foreground transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-60 lg:min-h-9"
     >
+      <LogOutIcon className="size-4" strokeWidth={1.75} aria-hidden />
       {pending ? pendingLabel : label}
     </button>
   );

@@ -5,8 +5,21 @@ import { routing } from "@/lib/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { isPaymentEnabled } from "@/lib/payment/is-payment-enabled";
+import {
+  ArrowRightIcon,
+  BookOpenIcon,
+  CheckIcon,
+  FlaskConicalIcon,
+  MessageCircleIcon,
+  MessagesSquareIcon,
+  UserRoundIcon,
+} from "lucide-react";
 import { DashboardLanguageSwitcher } from "./dashboard-language-switcher";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { Button } from "@/components/ui/button";
+import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { IconTile } from "@/components/layout/icon-tile";
 
 export default async function DashboardPage({
   params,
@@ -40,118 +53,141 @@ export default async function DashboardPage({
   const displayName = profile?.display_name ?? "";
   const isAnon = user.is_anonymous === true;
 
+  const account = (
+    <div className="flex items-center gap-3">
+      {displayName && (
+        <span className="inline-flex max-w-[12rem] items-center gap-2 truncate text-sm text-foreground">
+          <UserRoundIcon className="size-4 shrink-0 text-muted-foreground" strokeWidth={1.75} aria-hidden />
+          <span className="truncate">{displayName}</span>
+        </span>
+      )}
+      <SignOutButton
+        locale={safeLocale}
+        label={t("signOut")}
+        pendingLabel={t("signingOut")}
+      />
+    </div>
+  );
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="flex items-center justify-between px-6 py-4 border-b border-neutral-200 dark:border-neutral-800">
-        <span className="font-bold text-lg">{t("headerLogo")}</span>
-        <div className="flex items-center gap-4">
+    <div className="flex min-h-dvh flex-col">
+      <SiteHeader
+        locale={safeLocale}
+        variant="app"
+        active="dashboard"
+        switcher={
           <DashboardLanguageSwitcher
             currentLocale={safeLocale}
             label={t("footerLanguage")}
           />
-          <span className="text-sm text-neutral-700 dark:text-neutral-300">
-            {displayName}
-          </span>
-          <SignOutButton
-            locale={safeLocale}
-            label={t("signOut")}
-            pendingLabel={t("signingOut")}
-          />
-        </div>
-      </header>
+        }
+        actions={<div className="hidden lg:block">{account}</div>}
+      />
 
-      <main className="flex-1 px-6 py-12">
-        <section className="max-w-3xl mx-auto space-y-6">
+      <main id="main-content" className="flex-1 px-4 py-10 md:px-6 md:py-16">
+        <section className="mx-auto max-w-[1120px] space-y-10">
+          {/* Account row for phones — the header has no room for it there. */}
+          <div className="flex justify-end lg:hidden">{account}</div>
+
           {isAnon && (
-            <div className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100">
-              <span className="font-semibold">{tAnon("label")}</span>
-              <span className="mx-2">·</span>
-              <span>{tAnon("body")}</span>
+            <div
+              role="status"
+              className="flex items-start gap-3 rounded-lg border border-highlight/40 bg-highlight-soft px-4 py-3 text-sm text-foreground"
+            >
+              <FlaskConicalIcon className="mt-0.5 size-4 shrink-0 text-highlight-soft-foreground" strokeWidth={1.75} aria-hidden />
+              <p>
+                <span className="font-bold text-highlight-soft-foreground">{tAnon("label")}</span>
+                <span className="mx-2" aria-hidden>·</span>
+                <span>{tAnon("body")}</span>
+              </p>
             </div>
           )}
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold">
-              {t("greeting", { name: displayName })}
-            </h1>
+
+          <div className="space-y-3">
             {!isPaymentEnabled() && (
-              <span className="inline-block rounded-full bg-emerald-100 dark:bg-emerald-900 px-3 py-1 text-xs font-medium text-emerald-800 dark:text-emerald-200">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-highlight-soft px-3 py-1 text-sm font-medium text-highlight-soft-foreground">
+                <CheckIcon className="size-4" strokeWidth={1.75} aria-hidden />
                 {t("freeBadge")}
               </span>
             )}
+            <h1 className="text-2xl font-bold md:text-3xl">
+              {t("greeting", { name: displayName })}
+            </h1>
+            <p className="max-w-[680px] text-base text-muted-foreground">{t("lead")}</p>
           </div>
 
-          <div className="rounded-md border border-neutral-200 dark:border-neutral-800 p-6 space-y-4">
-            <div className="space-y-2">
-              <h2 className="text-lg font-semibold">{t("chatCtaTitle")}</h2>
-              <p className="text-sm text-neutral-600 dark:text-neutral-300">
-                {t("chatCtaBody")}
-              </p>
-            </div>
-            {/* "View past consultations" was previously a second CTA
-                here. Replaced by the always-visible sidebar inside
-                /chat itself (Phase 1 chat UX rework), so the dashboard
-                only needs the entry point now. */}
-            <Link
-              href={`/${safeLocale}/chat`}
-              className="inline-flex items-center justify-center rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
-            >
-              {t("chatCtaButton")}
-            </Link>
-          </div>
-
-          <div className="rounded-md border border-neutral-200 dark:border-neutral-800 p-6 space-y-4">
-            <div className="space-y-2">
-              <h2 className="text-lg font-semibold">{t("articlesCtaTitle")}</h2>
-              <p className="text-sm text-neutral-600 dark:text-neutral-300">
-                {t("articlesCtaBody")}
-              </p>
-            </div>
-            <Link
-              href={`/${safeLocale}/articles`}
-              className="inline-flex items-center justify-center rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
-            >
-              {t("articlesCtaButton")}
-            </Link>
-          </div>
-
-          {/* Messenger linking is unavailable to anonymous beta sessions (the
-              link would be stranded when the session is purged), so the entry
-              point is hidden rather than shown and then refused. */}
-          {!isAnon && (
-            <div className="rounded-md border border-neutral-200 dark:border-neutral-800 p-6 space-y-4">
-              <div className="space-y-2">
-                <h2 className="text-lg font-semibold">
-                  {t("messengerCtaTitle")}
-                </h2>
-                <p className="text-sm text-neutral-600 dark:text-neutral-300">
-                  {t("messengerCtaBody")}
-                </p>
+          {/* The one thing to do next: start a consultation. */}
+          <div className="overflow-hidden rounded-lg border border-border bg-card shadow-card">
+            <div className="grid gap-6 p-6 md:grid-cols-[1fr_auto] md:items-center md:gap-10 md:p-8">
+              <div className="flex gap-4">
+                <IconTile icon={MessagesSquareIcon} size="lg" className="hidden sm:inline-flex" />
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-primary">{t("nextStep")}</p>
+                  <h2 className="text-2xl font-bold">{t("chatCtaTitle")}</h2>
+                  <p className="max-w-[600px] text-base text-muted-foreground">
+                    {t("chatCtaBody")}
+                  </p>
+                </div>
               </div>
-              <Link
-                href={`/${safeLocale}/messenger`}
-                className="inline-flex items-center justify-center rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
-              >
-                {t("messengerCtaButton")}
-              </Link>
+              {/* "View past consultations" was previously a second CTA
+                  here. Replaced by the always-visible sidebar inside
+                  /chat itself (Phase 1 chat UX rework), so the dashboard
+                  only needs the entry point now. */}
+              <Button asChild size="lg" className="w-full md:w-auto">
+                <Link href={`/${safeLocale}/chat`}>
+                  {t("chatCtaButton")}
+                  <ArrowRightIcon aria-hidden />
+                </Link>
+              </Button>
             </div>
-          )}
+            <div className="h-1 bg-highlight" aria-hidden />
+          </div>
+
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold">{t("moreHeading")}</h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-6 shadow-card">
+                <IconTile icon={BookOpenIcon} tone="highlight" />
+                <div className="flex-1 space-y-2">
+                  <h3 className="text-xl font-bold">{t("articlesCtaTitle")}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {t("articlesCtaBody")}
+                  </p>
+                </div>
+                <Button asChild variant="outline" className="w-full sm:w-auto sm:self-start">
+                  <Link href={`/${safeLocale}/articles`}>
+                    {t("articlesCtaButton")}
+                  </Link>
+                </Button>
+              </div>
+
+              {/* Messenger linking is unavailable to anonymous beta sessions (the
+                  link would be stranded when the session is purged), so the entry
+                  point is hidden rather than shown and then refused. */}
+              {!isAnon && (
+                <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-6 shadow-card">
+                  <IconTile icon={MessageCircleIcon} tone="highlight" />
+                  <div className="flex-1 space-y-2">
+                    <h3 className="text-xl font-bold">
+                      {t("messengerCtaTitle")}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {t("messengerCtaBody")}
+                    </p>
+                  </div>
+                  <Button asChild variant="outline" className="w-full sm:w-auto sm:self-start">
+                    <Link href={`/${safeLocale}/messenger`}>
+                      {t("messengerCtaButton")}
+                    </Link>
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
         </section>
       </main>
 
-      <footer className="px-6 py-6 border-t border-neutral-200 dark:border-neutral-800 text-sm text-neutral-500 flex justify-center gap-6">
-        <Link
-          href={`/${safeLocale}/legal/terms`}
-          className="hover:underline"
-        >
-          {t("footerTerms")}
-        </Link>
-        <Link
-          href={`/${safeLocale}/legal/privacy`}
-          className="hover:underline"
-        >
-          {t("footerPrivacy")}
-        </Link>
-      </footer>
+      <SiteFooter locale={safeLocale} />
     </div>
   );
 }

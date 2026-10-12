@@ -2,6 +2,8 @@ import Link from "next/link";
 import { hasLocale } from "next-intl";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { routing } from "@/lib/i18n/routing";
+import { HomeIcon, MessageCircleIcon } from "lucide-react";
+import { PageHeader } from "@/components/layout/page-header";
 import { MessengerLinkClient, type MessengerLinkLabels } from "./link-client";
 
 // Self-serve Messenger linking (P2-K follow-up). The user issues a short code
@@ -44,19 +46,21 @@ export default async function MessengerLinkPage({ params }: PageProps) {
   };
 
   return (
-    <main className="mx-auto max-w-xl px-4 py-8">
-      <div className="mb-4">
+    <main id="main-content" className="mx-auto w-full max-w-[680px] flex-1 px-4 py-10 md:px-6 md:py-16">
+      <div className="mb-6">
         <Link
           href={`/${safeLocale}/dashboard`}
-          className="text-sm text-muted-foreground hover:text-foreground hover:underline"
+          className="inline-flex min-h-11 items-center gap-2 rounded-md border border-input bg-card px-3.5 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-accent lg:min-h-9"
         >
-          ← {t("backToDashboard")}
+          <HomeIcon className="size-4" strokeWidth={1.75} aria-hidden />
+          {t("backToDashboard")}
         </Link>
       </div>
-      <header className="mb-8 border-b border-border pb-4">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
-      </header>
+      <PageHeader
+        icon={MessageCircleIcon}
+        title={t("title")}
+        description={t("subtitle")}
+      />
 
       <MessengerLinkClient
         labels={labels}

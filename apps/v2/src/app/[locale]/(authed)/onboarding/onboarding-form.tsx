@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { CircleAlertIcon, Loader2Icon, MapPinIcon } from "lucide-react";
 import { PREFECTURES } from "@/lib/i18n/prefectures";
 import {
   ConsentCheckboxes,
@@ -84,20 +85,21 @@ export function OnboardingForm({
         labels={labels}
       />
 
-      <fieldset className="space-y-3 rounded-md border border-neutral-200 dark:border-neutral-800 p-4">
-        <legend className="text-sm font-semibold px-1">
+      <fieldset className="space-y-4 rounded-lg border border-border bg-card p-5">
+        <legend className="flex items-center gap-2 px-1 text-base font-bold">
+          <MapPinIcon className="size-4 text-primary" strokeWidth={1.75} aria-hidden />
           {labels.locationHeading}
         </legend>
 
-        <div className="space-y-1">
-          <label htmlFor="pref-select" className="block text-sm">
+        <div className="space-y-1.5">
+          <label htmlFor="pref-select" className="block text-sm font-medium">
             {labels.prefectureLabel}
           </label>
           <select
             id="pref-select"
             value={prefectureCode}
             onChange={(e) => setPrefectureCode(e.target.value)}
-            className="w-full px-3 py-2 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900"
+            className={"h-12 w-full rounded-md border border-input bg-card px-3.5 text-base text-foreground focus-visible:border-ring"}
           >
             <option value="">{labels.prefectureSelectPlaceholder}</option>
             {PREFECTURES.map((p) => (
@@ -108,8 +110,8 @@ export function OnboardingForm({
           </select>
         </div>
 
-        <div className="space-y-1">
-          <label htmlFor="city-input" className="block text-sm">
+        <div className="space-y-1.5">
+          <label htmlFor="city-input" className="block text-sm font-medium">
             {labels.cityLabel}
           </label>
           <input
@@ -119,7 +121,7 @@ export function OnboardingForm({
             onChange={(e) => setCityName(e.target.value)}
             placeholder={labels.cityPlaceholder}
             maxLength={100}
-            className="w-full px-3 py-2 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900"
+            className={"h-12 w-full rounded-md border border-input bg-card px-3.5 text-base text-foreground focus-visible:border-ring"}
           />
         </div>
       </fieldset>
@@ -127,8 +129,9 @@ export function OnboardingForm({
       {error && (
         <div
           role="alert"
-          className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:bg-red-950 dark:border-red-800 dark:text-red-200"
+          className="flex items-start gap-2.5 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
         >
+          <CircleAlertIcon className="mt-0.5 size-4 shrink-0" strokeWidth={1.75} aria-hidden />
           {error}
         </div>
       )}
@@ -137,8 +140,12 @@ export function OnboardingForm({
         type="button"
         onClick={handleSubmit}
         disabled={!ready || submitting}
-        className="w-full px-6 py-3 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        aria-busy={submitting}
+        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-primary px-6 text-base font-medium text-primary-foreground transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
       >
+        {submitting && (
+          <Loader2Icon className="size-5 animate-spin" strokeWidth={1.75} aria-hidden />
+        )}
         {labels.submit}
       </button>
     </div>

@@ -48,7 +48,7 @@ export function ConsentCheckboxes({
   labels: ConsentCheckboxLabels;
 }) {
   return (
-    <div className="space-y-3 rounded-md border border-neutral-200 dark:border-neutral-800 p-4">
+    <div className="divide-y divide-border overflow-hidden rounded-lg border border-border bg-card">
       <Checkbox
         id="agree-terms"
         checked={value.terms}
@@ -95,15 +95,18 @@ function Checkbox({
   link?: { href: string; text: string; onOpen: () => void };
 }) {
   return (
-    <label htmlFor={id} className="flex items-start gap-3 cursor-pointer">
+    <label
+      htmlFor={id}
+      className="flex min-h-14 cursor-pointer items-start gap-3 px-4 py-4 transition-colors hover:bg-accent/60 has-[:checked]:bg-primary-soft/60"
+    >
       <input
         id={id}
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="mt-1"
+        className="mt-1 size-5 shrink-0 cursor-pointer accent-primary"
       />
-      <span className="text-sm leading-relaxed">
+      <span className="text-base">
         {label}
         {link && (
           <>
@@ -112,7 +115,7 @@ function Checkbox({
               href={link.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="underline text-blue-700 hover:text-blue-900"
+              className="font-medium text-primary underline underline-offset-4 hover:text-primary-hover"
               onClick={(e) => {
                 // Inside a <label>: without this the click also toggles the box.
                 e.stopPropagation();

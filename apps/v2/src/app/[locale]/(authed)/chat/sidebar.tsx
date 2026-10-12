@@ -1,9 +1,11 @@
 import { NewConversationLink } from "@/components/chat/NewConversationLink";
 import { getTranslations } from "next-intl/server";
-import { PlusIcon } from "lucide-react";
+import Link from "next/link";
+import { CircleAlertIcon, PlusIcon } from "lucide-react";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
+import { BrandMark } from "@/components/layout/brand-mark";
 import {
   ConversationList,
   type SidebarConversation,
@@ -79,6 +81,8 @@ export async function ConversationsSidebar({ locale }: Props) {
     locale,
     namespace: "common",
   });
+  const tNav = await getTranslations({ locale, namespace: "nav" });
+  const tDashboard = await getTranslations({ locale, namespace: "dashboard" });
 
   const rows = (data ?? []) as ConversationRow[];
   const shaped: SidebarConversation[] = rows.map((row) => {
@@ -92,30 +96,47 @@ export async function ConversationsSidebar({ locale }: Props) {
     };
   });
 
+  const footLink =
+    "inline-flex min-h-11 min-w-11 items-center text-xs text-muted-foreground hover:text-foreground hover:underline lg:min-h-8 lg:min-w-0";
+
   return (
-    <aside className="flex h-full w-full flex-col border-r border-border bg-muted/20">
-      <div className="border-b border-border p-3">
+    <aside className="flex h-full w-full flex-col border-r border-border bg-sidebar">
+      <div className="space-y-3 border-b border-border p-4">
+        <Link
+          href={`/${locale}/dashboard`}
+          aria-label={tNav("dashboard")}
+          className="flex min-h-11 items-center gap-2.5 rounded-md"
+        >
+          <BrandMark className="size-8" />
+          <span className="text-base font-bold">{tDashboard("headerLogo")}</span>
+        </Link>
         <NewConversationLink
           locale={locale}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm font-medium hover:bg-accent/40"
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-primary/25 bg-primary-soft px-3 text-sm font-medium text-primary transition-colors hover:border-primary/40 hover:bg-primary/10"
         >
-          <PlusIcon className="size-4" aria-hidden />
+          <PlusIcon className="size-4" strokeWidth={1.75} aria-hidden />
           {t("newButton")}
         </NewConversationLink>
       </div>
-      {/* Locale switcher at the very top, before "+ new conversation".
-          Always visible on desktop sidebar; reachable on mobile via the
-          hamburger drawer. Tiny so it does not crowd. */}
-      <div className="border-b border-border px-3 py-2 text-xs">
+      {/* Language switcher just below "+ new conversation". Always
+          visible on the desktop sidebar; reachable on mobile via the
+          hamburger drawer. */}
+      <div className="border-b border-border px-4 py-3">
         <LocaleSwitcher
           currentLocale={locale}
           label={tCommon("language")}
-          className="text-xs"
         />
       </div>
-      <div className="flex-1 overflow-y-auto p-2">
+      <div className="flex-1 overflow-y-auto p-3">
+        <p className="px-2 pb-2 text-xs font-bold text-muted-foreground">{t("title")}</p>
         {error ? (
-          <p className="px-2 py-4 text-xs text-destructive">{t("loadError")}</p>
+          <p
+            role="alert"
+            className="mx-1 flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-sm text-destructive"
+          >
+            <CircleAlertIcon className="mt-0.5 size-4 shrink-0" strokeWidth={1.75} aria-hidden />
+            <span>{t("loadError")}</span>
+          </p>
         ) : (
           <ConversationList
             locale={locale}
@@ -136,6 +157,20 @@ export async function ConversationsSidebar({ locale }: Props) {
           />
         )}
       </div>
+      <nav
+        aria-label={tNav("mainLabel")}
+        className="flex flex-wrap gap-x-4 border-t border-border px-4 py-2"
+      >
+        <Link href={`/${locale}/contact`} className={footLink}>
+          {tNav("contact")}
+        </Link>
+        <Link href={`/${locale}/legal/terms`} className={footLink}>
+          {tDashboard("footerTerms")}
+        </Link>
+        <Link href={`/${locale}/legal/privacy`} className={footLink}>
+          {tDashboard("footerPrivacy")}
+        </Link>
+      </nav>
     </aside>
   );
 }

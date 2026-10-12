@@ -1,7 +1,9 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { hasLocale } from "next-intl";
 import { cookies } from "next/headers";
+import { LogInIcon } from "lucide-react";
 import { routing } from "@/lib/i18n/routing";
+import { IconTile } from "@/components/layout/icon-tile";
 import { validateRedirect } from "@/lib/auth/redirect-validator";
 import {
   LOGIN_FAILURE_COOKIE,
@@ -11,7 +13,6 @@ import { LoginForm } from "./login-form";
 import { EmailPasswordForm } from "./email-password-form";
 import { AnonSignInButton } from "./anon-signin-button";
 import { ErrorBanner } from "./error-banner";
-import { LanguageSwitcher } from "./language-switcher";
 
 export default async function LoginPage({
   params,
@@ -46,14 +47,13 @@ export default async function LoginPage({
   );
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center space-y-2">
-          <p className="text-xs uppercase tracking-widest text-neutral-500">
-            {tApp("name")}
-          </p>
-          <h1 className="text-3xl font-bold">{t("heading")}</h1>
-          <p className="text-neutral-600 dark:text-neutral-300">{t("subheading")}</p>
+    <main id="main-content" className="w-full">
+      <div className="space-y-6 rounded-lg border border-border bg-card p-6 shadow-card md:p-8">
+        <div className="space-y-3">
+          <IconTile icon={LogInIcon} />
+          <p className="text-sm font-medium text-primary">{tApp("name")}</p>
+          <h1 className="text-2xl font-bold md:text-3xl">{t("heading")}</h1>
+          <p className="text-base text-muted-foreground">{t("subheading")}</p>
         </div>
 
         <ErrorBanner errorCode={errorCode} failureCount={failureCount} locale={safeLocale} />
@@ -64,10 +64,10 @@ export default async function LoginPage({
           buttonLabel={t("facebookButton")}
         />
 
-        <div className="flex items-center gap-3 text-xs uppercase tracking-wider text-neutral-400">
-          <span className="h-px flex-1 bg-neutral-200 dark:bg-neutral-800" />
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <span className="h-px flex-1 bg-border" />
           <span>{t("orDivider")}</span>
-          <span className="h-px flex-1 bg-neutral-200 dark:bg-neutral-800" />
+          <span className="h-px flex-1 bg-border" />
         </div>
 
         <EmailPasswordForm
@@ -96,10 +96,10 @@ export default async function LoginPage({
           }}
         />
 
-        <div className="flex items-center gap-3 text-xs uppercase tracking-wider text-neutral-400">
-          <span className="h-px flex-1 bg-neutral-200 dark:bg-neutral-800" />
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <span className="h-px flex-1 bg-border" />
           <span>{t("orDivider")}</span>
-          <span className="h-px flex-1 bg-neutral-200 dark:bg-neutral-800" />
+          <span className="h-px flex-1 bg-border" />
         </div>
 
         <AnonSignInButton
@@ -110,20 +110,16 @@ export default async function LoginPage({
           errorLabel={t("tryWithoutLoginFailed")}
         />
 
-        <div className="text-center text-sm text-neutral-500 space-y-2">
+        <div className="border-t border-border pt-5 text-center text-sm text-muted-foreground">
           <p>
             {t("supportText")}{" "}
             <a
               href="mailto:ryuhei.miyasawa@novalisgroup.biz"
-              className="underline hover:text-neutral-700"
+              className="font-medium text-primary underline underline-offset-4 hover:text-primary-hover"
             >
               {t("supportLink")}
             </a>
           </p>
-          <LanguageSwitcher
-            currentLocale={safeLocale}
-            label={t("switchLanguage")}
-          />
         </div>
       </div>
     </main>

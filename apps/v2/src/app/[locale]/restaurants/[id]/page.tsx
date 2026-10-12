@@ -5,7 +5,16 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { routing } from "@/lib/i18n/routing";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPrefectureLabel } from "@/lib/i18n/prefectures";
+import {
+  ArrowLeftIcon,
+  ClockIcon,
+  ExternalLinkIcon,
+  MapPinIcon,
+  UtensilsCrossedIcon,
+} from "lucide-react";
 import { HomeLink } from "@/components/layout/home-link";
+import { IconTile } from "@/components/layout/icon-tile";
+import { Button } from "@/components/ui/button";
 
 export const revalidate = 600;
 
@@ -85,71 +94,91 @@ export default async function RestaurantDetailPage({ params }: PageProps) {
   const map = mapUrl(r);
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8">
-      <HomeLink locale={safeLocale} className="mb-4" />
-      <Link
-        href={`/${safeLocale}/restaurants`}
-        className="text-sm text-primary hover:underline"
-      >
-        ← {t("back")}
-      </Link>
+    <main id="main-content" className="mx-auto w-full max-w-[728px] flex-1 px-4 py-10 md:px-6 md:py-16">
+      <div className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <HomeLink locale={safeLocale} />
+        <Link
+          href={`/${safeLocale}/restaurants`}
+          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline lg:min-h-9"
+        >
+          <ArrowLeftIcon className="size-4" strokeWidth={1.75} aria-hidden />
+          {t("back")}
+        </Link>
+      </div>
 
-      {r.photo_url && (
+      {r.photo_url ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={r.photo_url}
           alt={r.name}
-          className="mt-4 h-56 w-full rounded-md object-cover"
+          className="aspect-[16/9] w-full rounded-lg border border-border object-cover"
         />
+      ) : (
+        <div
+          aria-hidden
+          className="flex aspect-[16/7] w-full items-center justify-center rounded-lg bg-highlight-soft text-highlight-soft-foreground"
+        >
+          <UtensilsCrossedIcon className="size-12" strokeWidth={1.75} />
+        </div>
       )}
 
-      <header className="mt-4">
-        <div className="flex items-center gap-2">
-          {r.cuisine_type && (
-            <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-              {r.cuisine_type}
-            </span>
-          )}
-        </div>
-        <h1 className="mt-2 text-2xl font-bold">{r.name}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+      <header className="mt-8 space-y-3">
+        {r.cuisine_type && (
+          <span className="inline-flex rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">
+            {r.cuisine_type}
+          </span>
+        )}
+        <h1 className="text-2xl font-bold md:text-3xl">{r.name}</h1>
+        <p className="inline-flex items-center gap-1.5 text-base text-muted-foreground">
+          <MapPinIcon className="size-4 shrink-0" strokeWidth={1.75} aria-hidden />
           {[pref, r.city_name].filter(Boolean).join(" ")}
         </p>
       </header>
 
-      <dl className="mt-6 space-y-3 text-sm">
-        {r.address && (
-          <div>
-            <dt className="font-medium">{t("address")}</dt>
-            <dd className="text-muted-foreground">{r.address}</dd>
-          </div>
-        )}
-        {r.hours && (
-          <div>
-            <dt className="font-medium">{t("hours")}</dt>
-            <dd className="whitespace-pre-line text-muted-foreground">
-              {r.hours}
-            </dd>
-          </div>
-        )}
-      </dl>
+      {(r.address || r.hours) && (
+        <dl className="mt-8 grid gap-4 rounded-lg border border-border bg-card p-5 shadow-card sm:grid-cols-2 md:p-6">
+          {r.address && (
+            <div className="flex gap-3">
+              <IconTile icon={MapPinIcon} size="sm" />
+              <div>
+                <dt className="text-sm font-bold">{t("address")}</dt>
+                <dd className="text-sm text-muted-foreground">{r.address}</dd>
+              </div>
+            </div>
+          )}
+          {r.hours && (
+            <div className="flex gap-3">
+              <IconTile icon={ClockIcon} size="sm" />
+              <div>
+                <dt className="text-sm font-bold">{t("hours")}</dt>
+                <dd className="whitespace-pre-line text-sm text-muted-foreground">
+                  {r.hours}
+                </dd>
+              </div>
+            </div>
+          )}
+        </dl>
+      )}
 
       {desc && (
-        <section className="mt-6">
-          <p className="whitespace-pre-line text-sm leading-relaxed">{desc}</p>
+        <section className="mt-8">
+          <p className="max-w-[680px] whitespace-pre-line text-base">{desc}</p>
         </section>
       )}
 
       {map && (
-        <div className="mt-6">
-          <a
-            href={map}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-accent"
-          >
-            {t("viewOnMap")}
-          </a>
+        <div className="mt-8">
+          <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
+            <a
+              href={map}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <MapPinIcon aria-hidden />
+              {t("viewOnMap")}
+              <ExternalLinkIcon aria-hidden />
+            </a>
+          </Button>
         </div>
       )}
     </main>

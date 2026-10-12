@@ -9,7 +9,75 @@
     "ctaPrimary": "Login with Facebook",
     "ctaSecondary": "Learn more",
     "restaurantsHeading": "Filipino restaurants",
-    "restaurantsViewAll": "View all"
+    "restaurantsViewAll": "View all",
+    "heroEyebrow": "A help desk for Filipinos living in Japan and their families",
+    "heroPoints": {
+      "general": "The AI answers right away with general information on residence status, social insurance, government procedures and family matters",
+      "experts": "When your situation needs an individual judgment, we show where you can consult a lawyer or gyoseishoshi",
+      "languages": "Ask in 日本語, English or Tagalog"
+    },
+    "freeNote": "Free to use for now",
+    "startNote": "Start with your Facebook account, or sign up with an email address.",
+    "mockCaption": "Example of the consultation screen",
+    "mockQuestion": "Where do I renew my residence card?",
+    "mockAnswer": "Renewals of your period of stay are filed at the regional immigration services bureau that covers where you live. The documents you need depend on your status of residence.",
+    "mockNote": "General information. Please confirm final decisions with a professional.",
+    "mockEscalation": "For questions that need an individual judgment, we show where to consult a professional",
+    "featuresHeading": "What we can help with",
+    "featuresLead": "Clear, general information on four areas where life in Japan often gets confusing.",
+    "features": {
+      "visa": {
+        "title": "Residence status",
+        "body": "How renewals and changes generally work, and which documents to prepare"
+      },
+      "insurance": {
+        "title": "Social insurance",
+        "body": "The basics of joining health insurance and the pension system"
+      },
+      "procedures": {
+        "title": "Government procedures",
+        "body": "City hall procedures such as address registration, taxes and your child's school"
+      },
+      "family": {
+        "title": "Family matters",
+        "body": "Questions about marriage, divorce, raising children and other family concerns"
+      }
+    },
+    "stepsHeading": "How it works",
+    "stepsLead": "A consultation takes three steps.",
+    "steps": {
+      "ask": {
+        "title": "Ask your question",
+        "body": "Type what you need help with in 日本語, English or Tagalog."
+      },
+      "answer": {
+        "title": "The AI answers with general information",
+        "body": "We explain how systems and procedures generally work, and show the articles we referred to when there are any."
+      },
+      "experts": {
+        "title": "When needed, we show where to consult a professional",
+        "body": "The AI does not answer questions that need an individual judgment. Instead, we list lawyers, gyoseishoshi and other places to consult, for your reference. Whether and where to consult is up to you."
+      }
+    },
+    "stepsNote": "AI answers are general information, not legal advice.",
+    "trustHeading": "Built to be safe to use",
+    "trustLead": "Questions about your status and your family involve important personal information. Here is how we protect it.",
+    "trust": {
+      "pii": {
+        "title": "Personal details are checked before they reach the AI",
+        "body": "If we detect a number in a fixed format, such as a residence card number, My Number, a Japanese passport number, a Japanese phone number or an email address, your message is not sent to the AI or saved, and you are asked to rewrite it. We cannot detect everything, so please do not enter information that identifies you."
+      },
+      "languages": {
+        "title": "Three languages",
+        "body": "Switch between 日本語, English and Tagalog at any time from the language menu at the top of the screen."
+      },
+      "operator": {
+        "title": "A clearly named operator",
+        "body": "Novalis Inc. runs this service. If anything is unclear, please reach us through the contact page."
+      }
+    },
+    "closingTitle": "Start with a simple question",
+    "closingBody": "You don't have to figure out life in Japan on your own."
   },
   "login": {
     "heading": "Sign in",
@@ -40,7 +108,8 @@
     "supportText": "Trouble signing in?",
     "tryWithoutLogin": "Try without signing in (beta test)",
     "tryWithoutLoginLoading": "Preparing your session...",
-    "tryWithoutLoginFailed": "Could not create a guest session."
+    "tryWithoutLoginFailed": "Could not create a guest session.",
+    "panelTitle": "What Novalis offers"
   },
   "resetPassword": {
     "title": "Set a new password",
@@ -112,7 +181,10 @@
     "messengerCtaButton": "Connect Messenger",
     "footerTerms": "Terms",
     "footerPrivacy": "Privacy",
-    "footerLanguage": "Language"
+    "footerLanguage": "Language",
+    "lead": "Ask about anything in your life in Japan, any time.",
+    "nextStep": "Start here",
+    "moreHeading": "More ways to get help"
   },
   "conversations": {
     "title": "Past consultations",
@@ -201,7 +273,9 @@
   "common": {
     "loading": "Loading...",
     "error": "An error occurred",
-    "language": "Language"
+    "language": "Language",
+    "reload": "Reload",
+    "close": "Close"
   },
   "chat": {
     "disclaimer": "I am an AI and may present inaccurate information, so please verify my responses yourself. This is general information only; for final decisions or matters specific to your situation, please consult a professional.",
@@ -235,8 +309,37 @@
       "systemLabel": "System",
       "operatorLabel": "Support staff",
       "operatorBanner": "A staff member is handling this conversation. Automatic AI replies are paused.",
-      "pollError": "Can't reach the server. Please reload the page."
+      "pollError": "Can't reach the server. Please reload the page.",
+      "emptyTitle": "Ask about anything you're unsure of",
+      "emptyBody": "We answer questions about life in Japan, such as residence status, social insurance, government procedures and family matters, with general information.",
+      "emptyPrivacyHint": "Please don't include personal details such as your residence card number or phone number.",
+      "escalationTitle": "Where you can consult a professional",
+      "composerHint": "Enter to send, Shift + Enter for a new line"
     },
     "consentRequired": "Our Terms of Service and Privacy Policy have been updated. To keep using Novalis, you need to agree to them.\nPlease open {url} in your browser, review the documents, and agree."
+  },
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "articles": "Articles",
+    "restaurants": "Restaurants",
+    "contact": "Contact",
+    "login": "Log in",
+    "mainLabel": "Main menu",
+    "homeLabel": "Novalis home",
+    "skipToContent": "Skip to main content"
+  },
+  "footer": {
+    "operator": "Operated by Novalis Inc.",
+    "languages": "Available in 日本語, English and Tagalog",
+    "serviceHeading": "Service",
+    "legalHeading": "Policies",
+    "note": "AI answers are general information. Please consult a professional about decisions on your own situation."
+  },
+  "notFound": {
+    "title": "We could not find this page",
+    "body": "The page may have moved or been removed, or the URL may be incorrect. Please look for it from the home page or the article list.",
+    "home": "Back to home",
+    "articles": "See all articles"
   }
 }

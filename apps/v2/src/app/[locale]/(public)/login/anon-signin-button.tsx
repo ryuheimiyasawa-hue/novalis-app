@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CircleAlertIcon, FlaskConicalIcon, Loader2Icon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 // "Try without signing in" button that creates a Supabase anonymous
@@ -83,14 +84,26 @@ export function AnonSignInButton({
         type="button"
         onClick={handleClick}
         disabled={state === "loading"}
-        className="w-full rounded-md border border-dashed border-neutral-400 px-6 py-3 text-sm font-medium text-neutral-700 hover:border-neutral-600 hover:bg-neutral-50 disabled:opacity-60 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-900"
+        aria-busy={state === "loading"}
+        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md border border-dashed border-input bg-transparent px-6 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-card hover:text-foreground disabled:pointer-events-none disabled:opacity-60"
       >
+        {state === "loading" ? (
+          <Loader2Icon className="size-4 animate-spin" strokeWidth={1.75} aria-hidden />
+        ) : (
+          <FlaskConicalIcon className="size-4" strokeWidth={1.75} aria-hidden />
+        )}
         {state === "loading" ? loadingLabel : label}
       </button>
       {state === "error" && (
-        <p className="text-xs text-red-600 dark:text-red-400">
-          {errorLabel}
-          {errorDetail ? ` (${errorDetail})` : ""}
+        <p
+          role="alert"
+          className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3.5 py-3 text-sm text-destructive"
+        >
+          <CircleAlertIcon className="mt-0.5 size-4 shrink-0" strokeWidth={1.75} aria-hidden />
+          <span>
+            {errorLabel}
+            {errorDetail ? ` (${errorDetail})` : ""}
+          </span>
         </p>
       )}
     </div>

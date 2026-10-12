@@ -3,6 +3,7 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/lib/i18n/routing";
 import type { Locale } from "@/lib/i18n/config";
+import { Toaster } from "@/components/ui/sonner";
 import { LangSync } from "./lang-sync";
 
 export function generateStaticParams() {
@@ -28,6 +29,9 @@ export default async function LocaleLayout({
     <NextIntlClientProvider locale={locale}>
       <LangSync locale={locale} />
       {children}
+      {/* Host for the toast.error() calls the chat and conversation list
+          already make; without it those messages were never shown. */}
+      <Toaster position="top-center" closeButton />
     </NextIntlClientProvider>
   );
 }

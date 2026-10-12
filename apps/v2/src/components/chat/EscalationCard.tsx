@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  CalendarCheckIcon,
+  MailIcon,
+  ScaleIcon,
+  UserRoundIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Expert {
@@ -25,6 +30,8 @@ interface Props {
     continue?: string;
     /** Persistent recommendation label kept after minimizing. */
     recommend?: string;
+    /** Neutral heading for the card ("where you can consult"). */
+    title?: string;
   };
   /** P2-L improvement 2: render a "continue asking" button that collapses the
    *  card. Gated by NEXT_PUBLIC_ESCALATION_SHOW_CONTINUE_BUTTON (default off). */
@@ -88,73 +95,108 @@ export function EscalationCard({
   // continues without losing the "consult an expert" reminder.
   if (minimized) {
     return (
-      <Card className="border-amber-300 bg-amber-50/40">
-        <CardContent className="py-3">
-          <p className="text-xs text-muted-foreground">
-            {labels.recommend ?? labels.heading}
-          </p>
-        </CardContent>
-      </Card>
+      <div className="flex items-center gap-2.5 rounded-lg border border-border border-l-[3px] border-l-caution bg-card px-4 py-3">
+        <ScaleIcon className="size-4 shrink-0 text-caution" strokeWidth={1.75} aria-hidden />
+        <p className="text-sm text-muted-foreground">
+          {labels.recommend ?? labels.heading}
+        </p>
+      </div>
     );
   }
 
+  // A careful hand-off, not an error: terracotta accent, a scales icon,
+  // the lawyer-reviewed body text verbatim, then the places to consult.
   return (
-    <Card className="border-amber-300 bg-amber-50/40">
-      {hasExperts && (
-        <CardHeader>
-          <CardTitle className="text-base">{labels.heading}</CardTitle>
-        </CardHeader>
-      )}
-      <CardContent className="space-y-3 pt-6">
-        <p className="whitespace-pre-line text-sm">{body}</p>
+    <section
+      aria-label={labels.title ?? labels.heading}
+      className="overflow-hidden rounded-lg border border-border border-t-[3px] border-t-caution bg-card shadow-card"
+    >
+      <div className="space-y-4 p-5 md:p-6">
+        <div className="flex items-start gap-3">
+          <span
+            aria-hidden
+            className="inline-flex size-10 shrink-0 items-center justify-center rounded-md bg-highlight-soft text-caution"
+          >
+            <ScaleIcon className="size-5" strokeWidth={1.75} />
+          </span>
+          <div className="min-w-0 space-y-1">
+            {labels.title && (
+              <h2 className="text-base font-bold text-caution-foreground">{labels.title}</h2>
+            )}
+            <p className="text-base whitespace-pre-line text-foreground">{body}</p>
+          </div>
+        </div>
+
         {experts === null && (
-          <p className="text-xs text-muted-foreground">…</p>
+          <div className="space-y-2" aria-busy="true">
+            <div className="h-14 animate-pulse rounded-md bg-muted" />
+            <div className="h-14 animate-pulse rounded-md bg-muted" />
+          </div>
         )}
+
         {hasExperts && (
-          <ul className="space-y-2">
-            {experts!.map((e) => (
-              <li
-                key={e.id}
-                className="flex items-center justify-between rounded border border-border bg-background px-3 py-2"
-              >
-                <div className="space-y-0.5">
-                  <p className="text-sm font-medium">
-                    {e.name}{" "}
-                    <span className="text-xs text-muted-foreground">{e.title}</span>
-                  </p>
-                  {pickSpecialty(e) && (
-                    <p className="text-xs text-muted-foreground">
-                      {pickSpecialty(e)}
-                    </p>
-                  )}
-                </div>
-                {e.calendar_url && (
-                  <Button asChild size="sm" variant="outline">
-                    <a
-                      href={e.calendar_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
+          <div className="space-y-2">
+            <h3 className="text-sm font-bold">{labels.heading}</h3>
+            <ul className="space-y-2">
+              {experts!.map((e) => (
+                <li
+                  key={e.id}
+                  className="flex flex-col gap-3 rounded-md border border-border bg-background px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span
+                      aria-hidden
+                      className="inline-flex size-9 shrink-0 items-center justify-center rounded-[8px] bg-primary-soft text-primary"
                     >
-                      {labels.book}
-                    </a>
-                  </Button>
-                )}
-              </li>
-            ))}
-          </ul>
+                      <UserRoundIcon className="size-4" strokeWidth={1.75} />
+                    </span>
+                    <div className="min-w-0 space-y-0.5">
+                      <p className="text-base font-bold">
+                        {e.name}{" "}
+                        <span className="text-sm font-normal text-muted-foreground">{e.title}</span>
+                      </p>
+                      {pickSpecialty(e) && (
+                        <p className="text-sm text-muted-foreground">
+                          {pickSpecialty(e)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {e.calendar_url && (
+                    <Button asChild size="sm" variant="outline" className="shrink-0">
+                      <a
+                        href={e.calendar_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <CalendarCheckIcon aria-hidden />
+                        {labels.book}
+                      </a>
+                    </Button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
         {/*
           Standing fallback: even when an expert is shown, the user may
           prefer to write to Novalis support directly. New tab so they
           don't lose the chat context behind them.
         */}
-        <div className="flex flex-wrap gap-2 pt-1">
-          <Button asChild size="sm" variant="secondary">
+        <div className="flex flex-col gap-2 border-t border-border pt-4 sm:flex-row sm:flex-wrap">
+          <Button
+            asChild
+            size="sm"
+            variant="secondary"
+            className="h-auto min-h-11 justify-start py-2 text-left whitespace-normal lg:min-h-9"
+          >
             <a
               href={`/${locale}/contact`}
               target="_blank"
               rel="noopener noreferrer"
             >
+              <MailIcon aria-hidden />
               {labels.contactCta}
             </a>
           </Button>
@@ -162,6 +204,7 @@ export function EscalationCard({
             <Button
               size="sm"
               variant="ghost"
+              className="h-auto min-h-11 justify-start py-2 text-left whitespace-normal lg:min-h-9"
               onClick={() => {
                 setMinimized(true);
                 onContinue?.();
@@ -171,7 +214,7 @@ export function EscalationCard({
             </Button>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }

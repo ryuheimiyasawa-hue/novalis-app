@@ -13,9 +13,9 @@ interface Props {
 export function CitationLink({ citation, index, locale }: Props) {
   const label = `[${index + 1}]`;
   const inner = (
-    <span className="inline-flex items-center gap-1 rounded border border-border bg-muted/30 px-1.5 py-0.5 text-xs hover:bg-muted">
-      <span className="font-mono text-muted-foreground">{label}</span>
-      <span className="text-foreground/80">{citation.title}</span>
+    <span className="inline-flex min-h-11 lg:min-h-9 max-w-full items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-sm transition-colors hover:border-primary/40 hover:bg-accent">
+      <span className="font-mono text-xs text-primary">{label}</span>
+      <span className="min-w-0 text-left break-words text-foreground">{citation.title}</span>
     </span>
   );
   if (citation.source_type === "article" && citation.slug) {

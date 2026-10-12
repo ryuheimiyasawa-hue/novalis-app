@@ -3,7 +3,11 @@ import { hasLocale } from "next-intl";
 import { redirect } from "next/navigation";
 import { routing } from "@/lib/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
+import { KeyRoundIcon } from "lucide-react";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
+import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { IconTile } from "@/components/layout/icon-tile";
 import { ResetPasswordForm } from "./reset-form";
 
 // /[locale]/reset-password — landing page after a user clicks the
@@ -46,34 +50,42 @@ export default async function ResetPasswordPage({ params }: Props) {
   });
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
-      <div className="max-w-md w-full space-y-6">
-        <div className="flex justify-end">
+    <div className="flex min-h-dvh flex-col">
+      <SiteHeader
+        locale={safeLocale}
+        mobileNav={false}
+        switcher={
           <LocaleSwitcher
             currentLocale={safeLocale}
             label={tCommon("language")}
           />
+        }
+      />
+      <main id="main-content" className="flex flex-1 items-start justify-center px-4 py-10 md:px-6 md:py-16">
+        <div className="w-full max-w-[460px] space-y-6 rounded-lg border border-border bg-card p-6 shadow-card md:p-8">
+          <div className="space-y-3">
+            <IconTile icon={KeyRoundIcon} />
+            <h1 className="text-2xl font-bold">{t("title")}</h1>
+            <p className="text-base text-muted-foreground">
+              {t("subtitle")}
+            </p>
+          </div>
+          <ResetPasswordForm
+            locale={safeLocale}
+            labels={{
+              newPasswordPlaceholder: t("newPasswordPlaceholder"),
+              confirmPasswordPlaceholder: t("confirmPasswordPlaceholder"),
+              submit: t("submit"),
+              submitting: t("submitting"),
+              successMessage: t("successMessage"),
+              mismatch: t("mismatch"),
+              tooShort: t("tooShort"),
+              failed: t("failed"),
+            }}
+          />
         </div>
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
-          <p className="text-sm text-neutral-600 dark:text-neutral-300">
-            {t("subtitle")}
-          </p>
-        </div>
-        <ResetPasswordForm
-          locale={safeLocale}
-          labels={{
-            newPasswordPlaceholder: t("newPasswordPlaceholder"),
-            confirmPasswordPlaceholder: t("confirmPasswordPlaceholder"),
-            submit: t("submit"),
-            submitting: t("submitting"),
-            successMessage: t("successMessage"),
-            mismatch: t("mismatch"),
-            tooShort: t("tooShort"),
-            failed: t("failed"),
-          }}
-        />
-      </div>
-    </main>
+      </main>
+      <SiteFooter locale={safeLocale} />
+    </div>
   );
 }

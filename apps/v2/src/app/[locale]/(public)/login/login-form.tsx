@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { FacebookIcon, Loader2Icon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 interface Props {
@@ -65,8 +66,14 @@ export function LoginForm({ locale, redirect, buttonLabel }: Props) {
       type="button"
       onClick={handleClick}
       disabled={pending}
-      className="w-full px-6 py-3 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-60"
+      aria-busy={pending}
+      className="inline-flex min-h-12 w-full items-center justify-center gap-2.5 rounded-md bg-primary px-6 text-base font-medium text-primary-foreground transition-colors hover:bg-primary-hover disabled:pointer-events-none disabled:opacity-60"
     >
+      {pending ? (
+        <Loader2Icon className="size-5 animate-spin" strokeWidth={1.75} aria-hidden />
+      ) : (
+        <FacebookIcon className="size-5" strokeWidth={1.75} aria-hidden />
+      )}
       {buttonLabel}
     </button>
   );
