@@ -109,7 +109,7 @@
     "tryWithoutLogin": "Try without signing in (beta test)",
     "tryWithoutLoginLoading": "Preparing your session...",
     "tryWithoutLoginFailed": "Could not create a guest session.",
-    "panelTitle": "What Novalis offers"
+    "panelTitle": "What MORITA offers"
   },
   "resetPassword": {
     "title": "Set a new password",
@@ -130,7 +130,7 @@
     "tooManyAttempts": "Sign-in has failed several times. Please contact support."
   },
   "onboarding": {
-    "heading": "Welcome to Novalis",
+    "heading": "Welcome to MORITA",
     "subheading": "Please agree to the following before continuing.",
     "termsLabel": "I agree to the Terms of Service",
     "privacyLabel": "I agree to the Privacy Policy",
@@ -147,7 +147,7 @@
   },
   "consent": {
     "heading": "Updated Terms of Service and Privacy Policy",
-    "subheading": "To keep using Novalis, please review the updated documents and agree to them.",
+    "subheading": "To keep using MORITA, please review the updated documents and agree to them.",
     "submit": "Agree and continue",
     "error": "Could not record your agreement. Please try again.",
     "errorVersion": "The documents were updated while this page was open. Please reload the page."
@@ -165,7 +165,7 @@
     "body": "Temporary beta session. Data will not persist if you switch browsers."
   },
   "dashboard": {
-    "headerLogo": "Novalis",
+    "headerLogo": "MORITA",
     "signOut": "Sign out",
     "signingOut": "Signing out...",
     "greeting": "Welcome, {name}",
@@ -226,7 +226,7 @@
     "viewOnMap": "View on map"
   },
   "contact": {
-    "title": "Contact Novalis",
+    "title": "Contact MORITA",
     "subtitle": "Send us a question, request, or feedback. A team member will get back to you.",
     "backToDashboard": "Back to dashboard",
     "loading": "Loading form...",
@@ -257,7 +257,7 @@
     "issuing": "Generating...",
     "reissueButton": "Get a new code",
     "step2Title": "2. Send the code on Messenger",
-    "step2Body": "Open the Novalis Facebook Page in Messenger and send this code as a message.",
+    "step2Body": "Open the MORITA Facebook Page in Messenger and send this code as a message.",
     "openMessenger": "Open Messenger",
     "expiresIn": "Valid for about {minutes} minutes",
     "expired": "This code has expired. Please get a new one.",
@@ -299,7 +299,7 @@
       "expertHeading": "Recommended experts",
       "expertSchedule": "Book",
       "noExperts": "No experts available right now. Please try again later.",
-      "contactCta": "Contact Novalis support",
+      "contactCta": "Contact MORITA support",
       "escalationContinue": "Keep asking anyway",
       "escalationRecommend": "We recommend consulting a professional",
       "citationsHeading": "References",
@@ -316,7 +316,7 @@
       "escalationTitle": "Where you can consult a professional",
       "composerHint": "Enter to send, Shift + Enter for a new line"
     },
-    "consentRequired": "Our Terms of Service and Privacy Policy have been updated. To keep using Novalis, you need to agree to them.\nPlease open {url} in your browser, review the documents, and agree."
+    "consentRequired": "Our Terms of Service and Privacy Policy have been updated. To keep using MORITA, you need to agree to them.\nPlease open {url} in your browser, review the documents, and agree."
   },
   "nav": {
     "home": "Home",
@@ -326,7 +326,7 @@
     "contact": "Contact",
     "login": "Log in",
     "mainLabel": "Main menu",
-    "homeLabel": "Novalis home",
+    "homeLabel": "MORITA home",
     "skipToContent": "Skip to main content"
   },
   "footer": {

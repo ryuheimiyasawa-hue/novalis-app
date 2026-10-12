@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Philippine Community",
+  title: "MORITA | Philippine Community",
   description: "Life support for Filipinos in Japan",
 };
 
