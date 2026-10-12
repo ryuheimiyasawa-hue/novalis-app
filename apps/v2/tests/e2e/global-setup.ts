@@ -10,9 +10,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
-
-const TEST_EMAIL = process.env.E2E_TEST_EMAIL ?? "e2e-test@novalis-test.local";
-const TEST_PASSWORD = process.env.E2E_TEST_PASSWORD ?? "e2e-password-DO-NOT-USE-IN-PROD";
+import { CURRENT_PRIVACY_VERSION, CURRENT_TERMS_VERSION } from "../../src/lib/legal/versions";
+import { assertE2ETestTarget } from "./safety";
 
 function loadEnvLocal(): void {
   const file = path.join(process.cwd(), ".env.local");
@@ -28,7 +27,7 @@ function loadEnvLocal(): void {
   }
 }
 
-async function ensureTestUser(): Promise<{ userId: string }> {
+async function ensureTestUser(email: string, password: string): Promise<{ userId: string }> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
   const admin = createClient(url, serviceKey, {
@@ -37,45 +36,54 @@ async function ensureTestUser(): Promise<{ userId: string }> {
 
   // Try to create; if it already exists we just look it up.
   const created = await admin.auth.admin.createUser({
-    email: TEST_EMAIL,
-    password: TEST_PASSWORD,
+    email,
+    password,
     email_confirm: true,
   });
-  if (created.data.user) {
-    const userId = created.data.user.id;
-    // Ensure a profile row exists so middleware doesn't redirect to
-    // onboarding. trial_ends_at must be set (NOT NULL in schema).
-    const trialEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    await admin.from("profiles").upsert(
-      {
-        id: userId,
-        facebook_id: `e2e-${userId}`,
-        display_name: "E2E Tester",
-        preferred_language: "ja",
-        prefecture_code: "JP-13",
-        city_name: "渋谷区",
-        trial_started_at: new Date().toISOString(),
-        trial_ends_at: trialEnd.toISOString(),
-        onboarded_at: new Date().toISOString(),
-        age_verified: true,
-      },
-      { onConflict: "id" },
-    );
-    return { userId };
+  let userId = created.data.user?.id;
+  if (!userId) {
+    if (created.error?.code !== "email_exists" && created.error?.code !== "user_already_exists") {
+      throw new Error(`E2E setup: failed to create test user (${created.error?.message ?? "no user returned"})`);
+    }
+    const list = await admin.auth.admin.listUsers();
+    if (list.error) throw new Error(`E2E setup: test user lookup failed: ${list.error.message}`);
+    const existing = list.data.users.find((u) => u.email === email);
+    if (!existing) throw new Error("E2E setup: existing test user was not found on the first account page.");
+    userId = existing.id;
   }
-  // createUser failed (probably "already registered"); look up.
-  // listUsers paginates; fetch the first page (enough for tests).
-  const list = await admin.auth.admin.listUsers();
-  const existing = list.data.users.find((u) => u.email === TEST_EMAIL);
-  if (!existing) {
-    throw new Error(
-      `E2E setup: failed to create or find test user (${created.error?.message ?? "no user returned"})`,
-    );
-  }
-  return { userId: existing.id };
+
+  // Refresh both new and reused fixtures. Only record_consent marks the
+  // profile onboarded, atomically with the current-version consent log.
+  const trialEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  const profile = await admin.from("profiles").upsert(
+    {
+      id: userId,
+      facebook_id: `e2e-${userId}`,
+      display_name: "E2E Tester",
+      preferred_language: "ja",
+      prefecture_code: "JP-13",
+      city_name: "渋谷区",
+      trial_started_at: new Date().toISOString(),
+      trial_ends_at: trialEnd.toISOString(),
+      age_verified: true,
+    },
+    { onConflict: "id" },
+  );
+  if (profile.error) throw new Error(`E2E setup: profile preparation failed: ${profile.error.message}`);
+  const consent = await admin.rpc("record_consent", {
+    p_user_id: userId,
+    p_terms_version: CURRENT_TERMS_VERSION,
+    p_privacy_version: CURRENT_PRIVACY_VERSION,
+    p_terms_opened: true,
+    p_privacy_opened: true,
+    p_mark_onboarded: true,
+  });
+  if (consent.error) throw new Error(`E2E setup: consent preparation failed: ${consent.error.message}`);
+  return { userId };
 }
 
 export default async function globalSetup(): Promise<void> {
+  assertE2ETestTarget();
   loadEnvLocal();
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
@@ -87,7 +95,9 @@ export default async function globalSetup(): Promise<void> {
     );
   }
 
-  await ensureTestUser();
+  const email = process.env.E2E_TEST_EMAIL ?? "e2e-test@novalis-test.local";
+  const password = process.env.E2E_TEST_PASSWORD ?? "e2e-password-DO-NOT-USE-IN-PROD";
+  await ensureTestUser(email, password);
 
   // Sign in with the anon key to get a real session pair.
   const anon = createClient(
@@ -95,8 +105,8 @@ export default async function globalSetup(): Promise<void> {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
   const signIn = await anon.auth.signInWithPassword({
-    email: TEST_EMAIL,
-    password: TEST_PASSWORD,
+    email,
+    password,
   });
   if (signIn.error || !signIn.data.session) {
     throw new Error(`E2E setup: sign-in failed: ${signIn.error?.message}`);
