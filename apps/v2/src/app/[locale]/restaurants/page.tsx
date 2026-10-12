@@ -4,6 +4,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { routing } from "@/lib/i18n/routing";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPrefectureLabel } from "@/lib/i18n/prefectures";
+import { getCuisineLabel } from "@/lib/i18n/cuisines";
 import {
   MapPinIcon,
   RefreshCwIcon,
@@ -149,7 +150,7 @@ export default async function RestaurantsListPage({
                   <div className="flex flex-1 flex-col gap-2 p-5">
                     {row.cuisine_type && (
                       <span className="w-fit rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">
-                        {row.cuisine_type}
+                        {getCuisineLabel(row.cuisine_type, safeLocale)}
                       </span>
                     )}
                     <h2 className="text-xl font-bold group-hover:text-primary">
