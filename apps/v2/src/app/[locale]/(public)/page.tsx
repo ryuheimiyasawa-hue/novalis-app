@@ -22,6 +22,8 @@ import { hasLocale } from "next-intl";
 import { routing } from "@/lib/i18n/routing";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPrefectureLabel } from "@/lib/i18n/prefectures";
+import { getCuisineLabel } from "@/lib/i18n/cuisines";
+import { pickRestaurantName } from "@/lib/restaurants/localize";
 import { isPaymentEnabled } from "@/lib/payment/is-payment-enabled";
 import { Button } from "@/components/ui/button";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
@@ -38,6 +40,7 @@ type Locale = "ja" | "en" | "tl";
 interface RestaurantCard {
   id: string;
   name: string;
+  name_en: string | null;
   prefecture_code: string;
   city_name: string;
   cuisine_type: string | null;
@@ -70,7 +73,7 @@ export default async function LandingPage({
     const admin = getAdminClient();
     const { data } = await admin
       .from("restaurants")
-      .select("id, name, prefecture_code, city_name, cuisine_type, photo_url")
+      .select("id, name, name_en, prefecture_code, city_name, cuisine_type, photo_url")
       .eq("is_active", true)
       .order("created_at", { ascending: false })
       .limit(4);
@@ -377,7 +380,7 @@ export default async function LandingPage({
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={r.photo_url}
-                            alt={r.name}
+                            alt={pickRestaurantName(r, safeLocale)}
                             loading="lazy"
                             className="aspect-[4/3] w-full object-cover"
                           />
@@ -390,9 +393,9 @@ export default async function LandingPage({
                           </div>
                         )}
                         <div className="space-y-1 p-4">
-                          <p className="line-clamp-2 text-base font-bold">{r.name}</p>
+                          <p className="line-clamp-2 text-base font-bold">{pickRestaurantName(r, safeLocale)}</p>
                           <p className="line-clamp-1 text-sm text-muted-foreground">
-                            {[r.cuisine_type, pref].filter(Boolean).join(" · ")}
+                            {[r.cuisine_type && getCuisineLabel(r.cuisine_type, safeLocale), pref].filter(Boolean).join(" · ")}
                           </p>
                         </div>
                       </Link>

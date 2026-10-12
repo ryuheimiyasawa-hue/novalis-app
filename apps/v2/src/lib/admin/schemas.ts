@@ -194,8 +194,10 @@ export const ExpertListQuerySchema = z.object({
 // -----------------------------------------------------------------------------
 const restaurantFields = {
   name: z.string().min(1).max(100),
+  name_en: z.string().max(100).nullable().optional(),
   prefecture_code: PrefectureCodeSchema,
   city_name: z.string().min(1).max(100),
+  city_name_en: z.string().max(100).nullable().optional(),
   address: z.string().max(200).nullable().optional(),
   lat: z.number().min(-90).max(90).nullable().optional(),
   lng: z.number().min(-180).max(180).nullable().optional(),
@@ -213,8 +215,10 @@ export type RestaurantCreateInput = z.infer<typeof RestaurantCreateSchema>;
 
 export const RestaurantUpdateSchema = z.object({
   name: z.string().min(1).max(100).optional(),
+  name_en: z.string().max(100).nullable().optional(),
   prefecture_code: PrefectureCodeSchema.optional(),
   city_name: z.string().min(1).max(100).optional(),
+  city_name_en: z.string().max(100).nullable().optional(),
   address: z.string().max(200).nullable().optional(),
   lat: z.number().min(-90).max(90).nullable().optional(),
   lng: z.number().min(-180).max(180).nullable().optional(),

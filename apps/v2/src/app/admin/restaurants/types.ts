@@ -11,8 +11,10 @@ export interface RestaurantListRow {
 export interface RestaurantFull {
   id: string;
   name: string;
+  name_en: string | null;
   prefecture_code: string;
   city_name: string;
+  city_name_en: string | null;
   address: string | null;
   lat: number | null;
   lng: number | null;

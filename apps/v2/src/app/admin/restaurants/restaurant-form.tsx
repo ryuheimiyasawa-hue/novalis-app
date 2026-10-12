@@ -25,8 +25,10 @@ interface Props {
 
 interface FormState {
   name: string;
+  name_en: string;
   prefecture_code: string;
   city_name: string;
+  city_name_en: string;
   address: string;
   cuisine_type: string;
   hours: string;
@@ -44,8 +46,10 @@ const NULL_PREFECTURE = "__none__";
 function emptyForm(): FormState {
   return {
     name: "",
+    name_en: "",
     prefecture_code: NULL_PREFECTURE,
     city_name: "",
+    city_name_en: "",
     address: "",
     cuisine_type: "",
     hours: "",
@@ -60,8 +64,10 @@ function emptyForm(): FormState {
 function fromInitial(r: RestaurantFull): FormState {
   return {
     name: r.name,
+    name_en: r.name_en ?? "",
     prefecture_code: r.prefecture_code || NULL_PREFECTURE,
     city_name: r.city_name,
+    city_name_en: r.city_name_en ?? "",
     address: r.address ?? "",
     cuisine_type: r.cuisine_type ?? "",
     hours: r.hours ?? "",
@@ -79,6 +85,8 @@ function buildPayload(form: FormState) {
     prefecture_code:
       form.prefecture_code === NULL_PREFECTURE ? null : form.prefecture_code,
     city_name: form.city_name.trim(),
+    name_en: form.name_en.trim() || null,
+    city_name_en: form.city_name_en.trim() || null,
     address: form.address.trim() || null,
     cuisine_type: form.cuisine_type.trim() || null,
     hours: form.hours.trim() || null,
@@ -222,6 +230,29 @@ export function RestaurantForm({ mode, initial }: Props) {
             onChange={(e) => update("hours", e.target.value)}
             placeholder="11:00-22:00 / 火曜定休"
           />
+        </div>
+      </section>
+
+      <section className="grid grid-cols-12 gap-4">
+        <div className="col-span-6 space-y-1.5">
+          <Label htmlFor="name_en">店名（英語表記・任意）</Label>
+          <Input
+            id="name_en"
+            value={form.name_en}
+            onChange={(e) => update("name_en", e.target.value)}
+            placeholder="Manila Shokudo"
+          />
+          <p className="text-xs text-muted-foreground">英語・タガログ語の画面に出ます。空欄なら日本語の店名を表示します。</p>
+        </div>
+        <div className="col-span-6 space-y-1.5">
+          <Label htmlFor="city_name_en">市区町村（英語表記・任意）</Label>
+          <Input
+            id="city_name_en"
+            value={form.city_name_en}
+            onChange={(e) => update("city_name_en", e.target.value)}
+            placeholder="例: Minato"
+          />
+          <p className="text-xs text-muted-foreground">英語・タガログ語の画面に出ます。空欄なら日本語の市区町村名を表示します。</p>
         </div>
       </section>
 
