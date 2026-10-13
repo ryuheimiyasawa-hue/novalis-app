@@ -430,8 +430,10 @@ export type Database = {
         Row: {
           id: string;
           name: string;
+          name_en: string | null;
           prefecture_code: string;
           city_name: string;
+          city_name_en: string | null;
           address: string | null;
           lat: number | null;
           lng: number | null;
@@ -447,8 +449,10 @@ export type Database = {
         Insert: {
           id?: string;
           name: string;
+          name_en?: string | null;
           prefecture_code: string;
           city_name: string;
+          city_name_en?: string | null;
           address?: string | null;
           lat?: number | null;
           lng?: number | null;
@@ -463,8 +467,10 @@ export type Database = {
         };
         Update: Partial<{
           name: string;
+          name_en: string | null;
           prefecture_code: string;
           city_name: string;
+          city_name_en: string | null;
           address: string | null;
           lat: number | null;
           lng: number | null;

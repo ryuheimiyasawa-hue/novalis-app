@@ -12,7 +12,7 @@ interface PageProps {
 }
 
 const FULL_SELECT =
-  "id, name, prefecture_code, city_name, address, lat, lng, cuisine_type, hours, photo_url, description_ja, description_en, description_tl, is_active, created_at";
+  "id, name, name_en, prefecture_code, city_name, city_name_en, address, lat, lng, cuisine_type, hours, photo_url, description_ja, description_en, description_tl, is_active, created_at";
 
 export default async function EditRestaurantPage({ params }: PageProps) {
   const { id } = await params;

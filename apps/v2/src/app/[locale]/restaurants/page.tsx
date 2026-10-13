@@ -5,6 +5,7 @@ import { routing } from "@/lib/i18n/routing";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPrefectureLabel } from "@/lib/i18n/prefectures";
 import { getCuisineLabel } from "@/lib/i18n/cuisines";
+import { pickRestaurantCity, pickRestaurantName } from "@/lib/restaurants/localize";
 import {
   MapPinIcon,
   RefreshCwIcon,
@@ -28,8 +29,10 @@ type Locale = "ja" | "en" | "tl";
 interface RestaurantRow {
   id: string;
   name: string;
+  name_en: string | null;
   prefecture_code: string;
   city_name: string;
+  city_name_en: string | null;
   cuisine_type: string | null;
   photo_url: string | null;
   description_ja: string | null;
@@ -63,7 +66,7 @@ export default async function RestaurantsListPage({
   let query = admin
     .from("restaurants")
     .select(
-      "id, name, prefecture_code, city_name, cuisine_type, photo_url, description_ja, description_en, description_tl",
+      "id, name, name_en, prefecture_code, city_name, city_name_en, cuisine_type, photo_url, description_ja, description_en, description_tl",
     )
     .eq("is_active", true)
     .order("created_at", { ascending: false });
@@ -135,7 +138,7 @@ export default async function RestaurantsListPage({
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={row.photo_url}
-                      alt={row.name}
+                      alt={pickRestaurantName(row, safeLocale)}
                       loading="lazy"
                       className="aspect-[16/10] w-full object-cover"
                     />
@@ -154,11 +157,11 @@ export default async function RestaurantsListPage({
                       </span>
                     )}
                     <h2 className="text-xl font-bold group-hover:text-primary">
-                      {row.name}
+                      {pickRestaurantName(row, safeLocale)}
                     </h2>
                     <p className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
                       <MapPinIcon className="size-4 shrink-0" strokeWidth={1.75} aria-hidden />
-                      {[pref, row.city_name].filter(Boolean).join(" ")}
+                      {[pref, pickRestaurantCity(row, safeLocale)].filter(Boolean).join(" ")}
                     </p>
                     {desc && (
                       <p className="line-clamp-2 text-sm text-muted-foreground">
