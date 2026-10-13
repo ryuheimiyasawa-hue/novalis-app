@@ -36,6 +36,7 @@ export default async function LoginPage({
 
   const errorCode =
     search.error === "fb_denied" ||
+    search.error === "fb_no_email" ||
     search.error === "fb_failed" ||
     search.error === "callback_failed"
       ? search.error
