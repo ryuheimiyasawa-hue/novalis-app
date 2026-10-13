@@ -9,6 +9,7 @@ import {
   parseFailureCount,
 } from "@/lib/auth/login-failure-cookie";
 import { routing } from "@/lib/i18n/routing";
+import { classifyOAuthError } from "@/lib/auth/oauth-error";
 
 function pickLocale(raw: string | null | undefined): string {
   if (raw && (routing.locales as readonly string[]).includes(raw)) return raw;
@@ -49,12 +50,21 @@ export async function GET(req: NextRequest) {
   // exchangeCodeForSession step and proceed straight to ensureProfile.
   const anon = params.get("anon") === "1";
 
-  // Facebook (or Supabase) returned an explicit error: user cancelled, denied, etc.
+  // Facebook (or Supabase) returned an explicit error instead of a code.
+  // Which one decides the message: a cancel, an account with no email
+  // address, or anything else (see classifyOAuthError).
   if (oauthError) {
     if (requestedRedirect && !validateRedirect(requestedRedirect)) {
       console.warn("[oauth-callback] suspicious redirect dropped:", requestedRedirect);
     }
-    return loginRedirect(req, locale, "fb_denied");
+    console.warn(
+      JSON.stringify({
+        event: "oauth_callback_provider_error",
+        error: oauthError,
+        description: params.get("error_description"),
+      }),
+    );
+    return loginRedirect(req, locale, classifyOAuthError(oauthError, params.get("error_description")));
   }
 
   if (!code && !anon) {

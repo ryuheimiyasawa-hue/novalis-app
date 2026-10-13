@@ -1,8 +1,9 @@
 import { CircleAlertIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
-const MESSAGE_KEY: Record<string, "fbDenied" | "fbFailed" | "callbackFailed"> = {
+const MESSAGE_KEY: Record<string, "fbDenied" | "fbNoEmail" | "fbFailed" | "callbackFailed"> = {
   fb_denied: "fbDenied",
+  fb_no_email: "fbNoEmail",
   fb_failed: "fbFailed",
   callback_failed: "callbackFailed",
 };
@@ -36,10 +37,10 @@ export async function ErrorBanner({ errorCode, failureCount, locale }: Props) {
         <p className="mt-2">
           {t("tooManyAttempts")}{" "}
           <a
-            href="mailto:contact@novalis.ph"
+            href="mailto:ryuhei.miyasawa@novalisgroup.biz"
             className="underline font-medium"
           >
-            contact@novalis.ph
+            ryuhei.miyasawa@novalisgroup.biz
           </a>
         </p>
       )}

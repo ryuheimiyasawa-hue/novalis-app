@@ -125,6 +125,7 @@
   },
   "loginErrors": {
     "fbDenied": "Facebook login was cancelled. Please try again.",
+    "fbNoEmail": "We could not sign you in because Facebook did not share an email address. Add an email address to your Facebook account, or allow sharing it when you log in, and try again. You can also sign up below with an email address and password.",
     "fbFailed": "Facebook login failed. Please try again later.",
     "callbackFailed": "Sign-in processing failed.",
     "tooManyAttempts": "Sign-in has failed several times. Please contact support."

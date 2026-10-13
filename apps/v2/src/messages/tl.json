@@ -125,6 +125,7 @@
   },
   "loginErrors": {
     "fbDenied": "Kinansela ang pag-login sa Facebook. Pakisubukang muli.",
+    "fbNoEmail": "Hindi po kayo makapag-log in dahil hindi ibinigay ng Facebook ang inyong email address. Magdagdag po ng email address sa inyong Facebook account, o payagan ang pagbabahagi nito sa pag-log in, at subukang muli. Puwede rin po kayong mag-sign up sa ibaba gamit ang email address at password.",
     "fbFailed": "Nabigo ang pag-login sa Facebook. Pakisubukang muli mamaya.",
     "callbackFailed": "Nabigo ang pagproseso ng sign-in.",
     "tooManyAttempts": "Maraming beses na nabigo ang sign-in. Pakikontak ang suporta."
