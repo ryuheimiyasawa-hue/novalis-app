@@ -20,26 +20,3 @@ export function displayablePhotoUrl(url: string | null | undefined): string | nu
   if (PLACEHOLDER_PHOTO_HOSTS.has(parsed.hostname.toLowerCase())) return null;
   return trimmed;
 }
-
-// Demo shops were seeded with names such as "Kapaya Mart Kawaguchi (Sample)"
-// or "…（サンプル）". Showing those to a visitor makes the whole app look
-// unfinished, so the public lists leave them out until the operator enters
-// real shops. Display-only: the rows stay in the database.
-const SAMPLE_NAME_RE = /[(（]\s*(?:sample|サンプル)\s*[)）]/i;
-
-export function isSampleRestaurant(r: {
-  name: string | null | undefined;
-  name_en?: string | null;
-}): boolean {
-  return [r.name, r.name_en].some((n) => !!n && SAMPLE_NAME_RE.test(n));
-}
-
-/** Shops good enough for the landing showcase: real (not a sample) and
- *  with a photo the card can actually show. An empty result means the
- *  landing hides its shop section; it comes back by itself once real shops
- *  with photos are entered. */
-export function showcaseRestaurants<
-  T extends { name: string; name_en?: string | null; photo_url: string | null },
->(rows: readonly T[]): T[] {
-  return rows.filter((r) => !isSampleRestaurant(r) && displayablePhotoUrl(r.photo_url) !== null);
-}

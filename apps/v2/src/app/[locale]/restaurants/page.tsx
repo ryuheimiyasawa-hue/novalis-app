@@ -5,7 +5,6 @@ import { routing } from "@/lib/i18n/routing";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPrefectureLabel } from "@/lib/i18n/prefectures";
 import { pickRestaurantCity, pickRestaurantName } from "@/lib/restaurants/localize";
-import { isSampleRestaurant } from "@/lib/restaurants/photo";
 import {
   BookOpenIcon,
   RefreshCwIcon,
@@ -117,10 +116,9 @@ export default async function RestaurantsListPage({
     );
   }
 
-  // Seeded demo shops ("… (Sample)") are left out; with none left the page
-  // shows a "coming soon" card, and real shops appear as soon as they are
-  // entered.
-  const rows = ((data ?? []) as RestaurantRow[]).filter((r) => !isSampleRestaurant(r));
+  // Sample shops stay listed on purpose (owner decision, 2026-10-12). With
+  // no active shops at all the page shows a "coming soon" card.
+  const rows = (data ?? []) as RestaurantRow[];
 
   return (
     <main id="main-content" className="w-full flex-1">

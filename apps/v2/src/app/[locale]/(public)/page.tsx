@@ -43,7 +43,6 @@ import {
   isFresh,
 } from "@/components/articles/article-row";
 import { RestaurantCard, restaurantKind } from "@/components/restaurants/restaurant-card";
-import { showcaseRestaurants } from "@/lib/restaurants/photo";
 import { StickyAskCta } from "./sticky-ask-cta";
 
 // ISR: the restaurant strip and the latest guides read the DB, so cache the
@@ -227,9 +226,9 @@ export default async function LandingPage({
     if (articlesRes.error) {
       console.warn("[landing] latest guides skipped:", articlesRes.error.message);
     }
-    // Only real shops with a photo make the showcase; with none (today the
-    // seeded "(Sample)" shops), the whole section stays hidden.
-    restaurants = showcaseRestaurants((restaurantsRes.data ?? []) as RestaurantCard[]);
+    // Sample shops stay visible on purpose (owner decision, 2026-10-12);
+    // cards without a usable photo show their icon tile instead.
+    restaurants = (restaurantsRes.data ?? []) as RestaurantCard[];
     latest = (articlesRes.data ?? []) as unknown as LatestArticle[];
   } catch (err) {
     console.warn(
