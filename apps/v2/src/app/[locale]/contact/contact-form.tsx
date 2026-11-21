@@ -27,12 +27,14 @@ export interface ContactFormLabels {
 interface Props {
   labels: ContactFormLabels;
   defaultEmail?: string;
+  /** Pre-filled subject, e.g. when the user arrives from an escalation. */
+  defaultSubject?: string;
   /** Where the post-send button leads (the dashboard for signed-in users). */
   doneHref?: string;
 }
 
-export function ContactForm({ labels, defaultEmail, doneHref }: Props) {
-  const [subject, setSubject] = useState("");
+export function ContactForm({ labels, defaultEmail, defaultSubject, doneHref }: Props) {
+  const [subject, setSubject] = useState(defaultSubject ?? "");
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState(defaultEmail ?? "");
   const [state, setState] = useState<"idle" | "submitting" | "done">("idle");

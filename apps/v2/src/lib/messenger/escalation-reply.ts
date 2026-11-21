@@ -4,11 +4,12 @@ import type { WhitelistLocale } from "@/lib/ai/whitelist-keywords";
 import jaMessages from "@/messages/ja.json";
 import enMessages from "@/messages/en.json";
 import tlMessages from "@/messages/tl.json";
+import { escalationFormPath } from "@/lib/chat/escalation-form";
 
 // Messenger has no cards, so the escalation that the web renders as
-// EscalationCard has to arrive as one message. The web shows the lawyer
-// text, then the active experts, then the support link; a Messenger user
-// was getting only the first of the three and no way to reach anyone.
+// EscalationCard has to arrive as one message, in the same order: the
+// lawyer-approved text, then the consultation form to fill in first, then
+// the active experts as reference.
 // Same source of truth: the `experts` rows the public directory exposes
 // and the `chat.ui` strings the card uses.
 
@@ -50,9 +51,9 @@ export async function loadActiveExperts(
 }
 
 /**
- * The escalation message for Messenger: lawyer-approved text, the expert
- * list when there is one, and the support link. Never throws — a missing
- * expert list only shortens the message.
+ * The escalation message for Messenger: lawyer-approved text, the
+ * consultation form link, and the expert list when there is one. Never
+ * throws: a missing expert list only shortens the message.
  */
 export function buildEscalationReply(
   escalationText: string,
@@ -63,6 +64,9 @@ export function buildEscalationReply(
   const copy = COPY[locale] ?? COPY.ja;
   const parts = [escalationText];
 
+  // First step, same as the web card: the consultation form.
+  if (appUrl) parts.push(`${copy.escalationFormStep}\n${appUrl}${escalationFormPath(locale)}`);
+
   if (experts.length > 0) {
     const lines = experts.map((e) => {
       const specialty = specialtyOf(e, locale);
@@ -72,6 +76,5 @@ export function buildEscalationReply(
     parts.push(`${copy.expertHeading}\n${lines.join("\n")}`);
   }
 
-  if (appUrl) parts.push(`${copy.contactCta}: ${appUrl}/${locale}/contact`);
   return parts.join("\n\n");
 }

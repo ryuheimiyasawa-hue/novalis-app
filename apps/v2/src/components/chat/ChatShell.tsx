@@ -74,6 +74,9 @@ interface Props {
     composerHint?: string;
     /** Heading shown at the top of the escalation card. */
     escalationTitle?: string;
+    /** First step on the escalation card: fill in the consultation form. */
+    escalationFormStep?: string;
+    escalationFormCta?: string;
   };
 }
 
@@ -592,6 +595,8 @@ export function ChatShell({
                 continue: labels.escalationContinue,
                 recommend: labels.escalationRecommend,
                 title: labels.escalationTitle,
+                formStep: labels.escalationFormStep,
+                formCta: labels.escalationFormCta,
               }}
               showContinue={CONTINUE_ENABLED}
               onContinue={() => inputRef.current?.focus()}

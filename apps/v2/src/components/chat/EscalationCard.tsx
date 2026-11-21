@@ -8,6 +8,7 @@ import {
   UserRoundIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { escalationFormPath } from "@/lib/chat/escalation-form";
 
 interface Expert {
   id: string;
@@ -32,6 +33,10 @@ interface Props {
     recommend?: string;
     /** Neutral heading for the card ("where you can consult"). */
     title?: string;
+    /** First step: fill in the consultation form. When set, the form link
+     *  leads the card and the experts below become reference. */
+    formStep?: string;
+    formCta?: string;
   };
   /** P2-L improvement 2: render a "continue asking" button that collapses the
    *  card. Gated by NEXT_PUBLIC_ESCALATION_SHOW_CONTINUE_BUTTON (default off). */
@@ -89,6 +94,7 @@ export function EscalationCard({
   }
 
   const hasExperts = Array.isArray(experts) && experts.length > 0;
+  const formFirst = Boolean(labels.formStep && labels.formCta);
 
   // Minimized state (after the user chose to keep asking): collapse to a
   // single persistent recommendation line so the conversation visibly
@@ -126,6 +132,18 @@ export function EscalationCard({
             <p className="text-base whitespace-pre-line text-foreground">{body}</p>
           </div>
         </div>
+
+        {formFirst && (
+          <div className="space-y-3 rounded-md border border-primary/30 bg-primary-soft px-4 py-4">
+            <p className="text-base text-foreground">{labels.formStep}</p>
+            <Button asChild className="h-auto min-h-11 w-full whitespace-normal sm:w-auto">
+              <a href={escalationFormPath(locale)} target="_blank" rel="noopener noreferrer">
+                <MailIcon aria-hidden />
+                {labels.formCta}
+              </a>
+            </Button>
+          </div>
+        )}
 
         {experts === null && (
           <div className="space-y-2" aria-busy="true">
@@ -180,11 +198,13 @@ export function EscalationCard({
           </div>
         )}
         {/*
-          Standing fallback: even when an expert is shown, the user may
-          prefer to write to Novalis support directly. New tab so they
-          don't lose the chat context behind them.
+          Bottom row: the support link when the form step is not shown
+          (it already leads the card otherwise), and "continue asking".
+          New tab so the chat context stays behind them.
         */}
+        {(!formFirst || (showContinue && labels.continue)) && (
         <div className="flex flex-col gap-2 border-t border-border pt-4 sm:flex-row sm:flex-wrap">
+          {!formFirst && (
           <Button
             asChild
             size="sm"
@@ -200,6 +220,7 @@ export function EscalationCard({
               {labels.contactCta}
             </a>
           </Button>
+          )}
           {showContinue && labels.continue && (
             <Button
               size="sm"
@@ -214,6 +235,7 @@ export function EscalationCard({
             </Button>
           )}
         </div>
+        )}
       </div>
     </section>
   );
