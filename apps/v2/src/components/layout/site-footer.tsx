@@ -11,27 +11,29 @@ export async function SiteFooter({ locale }: { locale: "ja" | "en" | "tl" }) {
   const tDash = await getTranslations({ locale, namespace: "dashboard" });
 
   const linkClass =
-    "inline-flex min-h-11 min-w-11 items-center text-sm text-muted-foreground transition-colors hover:text-foreground hover:underline lg:min-h-8";
+    "inline-flex min-h-11 min-w-11 items-center text-sm text-footer-muted underline-offset-4 transition-colors hover:text-footer-foreground hover:underline lg:min-h-8";
 
   return (
-    <footer className="mt-auto border-t border-border bg-card">
+    <footer data-surface="brand" className="mt-auto bg-footer text-footer-foreground">
       <div className="mx-auto grid max-w-[1120px] gap-10 px-4 py-12 md:grid-cols-[1.6fr_1fr_1fr] md:px-6">
         <div className="space-y-3">
           <div className="flex items-center gap-2.5">
             <BrandMark />
             <span className="flex flex-col leading-tight">
-              <span className="text-base font-bold">{tDash("headerLogo")}</span>
-              <span className="text-xs text-muted-foreground">{tApp("name")}</span>
+              <span className="font-display text-lg font-extrabold tracking-wide">
+                {tDash("headerLogo")}
+              </span>
+              <span className="text-xs text-footer-muted">{tApp("name")}</span>
             </span>
           </div>
-          <p className="text-sm text-muted-foreground">{tApp("tagline")}</p>
-          <p className="text-sm font-medium text-foreground">{t("operator")}</p>
-          <p className="text-sm text-muted-foreground">{t("languages")}</p>
-          <p className="max-w-md text-xs text-muted-foreground">{t("note")}</p>
+          <p className="text-sm text-footer-muted">{tApp("tagline")}</p>
+          <p className="text-sm font-bold">{t("operator")}</p>
+          <p className="text-sm text-footer-muted">{t("languages")}</p>
+          <p className="max-w-md text-xs text-footer-muted">{t("note")}</p>
         </div>
 
         <nav aria-label={t("serviceHeading")}>
-          <p className="mb-2 text-sm font-bold">{t("serviceHeading")}</p>
+          <p className="kicker mb-2 text-highlight">{t("serviceHeading")}</p>
           <ul>
             <li>
               <Link href={`/${locale}/articles`} className={linkClass}>
@@ -52,7 +54,7 @@ export async function SiteFooter({ locale }: { locale: "ja" | "en" | "tl" }) {
         </nav>
 
         <nav aria-label={t("legalHeading")}>
-          <p className="mb-2 text-sm font-bold">{t("legalHeading")}</p>
+          <p className="kicker mb-2 text-highlight">{t("legalHeading")}</p>
           <ul>
             <li>
               <Link href={`/${locale}/legal/terms`} className={linkClass}>

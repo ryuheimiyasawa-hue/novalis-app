@@ -7,6 +7,7 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { getPrefectureLabel } from "@/lib/i18n/prefectures";
 import { getCuisineLabel } from "@/lib/i18n/cuisines";
 import { pickRestaurantCity, pickRestaurantName } from "@/lib/restaurants/localize";
+import { displayablePhotoUrl } from "@/lib/restaurants/photo";
 import {
   ArrowLeftIcon,
   ClockIcon,
@@ -14,7 +15,7 @@ import {
   MapPinIcon,
   UtensilsCrossedIcon,
 } from "lucide-react";
-import { HomeLink } from "@/components/layout/home-link";
+import { PublicBackLink } from "@/components/layout/public-back-link";
 import { IconTile } from "@/components/layout/icon-tile";
 import { Button } from "@/components/ui/button";
 
@@ -88,6 +89,7 @@ export default async function RestaurantDetailPage({ params }: PageProps) {
   const r = data as RestaurantDetail | null;
   // Inactive rows are not public even by direct id.
   if (!r || !r.is_active) notFound();
+  const photo = displayablePhotoUrl(r.photo_url);
 
   const t = await getTranslations({
     locale: safeLocale,
@@ -100,7 +102,7 @@ export default async function RestaurantDetailPage({ params }: PageProps) {
   return (
     <main id="main-content" className="mx-auto w-full max-w-[728px] flex-1 px-4 py-10 md:px-6 md:py-16">
       <div className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-2">
-        <HomeLink locale={safeLocale} />
+        <PublicBackLink locale={safeLocale} tone="button" />
         <Link
           href={`/${safeLocale}/restaurants`}
           className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline lg:min-h-9"
@@ -110,10 +112,10 @@ export default async function RestaurantDetailPage({ params }: PageProps) {
         </Link>
       </div>
 
-      {r.photo_url ? (
+      {photo ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={r.photo_url}
+          src={photo}
           alt={pickRestaurantName(r, safeLocale)}
           className="aspect-[16/9] w-full rounded-lg border border-border object-cover"
         />

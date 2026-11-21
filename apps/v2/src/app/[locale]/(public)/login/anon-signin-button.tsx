@@ -85,7 +85,7 @@ export function AnonSignInButton({
         onClick={handleClick}
         disabled={state === "loading"}
         aria-busy={state === "loading"}
-        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md border border-dashed border-input bg-transparent px-6 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-card hover:text-foreground disabled:pointer-events-none disabled:opacity-60"
+        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-dashed border-input bg-transparent px-6 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-card hover:text-foreground disabled:pointer-events-none disabled:opacity-60"
       >
         {state === "loading" ? (
           <Loader2Icon className="size-4 animate-spin" strokeWidth={1.75} aria-hidden />

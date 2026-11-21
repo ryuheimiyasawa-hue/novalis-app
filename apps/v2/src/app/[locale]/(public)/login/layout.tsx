@@ -10,8 +10,8 @@ import { LanguageSwitcher } from "./language-switcher";
 
 // Frame around the sign-in card: the shared header (carrying the login
 // page's own language switcher, which keeps ?error= / ?redirect= across a
-// language change), a short reminder of what the service does beside the
-// card on wide screens, and the shared footer.
+// language change), a blue band the card sits on, a short reminder of what
+// the service does under the card, and the shared footer.
 export default async function LoginLayout({
   children,
   params,
@@ -37,38 +37,46 @@ export default async function LoginLayout({
           </Suspense>
         }
       />
-      <div className="mx-auto grid w-full max-w-[1120px] flex-1 items-start gap-10 px-4 py-10 md:px-6 md:py-16 lg:grid-cols-[1fr_460px] lg:gap-16">
-        <div className="lg:order-2">{children}</div>
-        <aside className="space-y-6 lg:order-1 lg:pt-6">
-          <h2 className="text-2xl font-bold">{t("panelTitle")}</h2>
-          <ul className="space-y-4">
-            {(["general", "experts", "languages"] as const).map((key) => (
-              <li key={key} className="flex items-start gap-3 text-base">
-                <span
-                  aria-hidden
-                  className="mt-1 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary"
-                >
-                  <CheckIcon className="size-3.5" strokeWidth={1.75} />
-                </span>
-                <span>{tLanding(`heroPoints.${key}`)}</span>
+      {/* The header's blue runs on as a band behind the top of the card. */}
+      <div className="relative flex-1">
+        <div
+          aria-hidden
+          data-surface="brand"
+          className="absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-primary to-primary-hover md:h-64"
+        />
+        <div className="relative mx-auto w-full max-w-[520px] px-4 pt-6 pb-12 md:pt-10 md:pb-16">
+          {children}
+          <aside className="mt-6 space-y-4 rounded-2xl border border-border bg-card p-5 shadow-card md:p-6">
+            <h2 className="text-lg">{t("panelTitle")}</h2>
+            <ul className="space-y-3">
+              {(["general", "experts", "languages"] as const).map((key) => (
+                <li key={key} className="flex items-start gap-3 text-base">
+                  <span
+                    aria-hidden
+                    className="mt-1 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary"
+                  >
+                    <CheckIcon className="size-3.5" strokeWidth={2} />
+                  </span>
+                  <span>{tLanding(`heroPoints.${key}`)}</span>
+                </li>
+              ))}
+            </ul>
+            <ul className="space-y-2 border-t border-border pt-4">
+              <li className="flex items-center gap-3">
+                <IconTile icon={ShieldCheckIcon} size="sm" />
+                <span className="text-sm font-medium">{tLanding("trust.pii.title")}</span>
               </li>
-            ))}
-          </ul>
-          <ul className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-            <li className="flex items-center gap-3 rounded-lg border border-border bg-card p-4">
-              <IconTile icon={ShieldCheckIcon} size="sm" />
-              <span className="text-sm font-medium">{tLanding("trust.pii.title")}</span>
-            </li>
-            <li className="flex items-center gap-3 rounded-lg border border-border bg-card p-4">
-              <IconTile icon={ScaleIcon} size="sm" tone="caution" />
-              <span className="text-sm font-medium">{tLanding("stepsNote")}</span>
-            </li>
-            <li className="flex items-center gap-3 rounded-lg border border-border bg-card p-4">
-              <IconTile icon={LanguagesIcon} size="sm" />
-              <span className="text-sm font-medium">{tLanding("trust.languages.title")}</span>
-            </li>
-          </ul>
-        </aside>
+              <li className="flex items-center gap-3">
+                <IconTile icon={ScaleIcon} size="sm" tone="caution" />
+                <span className="text-sm font-medium">{tLanding("stepsNote")}</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <IconTile icon={LanguagesIcon} size="sm" />
+                <span className="text-sm font-medium">{tLanding("trust.languages.title")}</span>
+              </li>
+            </ul>
+          </aside>
+        </div>
       </div>
       <SiteFooter locale={safeLocale} />
     </div>

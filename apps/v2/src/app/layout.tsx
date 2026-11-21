@@ -1,5 +1,16 @@
 import type { Metadata, Viewport } from "next";
+import { Nunito } from "next/font/google";
 import "./globals.css";
+
+// Display face for headings, buttons, chips and the MORITA wordmark only.
+// Self-hosted by next/font (no request to Google from the browser); body
+// copy stays on system fonts to keep the page light on mobile data.
+const nunito = Nunito({
+  subsets: ["latin", "latin-ext"],
+  weight: ["700", "800"],
+  display: "swap",
+  variable: "--font-nunito",
+});
 
 export const metadata: Metadata = {
   title: "MORITA | Philippine Community",
@@ -13,8 +24,9 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fbf8f2" },
-    { media: "(prefers-color-scheme: dark)", color: "#121821" },
+    // Matches the solid brand-blue header (--primary / dark --background).
+    { media: "(prefers-color-scheme: light)", color: "#0a4fb8" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f1726" },
   ],
 };
 
@@ -27,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ja">
+    <html lang="ja" className={nunito.variable}>
       <body>{children}</body>
     </html>
   );

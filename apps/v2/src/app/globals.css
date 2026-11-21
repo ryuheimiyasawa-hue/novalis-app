@@ -4,118 +4,175 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Brand tokens — "a trustworthy help desk with a family's warmth".
+ * Brand tokens: "Kabayan's help desk".
  *
- *   cream     #FBF8F2  page background
- *   indigo    #1E3A5F  primary (buttons, heading accents), hover #16304F
- *   mango     #E8A33D  highlight: badges, underlines, step numbers, icon
- *                      tiles only. Never carries white text (2.2:1).
- *   terracotta#C2573A  hand-off to professionals / caution headings.
- *                      Text uses the darker #A8462C (5.9:1 on white).
- *   green     #2F7D6D  success          red #B42318  error
- *   soft surfaces: indigo #EAF0F7 and mango #FDF3E1 — the only two tints.
+ * Borrowed from the sites Filipinos open every day (Philstar, GCash,
+ * Jollibee): a solid brand blue for the header and hero, white reading
+ * surfaces, and one sunflower yellow for the main action.
+ *
+ *   blue       #0A4FB8  primary (header, hero, links), hover #083E91.
+ *                       White text on it is 7.4:1.
+ *   sunflower  #FFC93C  highlight: the main call to action, step numbers,
+ *                       the logo underline. Dark text only (#14213D, 10:1);
+ *                       never white text on it.
+ *   red        #D0312D  hot: small NEW badges only, never errors (5:1 white).
+ *   facebook   #166FE5  the Facebook button only (4.7:1 white).
+ *   footer     #14213D  footer surface, white / #C9D3E3 text.
+ *   terracotta #C2573A  hand-off to professionals; text #A8462C.
+ *   green      #1F7A5C  success          red #B42318  error
+ *
+ * Rule of thumb: at most two saturated colours per screen (blue and
+ * yellow); red only as a small badge; gradients only blue to darker blue.
  *
  * Components consume these through the shadcn names (--primary, --accent,
- * --muted …) or the brand extras below (--highlight, --caution, --success);
- * no page should hard-code a palette class such as blue-600 or neutral-500.
+ * --muted ...) or the brand extras below (--highlight, --caution, --hot,
+ * --facebook, --footer); no page should hard-code a palette class such as
+ * blue-600 or a hex value.
  */
 :root {
-  --background: #fbf8f2;
-  --foreground: #1f2430;
+  --background: #f4f6fa;
+  --foreground: #14213d;
   --card: #ffffff;
-  --card-foreground: #1f2430;
+  --card-foreground: #14213d;
   --popover: #ffffff;
-  --popover-foreground: #1f2430;
-  --primary: #1e3a5f;
-  --primary-hover: #16304f;
+  --popover-foreground: #14213d;
+  --primary: #0a4fb8;
+  --primary-hover: #083e91;
   --primary-foreground: #ffffff;
-  --primary-soft: #eaf0f7;
-  --secondary: #eaf0f7;
-  --secondary-foreground: #1e3a5f;
-  --muted: #eaf0f7;
-  --muted-foreground: #5b6475;
-  --accent: #eaf0f7;
-  --accent-foreground: #1e3a5f;
-  --highlight: #e8a33d;
-  --highlight-foreground: #1f2430;
-  --highlight-soft: #fdf3e1;
-  --highlight-soft-foreground: #7a4e0e;
+  --primary-soft: #e7effb;
+  --secondary: #e7effb;
+  --secondary-foreground: #0a4fb8;
+  --muted: #e7effb;
+  --muted-foreground: #4b5567;
+  --accent: #e7effb;
+  --accent-foreground: #0a4fb8;
+  --highlight: #ffc93c;
+  --highlight-hover: #f5b800;
+  --highlight-foreground: #14213d;
+  --highlight-soft: #fff4d6;
+  --highlight-soft-foreground: #6b4a00;
+  --hot: #d0312d;
+  --hot-foreground: #ffffff;
+  --facebook: #166fe5;
+  --facebook-hover: #1259c3;
+  --facebook-foreground: #ffffff;
+  --footer: #14213d;
+  --footer-foreground: #ffffff;
+  --footer-muted: #c9d3e3; /* 10.9:1 on the footer */
   --caution: #c2573a;
   --caution-foreground: #a8462c;
-  --success: #2f7d6d;
+  --success: #1f7a5c;
   --success-foreground: #ffffff;
+  /* Soft tints for category thumbnails (article lists): one tone per
+     category so readers can pick them out at a glance. Icon colours are
+     4.5:1 or more on their tint. */
+  --success-soft: #e3f4ec;
+  --success-soft-foreground: #17694f;
+  --caution-soft: #fcebe4;
+  --caution-soft-foreground: #a8462c;
+  --slate-soft: #e9edf3;
+  --slate-soft-foreground: #33415c;
   --destructive: #b42318;
   --destructive-foreground: #ffffff;
-  --border: #e7e1d5;
-  --input: #948d80; /* field outline: 3.3:1 on white, 3.1:1 on cream (WCAG 1.4.11) */
-  --ring: #1e3a5f;
-  --chart-1: #1e3a5f;
-  --chart-2: #e8a33d;
+  --border: #dde3ec;
+  --input: #8a94a6; /* field outline: 3.0:1 on white (WCAG 1.4.11) */
+  --ring: #0a4fb8;
+  --chart-1: #0a4fb8;
+  --chart-2: #ffc93c;
   --chart-3: #c2573a;
-  --chart-4: #2f7d6d;
-  --chart-5: #5b6475;
+  --chart-4: #1f7a5c;
+  --chart-5: #4b5567;
   --sidebar: #ffffff;
-  --sidebar-foreground: #1f2430;
-  --sidebar-primary: #1e3a5f;
+  --sidebar-foreground: #14213d;
+  --sidebar-primary: #0a4fb8;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #eaf0f7;
-  --sidebar-accent-foreground: #1e3a5f;
-  --sidebar-border: #e7e1d5;
-  --sidebar-ring: #1e3a5f;
-  --radius: 12px;
-  --shadow-color: 31 36 48;
+  --sidebar-accent: #e7effb;
+  --sidebar-accent-foreground: #0a4fb8;
+  --sidebar-border: #dde3ec;
+  --sidebar-ring: #0a4fb8;
+  --radius: 14px;
+  --shadow-color: 20 33 61;
+
+  /* Font stacks (exposed as font-latin / font-display in @theme below). */
+  --latin-stack: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI",
+    "Meiryo", sans-serif;
+  --display-stack: var(--font-nunito), "Hiragino Sans",
+    "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", system-ui,
+    sans-serif;
 }
 
 .dark {
-  --background: #121821;
-  --foreground: #e8eaee;
-  --card: #1a2230;
-  --card-foreground: #e8eaee;
-  --popover: #1a2230;
-  --popover-foreground: #e8eaee;
-  --primary: #8db4e2;
-  --primary-hover: #a6c5ea;
-  --primary-foreground: #121821;
-  --primary-soft: #223047;
-  --secondary: #223047;
-  --secondary-foreground: #e8eaee;
-  --muted: #223047;
-  --muted-foreground: #a3acba;
-  --accent: #223047;
-  --accent-foreground: #e8eaee;
-  --highlight: #f0b65a;
-  --highlight-foreground: #121821;
-  --highlight-soft: #2a2418;
-  --highlight-soft-foreground: #f0b65a;
+  --background: #0f1726;
+  --foreground: #e8edf5;
+  --card: #17223a;
+  --card-foreground: #e8edf5;
+  --popover: #17223a;
+  --popover-foreground: #e8edf5;
+  --primary: #7fb0ff;
+  --primary-hover: #a3c6ff;
+  --primary-foreground: #0f1726;
+  --primary-soft: #1d2d4d;
+  --secondary: #1d2d4d;
+  --secondary-foreground: #e8edf5;
+  --muted: #1d2d4d;
+  --muted-foreground: #a9b4c6;
+  --accent: #1d2d4d;
+  --accent-foreground: #e8edf5;
+  --highlight: #ffd36b;
+  --highlight-hover: #ffdf8f;
+  --highlight-foreground: #0f1726;
+  --highlight-soft: #2c2614;
+  --highlight-soft-foreground: #ffd36b;
+  --hot: #ff8a80;
+  --hot-foreground: #0f1726;
+  --facebook: #5b9dff;
+  --facebook-hover: #7fb0ff;
+  --facebook-foreground: #0f1726;
+  --footer: #0a111e;
+  --footer-foreground: #ffffff;
+  --footer-muted: #c9d3e3;
   --caution: #e59a80;
   --caution-foreground: #e59a80;
   --success: #5fb3a1;
-  --success-foreground: #121821;
+  --success-foreground: #0f1726;
+  --success-soft: #163229;
+  --success-soft-foreground: #7ed3b8;
+  --caution-soft: #34211b;
+  --caution-soft-foreground: #f0a98f;
+  --slate-soft: #222c3d;
+  --slate-soft-foreground: #c9d3e3;
   --destructive: #f97066;
-  --destructive-foreground: #121821;
-  --border: #2a3444;
-  --input: #66738a; /* 3.3:1 on the dark card */
-  --ring: #8db4e2;
-  --chart-1: #8db4e2;
-  --chart-2: #f0b65a;
+  --destructive-foreground: #0f1726;
+  --border: #2a3a57;
+  --input: #6b7a94; /* 3.3:1 on the dark card */
+  --ring: #7fb0ff;
+  --chart-1: #7fb0ff;
+  --chart-2: #ffd36b;
   --chart-3: #e59a80;
   --chart-4: #5fb3a1;
-  --chart-5: #a3acba;
-  --sidebar: #1a2230;
-  --sidebar-foreground: #e8eaee;
-  --sidebar-primary: #8db4e2;
-  --sidebar-primary-foreground: #121821;
-  --sidebar-accent: #223047;
-  --sidebar-accent-foreground: #e8eaee;
-  --sidebar-border: #2a3444;
-  --sidebar-ring: #8db4e2;
+  --chart-5: #a9b4c6;
+  --sidebar: #17223a;
+  --sidebar-foreground: #e8edf5;
+  --sidebar-primary: #7fb0ff;
+  --sidebar-primary-foreground: #0f1726;
+  --sidebar-accent: #1d2d4d;
+  --sidebar-accent-foreground: #e8edf5;
+  --sidebar-border: #2a3a57;
+  --sidebar-ring: #7fb0ff;
   --shadow-color: 0 0 0;
 }
 
 @theme inline {
-  /* System fonts only — no web font download. */
+  /* Body copy uses system fonts only (no web font download): Japanese
+     faces first for ja, Latin system faces first for en / tl (switched by
+     [data-locale] below). Nunito (next/font, self-hosted) is the display
+     face for headings, buttons, chips and the wordmark; its Japanese
+     glyphs fall back to the Hiragino stack. */
   --font-sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI",
     "Meiryo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-latin: var(--latin-stack);
+  --font-display: var(--display-stack);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -134,13 +191,28 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-highlight: var(--highlight);
+  --color-highlight-hover: var(--highlight-hover);
   --color-highlight-foreground: var(--highlight-foreground);
   --color-highlight-soft: var(--highlight-soft);
   --color-highlight-soft-foreground: var(--highlight-soft-foreground);
+  --color-hot: var(--hot);
+  --color-hot-foreground: var(--hot-foreground);
+  --color-facebook: var(--facebook);
+  --color-facebook-hover: var(--facebook-hover);
+  --color-facebook-foreground: var(--facebook-foreground);
+  --color-footer: var(--footer);
+  --color-footer-foreground: var(--footer-foreground);
+  --color-footer-muted: var(--footer-muted);
   --color-caution: var(--caution);
   --color-caution-foreground: var(--caution-foreground);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
+  --color-success-soft: var(--success-soft);
+  --color-success-soft-foreground: var(--success-soft-foreground);
+  --color-caution-soft: var(--caution-soft);
+  --color-caution-soft-foreground: var(--caution-soft-foreground);
+  --color-slate-soft: var(--slate-soft);
+  --color-slate-soft-foreground: var(--slate-soft-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -160,11 +232,13 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Radii: card 12px (rounded-lg), button / input 10px (rounded-md). */
+  /* Radii: card 14px (rounded-lg) / 18px (rounded-xl / 2xl), input 12px
+     (rounded-md). Buttons and chips are full pills (rounded-full). */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 4px);
 
   /* One elevation step only. */
   --shadow-card: 0 1px 2px rgb(var(--shadow-color) / 0.06),
@@ -172,9 +246,9 @@
 }
 
 /*
- * Type scale fixed to 12 / 14 / 16 / 20 / 24 / 32 / 40px. text-lg is pulled
- * up to 20px and text-3xl / text-4xl / text-5xl down so no utility can fall
- * outside the scale. Body copy reads at 1.75 (Japanese); headings at 1.25.
+ * Type scale fixed to 12 / 14 / 16 / 20 / 24 / 32 / 40 / 46px. text-lg is
+ * pulled up to 20px and text-3xl / text-4xl down so no utility can fall
+ * outside the scale; text-5xl (46px) is for the desktop hero only. Body copy reads at 1.75 (Japanese); headings at 1.25.
  */
 @theme {
   --text-xs: 0.75rem;
@@ -193,8 +267,8 @@
   --text-3xl--line-height: 1.25;
   --text-4xl: 2.5rem;
   --text-4xl--line-height: 1.25;
-  --text-5xl: 2.5rem;
-  --text-5xl--line-height: 1.25;
+  --text-5xl: 2.875rem;
+  --text-5xl--line-height: 1.15;
 }
 
 @layer base {
@@ -216,7 +290,8 @@
   h2,
   h3,
   h4 {
-    font-weight: 700;
+    font-family: var(--display-stack);
+    font-weight: 800;
     text-wrap: pretty;
   }
   /* A visible ring on every keyboard-focused control, page-wide. */
@@ -224,15 +299,57 @@
     outline: 2px solid var(--ring);
     outline-offset: 2px;
   }
+  /* On the solid brand blue a blue ring would vanish: use white there. */
+  [data-surface="brand"] :focus-visible {
+    outline-color: var(--primary-foreground);
+  }
   ::selection {
     background: var(--primary-soft);
     color: var(--foreground);
   }
 }
 
+/* Body face and rhythm per language, switched on the wrapper that the
+   [locale] layout renders on the server (no client-side flash). Latin
+   system faces lead for English and Tagalog, Japanese faces for ja. */
+[data-locale="en"],
+[data-locale="tl"] {
+  font-family: var(--latin-stack);
+  line-height: 1.6;
+  --text-base--line-height: 1.6;
+  --text-sm--line-height: 1.6;
+}
+[data-locale="ja"] {
+  line-height: 1.7;
+  --text-base--line-height: 1.7;
+}
+
+/* Small uppercase section / category label (Philstar style). Japanese has
+   no case, and wide tracking only loosens kana, so ja keeps it plain. */
+.kicker {
+  font-family: var(--display-stack);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+[data-locale="ja"] .kicker {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Horizontal chip rails scroll without a visible bar. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Japanese headings need a little more air than Latin ones, and should
    break between phrases rather than mid-word. */
-html:lang(ja) :is(h1, h2, h3) {
+[data-locale="ja"] :is(h1, h2, h3) {
   line-height: 1.45;
   word-break: auto-phrase;
 }

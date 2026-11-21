@@ -42,7 +42,7 @@ export function SignOutButton({ locale, label, pendingLabel }: Props) {
       onClick={signOut}
       disabled={pending}
       aria-busy={pending}
-      className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md border border-input bg-card px-3 text-sm font-medium whitespace-nowrap text-foreground transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-60 lg:min-h-9"
+      className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border border-input bg-card px-3.5 font-display text-sm font-bold whitespace-nowrap text-foreground transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-60 in-data-[surface=brand]:border-primary-foreground/70 in-data-[surface=brand]:bg-transparent in-data-[surface=brand]:text-primary-foreground in-data-[surface=brand]:hover:bg-primary-hover lg:min-h-9"
     >
       <LogOutIcon className="size-4" strokeWidth={1.75} aria-hidden />
       {pending ? pendingLabel : label}

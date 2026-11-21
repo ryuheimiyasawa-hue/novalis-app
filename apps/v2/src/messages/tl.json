@@ -4,45 +4,24 @@
     "tagline": "Suporta sa pamumuhay ng mga Pilipino sa Japan"
   },
   "landing": {
-    "title": "Suporta sa pamumuhay ng mga Pilipino sa Japan",
-    "subtitle": "Tutulong ang AI at mga eksperto sa visa, social insurance, mga pamamaraan sa pamahalaan, at mga usaping pampamilya",
-    "ctaPrimary": "Mag-login gamit ang Facebook",
-    "ctaSecondary": "Alamin pa",
-    "restaurantsHeading": "Mga restawran para sa Pilipino",
+    "title": "May tanong tungkol sa buhay sa Japan? Nandito kami.",
+    "subtitle": "Visa, insurance, pamilya at iba pa: magtanong sa Tagalog, English o 日本語. Kung kailangan, ituturo namin kung saang propesyonal kokonsulta.",
+    "ctaPrimary": "Magpatuloy gamit ang Facebook",
+    "restaurantsHeading": "Pinoy sa Japan",
     "restaurantsViewAll": "Tingnan lahat",
-    "heroEyebrow": "Help desk para sa mga Pilipinong nakatira sa Japan at sa kanilang pamilya",
+    "heroEyebrow": "Kumusta, Kabayan!",
     "heroPoints": {
       "general": "Agad na sumasagot ang AI ng pangkalahatang impormasyon tungkol sa residence status, social insurance, mga proseso sa gobyerno at usaping pampamilya",
       "experts": "Kapag kailangan ng pasya para sa inyong sitwasyon, ipinapakita namin kung saan maaaring kumonsulta sa abogado o gyoseishoshi",
       "languages": "Magtanong sa 日本語, English o Tagalog"
     },
-    "freeNote": "Libre itong gamitin sa ngayon",
-    "startNote": "Magsimula gamit ang inyong Facebook account, o mag-sign up gamit ang email address.",
     "mockCaption": "Halimbawa ng screen ng konsultasyon",
     "mockQuestion": "Saan ako magre-renew ng residence card?",
     "mockAnswer": "Ang pag-renew ng period of stay ay inihahain sa regional immigration services bureau na sumasaklaw sa inyong tinitirhan. Nakadepende sa inyong status of residence ang mga kailangang dokumento.",
     "mockNote": "Pangkalahatang impormasyon. Kumpirmahin po sa propesyonal ang huling pasya.",
     "mockEscalation": "Para sa tanong na kailangan ng pasya sa inyong sitwasyon, ipinapakita namin kung saan kumonsulta sa propesyonal",
-    "featuresHeading": "Saan kami makakatulong",
-    "featuresLead": "Malinaw at pangkalahatang impormasyon sa apat na bagay na madalas nakalilito sa buhay sa Japan.",
-    "features": {
-      "visa": {
-        "title": "Residence status",
-        "body": "Paano karaniwang ginagawa ang renewal at pagpapalit, at anong mga dokumento ang ihahanda"
-      },
-      "insurance": {
-        "title": "Social insurance",
-        "body": "Mga pangunahing kaalaman sa pagsali sa health insurance at pension"
-      },
-      "procedures": {
-        "title": "Mga proseso sa gobyerno",
-        "body": "Mga proseso sa city hall gaya ng pagpaparehistro ng address, buwis at paaralan ng anak"
-      },
-      "family": {
-        "title": "Usaping pampamilya",
-        "body": "Mga tanong tungkol sa kasal, paghihiwalay, pagpapalaki ng anak at iba pang usaping pampamilya"
-      }
-    },
+    "featuresHeading": "Ano ang kailangan mo?",
+    "featuresLead": "Pumili ng paksa at magtanong agad sa AI. Pangkalahatang impormasyon ang sagot, at ituturo namin ang propesyonal kung kailangan ng inyong sitwasyon.",
     "stepsHeading": "Paano ito gumagana",
     "stepsLead": "Tatlong hakbang ang isang konsultasyon.",
     "steps": {
@@ -64,8 +43,15 @@
     "trustLead": "Mahalagang personal na impormasyon ang tungkol sa inyong status at pamilya. Ganito namin ito pinoprotektahan.",
     "trust": {
       "pii": {
-        "title": "Sinusuri ang personal na detalye bago umabot sa AI",
-        "body": "Kapag may nakita kaming numerong may tiyak na format, gaya ng residence card number, My Number, Japanese passport number, Japanese phone number o email address, hindi ito ipinapadala sa AI at hindi rin sine-save, at hihilingin na isulat muli ang mensahe. Hindi namin kayang makita ang lahat, kaya huwag po ninyong ilagay ang impormasyong makapagpapakilala sa inyo."
+        "title": "Proteksyon ng personal info mo",
+        "body": "Kapag may nakita kaming numerong may tiyak na format, gaya ng residence card number, My Number, Japanese passport number, Japanese phone number o email address, hindi ito ipinapadala sa AI at hindi rin sine-save, at hihilingin na isulat muli ang mensahe. Hindi namin kayang makita ang lahat, kaya huwag po ninyong ilagay ang impormasyong makapagpapakilala sa inyo.",
+        "summary": "Huwag po ilagay ang residence card number, My Number o passport number.",
+        "points": {
+          "notSent": "Ang numerong may tiyak na format ay hindi ipinapadala sa AI at hindi sine-save.",
+          "rewrite": "Hihilingin sa inyo na isulat muli ang mensahe.",
+          "notAll": "Hindi namin kayang makita ang lahat."
+        },
+        "more": "Basahin pa"
       },
       "languages": {
         "title": "Tatlong wika",
@@ -77,7 +63,70 @@
       }
     },
     "closingTitle": "Magsimula sa isang simpleng tanong",
-    "closingBody": "Hindi ninyo kailangang harapin nang mag-isa ang mga tanong tungkol sa buhay sa Japan."
+    "closingBody": "Hindi ninyo kailangang harapin nang mag-isa ang mga tanong tungkol sa buhay sa Japan.",
+    "ctaAsk": "Ask MORITA AI",
+    "askBarPlaceholder": "Paano mag-renew ng zairyu card (在留カード) ko?",
+    "quickQuestionsLabel": "Madalas itanong",
+    "quickQuestions": {
+      "visa": "Renewal ng visa",
+      "school": "Pag-enroll ng anak sa school",
+      "insurance": "Health insurance (kokuho / 国民健康保険)"
+    },
+    "trustPills": {
+      "free": "Libre",
+      "operator": "Novalis Inc. ang nagpapatakbo",
+      "languages": "3 wika"
+    },
+    "topicsLabel": "Mga paksa",
+    "topics": {
+      "food": "Pagkaing Pinoy"
+    },
+    "concerns": {
+      "visa": {
+        "title": "Visa at Residency",
+        "body": "Renewal at pagpapalit ng status (在留資格)"
+      },
+      "family": {
+        "title": "Kasal at Pamilya",
+        "body": "Kasal, paghihiwalay at usaping pampamilya"
+      },
+      "insurance": {
+        "title": "Insurance at Pension",
+        "body": "Health insurance (健康保険) at pension (年金)"
+      },
+      "kids": {
+        "title": "Anak",
+        "body": "School, daycare (保育園) at nationality"
+      },
+      "work": {
+        "title": "Trabaho",
+        "body": "Mga tanong tungkol sa trabaho at kontrata"
+      },
+      "cityhall": {
+        "title": "City Hall at Tax",
+        "body": "Address registration (住民登録) at buwis (税金)"
+      }
+    },
+    "latestHeading": "Mga bagong gabay",
+    "latestLead": "Mga praktikal na artikulo tungkol sa buhay sa Japan, pinakabago muna.",
+    "latestViewAll": "Tingnan lahat ng artikulo",
+    "stats": {
+      "languages": {
+        "value": "3",
+        "label": "wika: 日本語, English at Tagalog",
+        "short": "wika"
+      },
+      "free": {
+        "value": "Libre",
+        "label": "gamitin sa ngayon",
+        "short": "gamitin"
+      },
+      "operator": {
+        "value": "Novalis Inc.",
+        "label": "ang nagpapatakbo ng serbisyo",
+        "short": "nagpapatakbo"
+      }
+    }
   },
   "login": {
     "heading": "Mag-sign in",
@@ -212,13 +261,26 @@
     "loadError": "Hindi nakuha ang mga artikulo. Paki-ulit pagkalipas ng ilang sandali.",
     "prev": "Nakaraan",
     "next": "Susunod",
-    "pageOf": "Pahina {page} ng {total}"
+    "pageOf": "Pahina {page} ng {total}",
+    "kicker": "Mga gabay",
+    "newBadge": "Bago"
   },
   "restaurantsList": {
     "title": "Mga Restawran",
     "subtitle": "Piniling listahan ng mga Filipino na restawran at grocery sa Japan.",
     "empty": "Wala pang nakalistang restawran.",
-    "loadError": "Nabigong i-load ang mga restawran. Pakisubukan muli mamaya."
+    "loadError": "Nabigong i-load ang mga restawran. Pakisubukan muli mamaya.",
+    "kicker": "Pinoy sa Japan",
+    "kind": {
+      "restaurant": "Restaurant",
+      "grocery": "Grocery"
+    },
+    "view": "Tingnan",
+    "comingSoon": {
+      "title": "Malapit na",
+      "body": "Naghahanap pa kami ng mga Pinoy store at restaurant sa Japan. Lalabas sila rito kapag nailista na.",
+      "action": "Basahin ang mga gabay"
+    }
   },
   "restaurantDetail": {
     "back": "Bumalik sa listahan",
@@ -280,7 +342,8 @@
     "error": "May naganap na error",
     "language": "Wika",
     "reload": "I-reload",
-    "close": "Isara"
+    "close": "Isara",
+    "backHome": "Bumalik sa MORITA home"
   },
   "chat": {
     "disclaimer": "Ako ay isang AI at maaaring magpakita ng hindi tumpak na impormasyon, kaya mangyaring suriin ninyong muli ang aking mga sagot. Pangkalahatang impormasyon lamang din ito; para sa panghuling pasya o sa mga bagay na partikular sa inyong sitwasyon, mangyaring kumonsulta sa isang propesyonal.",

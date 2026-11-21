@@ -1,9 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { hasLocale } from "next-intl";
 import { cookies } from "next/headers";
-import { LogInIcon } from "lucide-react";
 import { routing } from "@/lib/i18n/routing";
-import { IconTile } from "@/components/layout/icon-tile";
 import { validateRedirect } from "@/lib/auth/redirect-validator";
 import {
   LOGIN_FAILURE_COOKIE,
@@ -49,13 +47,12 @@ export default async function LoginPage({
 
   return (
     <main id="main-content" className="w-full">
-      <div className="space-y-6 rounded-lg border border-border bg-card p-6 shadow-card md:p-8">
-        <div className="space-y-3">
-          <IconTile icon={LogInIcon} />
-          <p className="text-sm font-medium text-primary">{tApp("name")}</p>
-          <h1 className="text-2xl font-bold md:text-3xl">{t("heading")}</h1>
-          <p className="text-base text-muted-foreground">{t("subheading")}</p>
-        </div>
+      <div data-surface="brand" className="mb-5 space-y-2 text-primary-foreground">
+        <p className="kicker text-highlight">{tApp("name")}</p>
+        <h1 className="text-3xl">{t("heading")}</h1>
+        <p className="text-base text-primary-foreground/90">{t("subheading")}</p>
+      </div>
+      <div className="space-y-5 rounded-2xl border border-border bg-card p-5 shadow-card md:p-8">
 
         <ErrorBanner errorCode={errorCode} failureCount={failureCount} locale={safeLocale} />
 
@@ -65,7 +62,7 @@ export default async function LoginPage({
           buttonLabel={t("facebookButton")}
         />
 
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+        <div className="flex items-center gap-3 font-display text-sm font-bold text-muted-foreground">
           <span className="h-px flex-1 bg-border" />
           <span>{t("orDivider")}</span>
           <span className="h-px flex-1 bg-border" />
@@ -97,7 +94,7 @@ export default async function LoginPage({
           }}
         />
 
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+        <div className="flex items-center gap-3 font-display text-sm font-bold text-muted-foreground">
           <span className="h-px flex-1 bg-border" />
           <span>{t("orDivider")}</span>
           <span className="h-px flex-1 bg-border" />

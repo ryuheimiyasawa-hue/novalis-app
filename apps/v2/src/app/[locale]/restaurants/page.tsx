@@ -4,16 +4,17 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { routing } from "@/lib/i18n/routing";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPrefectureLabel } from "@/lib/i18n/prefectures";
-import { getCuisineLabel } from "@/lib/i18n/cuisines";
 import { pickRestaurantCity, pickRestaurantName } from "@/lib/restaurants/localize";
 import {
-  MapPinIcon,
+  BookOpenIcon,
   RefreshCwIcon,
+  StoreIcon,
   TriangleAlertIcon,
   UtensilsCrossedIcon,
 } from "lucide-react";
-import { HomeLink } from "@/components/layout/home-link";
-import { PageHeader } from "@/components/layout/page-header";
+import { PublicBackLink } from "@/components/layout/public-back-link";
+import { PageBand } from "@/components/layout/page-band";
+import { RestaurantCard, restaurantKind } from "@/components/restaurants/restaurant-card";
 import { EmptyState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/button";
 
@@ -87,9 +88,15 @@ export default async function RestaurantsListPage({
   if (error) {
     console.error("[restaurants list] fetch failed:", error.message);
     return (
-      <main id="main-content" className="mx-auto w-full max-w-[1120px] flex-1 px-4 py-10 md:px-6 md:py-16">
-        <HomeLink locale={safeLocale} className="mb-8" />
-        <PageHeader icon={UtensilsCrossedIcon} title={t("title")} description={t("subtitle")} />
+      <main id="main-content" className="w-full flex-1">
+        <PageBand
+          icon={UtensilsCrossedIcon}
+          kicker={t("kicker")}
+          title={t("title")}
+          description={t("subtitle")}
+          top={<PublicBackLink locale={safeLocale} />}
+        />
+        <div className="mx-auto max-w-[1120px] px-4 py-8 md:px-6 md:py-12">
         <EmptyState
           role="alert"
           icon={TriangleAlertIcon}
@@ -104,77 +111,66 @@ export default async function RestaurantsListPage({
             </Button>
           }
         />
+        </div>
       </main>
     );
   }
 
+  // Sample shops stay listed on purpose (owner decision, 2026-10-12). With
+  // no active shops at all the page shows a "coming soon" card.
   const rows = (data ?? []) as RestaurantRow[];
 
   return (
-    <main id="main-content" className="mx-auto w-full max-w-[1120px] flex-1 px-4 py-10 md:px-6 md:py-16">
-      <HomeLink locale={safeLocale} className="mb-8" />
-      <PageHeader icon={UtensilsCrossedIcon} title={t("title")} description={t("subtitle")} />
-
-      {rows.length === 0 ? (
-        <EmptyState
-          role="status"
-          icon={UtensilsCrossedIcon}
-          tone="highlight"
-          title={t("empty")}
-          action={<HomeLink locale={safeLocale} />}
-        />
-      ) : (
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {rows.map((row) => {
-            const pref = getPrefectureLabel(row.prefecture_code, safeLocale);
-            const desc = pickDescription(row, safeLocale);
-            return (
-              <li key={row.id}>
-                <Link
-                  href={`/${safeLocale}/restaurants/${row.id}`}
-                  className="group flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card transition-colors hover:border-primary/40"
-                >
-                  {row.photo_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={row.photo_url}
-                      alt={pickRestaurantName(row, safeLocale)}
-                      loading="lazy"
-                      className="aspect-[16/10] w-full object-cover"
-                    />
-                  ) : (
-                    <div
-                      aria-hidden
-                      className="flex aspect-[16/10] w-full items-center justify-center bg-highlight-soft text-highlight-soft-foreground"
-                    >
-                      <UtensilsCrossedIcon className="size-10" strokeWidth={1.75} />
-                    </div>
-                  )}
-                  <div className="flex flex-1 flex-col gap-2 p-5">
-                    {row.cuisine_type && (
-                      <span className="w-fit rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">
-                        {getCuisineLabel(row.cuisine_type, safeLocale)}
-                      </span>
-                    )}
-                    <h2 className="text-xl font-bold group-hover:text-primary">
-                      {pickRestaurantName(row, safeLocale)}
-                    </h2>
-                    <p className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <MapPinIcon className="size-4 shrink-0" strokeWidth={1.75} aria-hidden />
-                      {[pref, pickRestaurantCity(row, safeLocale)].filter(Boolean).join(" ")}
-                    </p>
-                    {desc && (
-                      <p className="line-clamp-2 text-sm text-muted-foreground">
-                        {desc}
-                      </p>
-                    )}
-                  </div>
+    <main id="main-content" className="w-full flex-1">
+      <PageBand
+        icon={UtensilsCrossedIcon}
+        kicker={t("kicker")}
+        title={t("title")}
+        description={t("subtitle")}
+        top={<PublicBackLink locale={safeLocale} />}
+      />
+      <div className="mx-auto max-w-[1120px] px-4 py-8 md:px-6 md:py-12">
+        {rows.length === 0 ? (
+          <EmptyState
+            role="status"
+            icon={StoreIcon}
+            tone="highlight"
+            titleAs="h2"
+            title={t("comingSoon.title")}
+            description={t("comingSoon.body")}
+            action={
+              <Button asChild variant="outline">
+                <Link href={`/${safeLocale}/articles`}>
+                  <BookOpenIcon aria-hidden />
+                  {t("comingSoon.action")}
                 </Link>
+              </Button>
+            }
+          />
+        ) : (
+          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {rows.map((row, i) => (
+              <li key={row.id}>
+                <RestaurantCard
+                  href={`/${safeLocale}/restaurants/${row.id}`}
+                  name={pickRestaurantName(row, safeLocale)}
+                  area={[
+                    getPrefectureLabel(row.prefecture_code, safeLocale),
+                    pickRestaurantCity(row, safeLocale),
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  description={pickDescription(row, safeLocale)}
+                  photoUrl={row.photo_url}
+                  kindLabel={t(`kind.${restaurantKind(row.cuisine_type)}`)}
+                  viewLabel={t("view")}
+                  priority={i < 3}
+                />
               </li>
-            );
-          })}
-        </ul>
-      )}
+            ))}
+          </ul>
+        )}
+      </div>
     </main>
   );
 }

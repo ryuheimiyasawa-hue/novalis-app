@@ -67,12 +67,12 @@ export function LoginForm({ locale, redirect, buttonLabel }: Props) {
       onClick={handleClick}
       disabled={pending}
       aria-busy={pending}
-      className="inline-flex min-h-12 w-full items-center justify-center gap-2.5 rounded-md bg-primary px-6 text-base font-medium text-primary-foreground transition-colors hover:bg-primary-hover disabled:pointer-events-none disabled:opacity-60"
+      className="inline-flex min-h-[52px] w-full items-center justify-center gap-2.5 rounded-full bg-facebook px-6 font-display text-base font-extrabold text-facebook-foreground transition-colors hover:bg-facebook-hover disabled:pointer-events-none disabled:opacity-60"
     >
       {pending ? (
         <Loader2Icon className="size-5 animate-spin" strokeWidth={1.75} aria-hidden />
       ) : (
-        <FacebookIcon className="size-5" strokeWidth={1.75} aria-hidden />
+        <FacebookIcon className="size-5 fill-current" strokeWidth={0} aria-hidden />
       )}
       {buttonLabel}
     </button>

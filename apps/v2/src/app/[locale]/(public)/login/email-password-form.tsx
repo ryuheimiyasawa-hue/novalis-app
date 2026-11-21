@@ -5,11 +5,11 @@ import { CircleAlertIcon, CircleCheckIcon, InfoIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const FIELD_CLASS =
-  "h-12 w-full rounded-md border border-input bg-card px-4 text-base text-foreground placeholder:text-muted-foreground focus-visible:border-ring disabled:opacity-60";
+  "h-12 w-full rounded-xl border border-input bg-card px-4 text-base text-foreground placeholder:text-muted-foreground focus-visible:border-ring disabled:opacity-60";
 const BUTTON_STRONG =
-  "inline-flex min-h-12 items-center justify-center rounded-md border border-primary bg-card px-5 text-sm font-medium text-primary transition-colors hover:bg-primary-soft disabled:pointer-events-none disabled:opacity-60";
+  "inline-flex min-h-12 items-center justify-center rounded-full bg-primary px-5 font-display text-sm font-extrabold text-primary-foreground transition-colors hover:bg-primary-hover disabled:pointer-events-none disabled:opacity-60";
 const BUTTON_QUIET =
-  "inline-flex min-h-12 items-center justify-center rounded-md border border-input bg-card px-5 text-sm font-medium text-foreground transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-60";
+  "inline-flex min-h-12 items-center justify-center rounded-full border border-input bg-card px-5 font-display text-sm font-bold text-foreground transition-colors hover:border-primary/40 hover:bg-accent disabled:pointer-events-none disabled:opacity-60";
 
 // Email + password authentication. Replaces the magic-link form.
 // Three actions on one screen:
