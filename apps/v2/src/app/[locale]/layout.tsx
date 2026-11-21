@@ -28,10 +28,16 @@ export default async function LocaleLayout({
   return (
     <NextIntlClientProvider locale={locale}>
       <LangSync locale={locale} />
-      {children}
-      {/* Host for the toast.error() calls the chat and conversation list
-          already make; without it those messages were never shown. */}
-      <Toaster position="top-center" closeButton />
+      {/* Server-rendered locale hook for the body font and line height
+          (see globals.css [data-locale]). `contents` keeps it out of the
+          layout; doing this in LangSync would flash the Japanese stack
+          before hydration. */}
+      <div data-locale={locale} lang={locale} className="contents">
+        {children}
+        {/* Host for the toast.error() calls the chat and conversation list
+            already make; without it those messages were never shown. */}
+        <Toaster position="top-center" closeButton />
+      </div>
     </NextIntlClientProvider>
   );
 }

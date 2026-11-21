@@ -5,7 +5,7 @@ import { Slot } from "radix-ui"
 import { cn } from "@/lib/utils/cn"
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors focus-visible:border-ring disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:stroke-[1.75] [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-display text-sm font-bold whitespace-nowrap transition-colors focus-visible:border-ring disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:stroke-[1.75] [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
@@ -20,14 +20,22 @@ const buttonVariants = cva(
         ghost:
           "text-foreground hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        // The main call to action: sunflower pill, dark text (never white).
+        highlight:
+          "bg-highlight text-highlight-foreground shadow-card hover:bg-highlight-hover",
+        // Facebook sign-in only, in Facebook's own blue so it reads as
+        // Facebook and not as one of our brand buttons.
+        facebook:
+          "bg-facebook text-facebook-foreground hover:bg-facebook-hover",
       },
       size: {
         default: "h-11 px-5 py-2 has-[>svg]:px-4 lg:h-10",
-        xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-11 gap-1.5 rounded-md px-3 has-[>svg]:px-3 lg:h-9",
-        lg: "h-12 rounded-md px-6 text-base has-[>svg]:px-5",
+        xs: "h-6 gap-1 rounded-full px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
+        sm: "h-11 gap-1.5 rounded-full px-4 has-[>svg]:px-3.5 lg:h-9",
+        lg: "h-12 rounded-full px-6 text-base has-[>svg]:px-5",
+        xl: "h-14 rounded-full px-7 text-lg has-[>svg]:px-6 [&_svg:not([class*='size-'])]:size-5",
         icon: "size-11 lg:size-10",
-        "icon-xs": "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
+        "icon-xs": "size-6 rounded-full [&_svg:not([class*='size-'])]:size-3",
         "icon-sm": "size-11 lg:size-9",
         "icon-lg": "size-12",
       },

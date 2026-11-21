@@ -12,16 +12,21 @@ import { getTranslations } from "next-intl/server";
 export async function HomeLink({
   locale,
   className = "",
+  tone = "button",
 }: {
   locale: "ja" | "en" | "tl";
   className?: string;
+  /** "button": outlined pill (default). "brand": a small white text link
+   *  for the top of a blue page band. */
+  tone?: "button" | "brand";
 }) {
   const t = await getTranslations({ locale, namespace: "chat.ui" });
+  const look =
+    tone === "brand"
+      ? "inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-primary-foreground/90 underline-offset-4 hover:text-primary-foreground hover:underline lg:min-h-8"
+      : "inline-flex min-h-11 items-center gap-2 rounded-full border border-input bg-card px-4 font-display text-sm font-bold text-foreground transition-colors hover:border-primary/40 hover:bg-accent lg:min-h-9";
   return (
-    <Link
-      href={`/${locale}/dashboard`}
-      className={`inline-flex min-h-11 items-center gap-2 rounded-md border border-input bg-card px-3.5 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-accent lg:min-h-9 ${className}`}
-    >
+    <Link href={`/${locale}/dashboard`} className={`${look} ${className}`}>
       <HomeIcon className="size-4" strokeWidth={1.75} aria-hidden />
       {t("backToDashboard")}
     </Link>

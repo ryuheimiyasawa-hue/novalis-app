@@ -25,7 +25,7 @@ export default function GlobalError({
   }, [error]);
 
   // Inline styles only: globals.css may not have loaded when this renders.
-  // Colours mirror the brand tokens (cream, ink, slate, indigo).
+  // Colours mirror the brand tokens (background, ink, slate, brand blue).
   const action = {
     display: "inline-flex",
     alignItems: "center",
@@ -33,8 +33,8 @@ export default function GlobalError({
     minHeight: "44px",
     padding: "0 1.25rem",
     fontSize: "0.875rem",
-    fontWeight: 500,
-    borderRadius: "10px",
+    fontWeight: 700,
+    borderRadius: "999px",
     cursor: "pointer",
     textDecoration: "none",
     boxSizing: "border-box",
@@ -52,8 +52,8 @@ export default function GlobalError({
           justifyContent: "center",
           margin: 0,
           padding: "1.5rem",
-          background: "#FBF8F2",
-          color: "#1F2430",
+          background: "#F4F6FA",
+          color: "#14213D",
         }}
       >
         <div
@@ -62,8 +62,8 @@ export default function GlobalError({
             width: "100%",
             textAlign: "center",
             background: "#FFFFFF",
-            border: "1px solid #E7E1D5",
-            borderRadius: "12px",
+            border: "1px solid #DDE3EC",
+            borderRadius: "18px",
             padding: "2rem 1.5rem",
             boxShadow: "0 1px 2px rgba(31,36,48,0.06), 0 4px 16px rgba(31,36,48,0.06)",
           }}
@@ -71,7 +71,7 @@ export default function GlobalError({
           <h1 style={{ fontSize: "1.25rem", fontWeight: 700, lineHeight: 1.45, margin: 0 }}>
             問題が発生しました / Something went wrong / May naganap na problema
           </h1>
-          <p style={{ color: "#5B6475", fontSize: "1rem", lineHeight: 1.75, marginTop: "0.75rem" }}>
+          <p style={{ color: "#4B5567", fontSize: "1rem", lineHeight: 1.75, marginTop: "0.75rem" }}>
             お手数ですが、もう一度お試しください。 Please try again. Pakisubukan
             muli.
           </p>
@@ -89,7 +89,7 @@ export default function GlobalError({
               style={{
                 ...action,
                 color: "#FFFFFF",
-                background: "#1E3A5F",
+                background: "#0A4FB8",
                 border: "none",
               }}
             >
@@ -99,9 +99,9 @@ export default function GlobalError({
               href="/"
               style={{
                 ...action,
-                color: "#1E3A5F",
+                color: "#0A4FB8",
                 background: "#FFFFFF",
-                border: "1px solid #948D80",
+                border: "1px solid #8A94A6",
               }}
             >
               ホーム / Home / Home

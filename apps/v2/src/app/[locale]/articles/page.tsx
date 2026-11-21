@@ -4,7 +4,6 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { routing } from "@/lib/i18n/routing";
 import { getAdminClient } from "@/lib/supabase/admin";
 import {
-  ArrowRightIcon,
   BookOpenIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -13,7 +12,12 @@ import {
   TriangleAlertIcon,
 } from "lucide-react";
 import { HomeLink } from "@/components/layout/home-link";
-import { PageHeader } from "@/components/layout/page-header";
+import { PageBand } from "@/components/layout/page-band";
+import {
+  ArticleRow,
+  formatArticleDate,
+  isFresh,
+} from "@/components/articles/article-row";
 import { EmptyState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/button";
 
@@ -62,6 +66,12 @@ function pickCategory(a: ArticleRow, locale: "ja" | "en" | "tl"): string | null 
   if (locale === "en") return a.category.name_en ?? a.category.name_ja;
   if (locale === "tl") return a.category.name_tl ?? a.category.name_ja;
   return a.category.name_ja;
+}
+
+/** Render time, for the NEW badge. The page is ISR-cached for 10 min, so
+ *  the badge can be at most that stale. */
+function currentTime(): number {
+  return Date.now();
 }
 
 /** Pull the leading prose chunk out of a markdown body for the list
@@ -120,9 +130,15 @@ export default async function ArticlesListPage({
   if (error) {
     console.error("[articles list] fetch failed:", error.message);
     return (
-      <main id="main-content" className="mx-auto w-full max-w-[1120px] flex-1 px-4 py-10 md:px-6 md:py-16">
-        <HomeLink locale={safeLocale} className="mb-8" />
-        <PageHeader icon={BookOpenIcon} title={t("title")} description={t("subtitle")} />
+      <main id="main-content" className="w-full flex-1">
+        <PageBand
+          icon={BookOpenIcon}
+          kicker={t("kicker")}
+          title={t("title")}
+          description={t("subtitle")}
+          top={<HomeLink locale={safeLocale} tone="brand" />}
+        />
+        <div className="mx-auto max-w-[1120px] px-4 py-8 md:px-6 md:py-12">
         <EmptyState
           role="alert"
           icon={TriangleAlertIcon}
@@ -137,6 +153,7 @@ export default async function ArticlesListPage({
             </Button>
           }
         />
+        </div>
       </main>
     );
   }
@@ -146,11 +163,18 @@ export default async function ArticlesListPage({
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const hasPrev = page > 1;
   const hasNext = page < totalPages;
+  const now = currentTime();
 
   return (
-    <main id="main-content" className="mx-auto w-full max-w-[1120px] flex-1 px-4 py-10 md:px-6 md:py-16">
-      <HomeLink locale={safeLocale} className="mb-8" />
-      <PageHeader icon={BookOpenIcon} title={t("title")} description={t("subtitle")} />
+    <main id="main-content" className="w-full flex-1">
+      <PageBand
+        icon={BookOpenIcon}
+        kicker={t("kicker")}
+        title={t("title")}
+        description={t("subtitle")}
+        top={<HomeLink locale={safeLocale} tone="brand" />}
+      />
+      <div className="mx-auto max-w-[1120px] px-4 py-6 md:px-6 md:py-10">
 
       {rows.length === 0 ? (
         <EmptyState
@@ -168,56 +192,22 @@ export default async function ArticlesListPage({
           }
         />
       ) : (
-        <ul className="grid gap-4 md:grid-cols-2">
-          {rows.map((row) => {
-            const title = pickTitle(row, safeLocale);
-            const body = pickBody(row, safeLocale);
-            const category = pickCategory(row, safeLocale);
-            const preview = snippet(body, SNIPPET_MAX);
-            const dateLabel = row.published_at
-              ? new Date(row.published_at).toLocaleDateString(
-                  safeLocale === "ja"
-                    ? "ja-JP"
-                    : safeLocale === "tl"
-                      ? "tl-PH"
-                      : "en-US",
-                )
-              : "";
-            return (
-              <li key={row.id}>
-                <Link
-                  href={`/${safeLocale}/articles/${row.slug}`}
-                  className="group flex h-full flex-col rounded-lg border border-border bg-card p-6 shadow-card transition-colors hover:border-primary/40"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    {category && (
-                      <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">
-                        {category}
-                      </span>
-                    )}
-                    {dateLabel && (
-                      <span className="text-xs text-muted-foreground">
-                        {dateLabel}
-                      </span>
-                    )}
-                  </div>
-                  <h2 className="mt-3 text-xl font-bold group-hover:text-primary">
-                    {title}
-                  </h2>
-                  {preview && (
-                    <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
-                      {preview}
-                    </p>
-                  )}
-                  <ArrowRightIcon
-                    className="mt-auto size-5 self-end pt-1 text-primary"
-                    strokeWidth={1.75}
-                    aria-hidden
-                  />
-                </Link>
-              </li>
-            );
-          })}
+        <ul className="divide-y divide-border rounded-2xl border border-border bg-card px-4 shadow-card md:px-6">
+          {rows.map((row) => (
+            <li key={row.id}>
+              <ArticleRow
+                href={`/${safeLocale}/articles/${row.slug}`}
+                title={pickTitle(row, safeLocale)}
+                categorySlug={row.category?.slug ?? null}
+                categoryLabel={pickCategory(row, safeLocale)}
+                dateLabel={formatArticleDate(row.published_at, safeLocale)}
+                dateTime={row.published_at}
+                fresh={isFresh(row.published_at, now)}
+                newLabel={t("newBadge")}
+                excerpt={snippet(pickBody(row, safeLocale), SNIPPET_MAX)}
+              />
+            </li>
+          ))}
         </ul>
       )}
 
@@ -248,6 +238,7 @@ export default async function ArticlesListPage({
           )}
         </nav>
       )}
+      </div>
     </main>
   );
 }

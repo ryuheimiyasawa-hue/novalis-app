@@ -68,62 +68,66 @@ export async function SiteHeader({
   const homeHref = variant === "app" ? `/${locale}/dashboard` : `/${locale}`;
 
   return (
-    <header className="border-b border-border bg-card">
-      <a
-        href="#main-content"
-        className="sr-only rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50"
-      >
-        {t("skipToContent")}
-      </a>
-      <div className="mx-auto flex h-16 max-w-[1120px] items-center gap-3 px-4 md:gap-6 md:px-6">
-        <Link
-          href={homeHref}
-          aria-label={variant === "app" ? t("dashboard") : t("homeLabel")}
-          className="flex min-h-11 shrink-0 items-center gap-2.5 rounded-md"
+    <header data-slot="site-header">
+      <div data-surface="brand" className="bg-primary text-primary-foreground">
+        <a
+          href="#main-content"
+          className="sr-only rounded-full bg-highlight px-4 py-2 text-sm font-bold text-highlight-foreground focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50"
         >
-          <BrandMark />
-          <span className="flex flex-col leading-tight">
-            <span className="text-base font-bold tracking-tight">{tDashboard("headerLogo")}</span>
-            <span className="hidden text-xs text-muted-foreground sm:block">
-              {tApp("name")}
+          {t("skipToContent")}
+        </a>
+        <div className="mx-auto flex h-14 max-w-[1120px] items-center gap-3 px-4 md:h-16 md:gap-6 md:px-6">
+          <Link
+            href={homeHref}
+            aria-label={variant === "app" ? t("dashboard") : t("homeLabel")}
+            className="flex min-h-11 shrink-0 items-center gap-2.5 rounded-md"
+          >
+            <BrandMark />
+            <span className="flex flex-col leading-tight">
+              <span className="font-display text-lg font-extrabold tracking-wide">
+                {tDashboard("headerLogo")}
+              </span>
+              <span className="hidden text-xs text-primary-foreground/85 sm:block">
+                {tApp("name")}
+              </span>
             </span>
-          </span>
-        </Link>
+          </Link>
 
-        {showNav && (
-        <nav aria-label={t("mainLabel")} className="hidden lg:block">
-          <ul className="flex items-center gap-1">
-            {items.map((item) => {
-              const isActive = item.key === active;
-              return (
-                <li key={item.key}>
-                  <Link
-                    href={item.href}
-                    aria-current={isActive ? "page" : undefined}
-                    className={cn(
-                      "relative inline-flex min-h-9 items-center rounded-md px-3 text-sm font-medium transition-colors",
-                      isActive
-                        ? "text-primary after:absolute after:inset-x-3 after:-bottom-[15px] after:h-[3px] after:rounded-full after:bg-highlight"
-                        : "text-muted-foreground hover:bg-accent hover:text-foreground",
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-        )}
+          {showNav && (
+            <nav aria-label={t("mainLabel")} className="hidden lg:block">
+              <ul className="flex items-center gap-1">
+                {items.map((item) => {
+                  const isActive = item.key === active;
+                  return (
+                    <li key={item.key}>
+                      <Link
+                        href={item.href}
+                        aria-current={isActive ? "page" : undefined}
+                        className={cn(
+                          "relative inline-flex min-h-10 items-center rounded-full px-3.5 font-display text-sm font-bold transition-colors",
+                          isActive
+                            ? "text-primary-foreground after:absolute after:inset-x-3.5 after:-bottom-[12px] after:h-[3px] after:rounded-full after:bg-highlight"
+                            : "text-primary-foreground/85 hover:bg-primary-hover hover:text-primary-foreground",
+                        )}
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+          )}
 
-        <div className="ml-auto flex min-w-0 items-center gap-2 md:gap-3">
-          {switcher}
-          {actions}
+          <div className="ml-auto flex min-w-0 items-center gap-2 md:gap-3">
+            {switcher}
+            {actions}
+          </div>
         </div>
       </div>
 
       {showNav && mobileNav && (
-        <nav aria-label={t("mainLabel")} className="border-t border-border lg:hidden">
+        <nav aria-label={t("mainLabel")} className="border-b border-border bg-card lg:hidden">
           <ul
             className={cn(
               "mx-auto grid max-w-[1120px] px-2",
@@ -139,7 +143,7 @@ export async function SiteHeader({
                     href={item.href}
                     aria-current={isActive ? "page" : undefined}
                     className={cn(
-                      "flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-md px-1 py-1.5 text-center text-xs font-medium break-words",
+                      "flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-md px-1 py-1.5 text-center font-display text-xs font-bold break-words",
                       isActive
                         ? "text-primary"
                         : "text-muted-foreground hover:text-foreground",

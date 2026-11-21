@@ -4,45 +4,24 @@
     "tagline": "Life support for Filipinos in Japan"
   },
   "landing": {
-    "title": "Life support for Filipinos in Japan",
-    "subtitle": "AI and experts help with visa, social insurance, government procedures, and family matters",
-    "ctaPrimary": "Login with Facebook",
-    "ctaSecondary": "Learn more",
-    "restaurantsHeading": "Filipino restaurants",
+    "title": "Hi, Kabayan! Life in Japan, made easier.",
+    "subtitle": "Ask about visas, insurance, family and more in English, Tagalog or 日本語. When you need a professional, we show you where to go.",
+    "ctaPrimary": "Continue with Facebook",
+    "restaurantsHeading": "Pinoy sa Japan",
     "restaurantsViewAll": "View all",
-    "heroEyebrow": "A help desk for Filipinos living in Japan and their families",
+    "heroEyebrow": "For Filipinos in Japan and their families",
     "heroPoints": {
       "general": "The AI answers right away with general information on residence status, social insurance, government procedures and family matters",
       "experts": "When your situation needs an individual judgment, we show where you can consult a lawyer or gyoseishoshi",
       "languages": "Ask in 日本語, English or Tagalog"
     },
-    "freeNote": "Free to use for now",
-    "startNote": "Start with your Facebook account, or sign up with an email address.",
     "mockCaption": "Example of the consultation screen",
     "mockQuestion": "Where do I renew my residence card?",
     "mockAnswer": "Renewals of your period of stay are filed at the regional immigration services bureau that covers where you live. The documents you need depend on your status of residence.",
     "mockNote": "General information. Please confirm final decisions with a professional.",
     "mockEscalation": "For questions that need an individual judgment, we show where to consult a professional",
-    "featuresHeading": "What we can help with",
-    "featuresLead": "Clear, general information on four areas where life in Japan often gets confusing.",
-    "features": {
-      "visa": {
-        "title": "Residence status",
-        "body": "How renewals and changes generally work, and which documents to prepare"
-      },
-      "insurance": {
-        "title": "Social insurance",
-        "body": "The basics of joining health insurance and the pension system"
-      },
-      "procedures": {
-        "title": "Government procedures",
-        "body": "City hall procedures such as address registration, taxes and your child's school"
-      },
-      "family": {
-        "title": "Family matters",
-        "body": "Questions about marriage, divorce, raising children and other family concerns"
-      }
-    },
+    "featuresHeading": "What do you need help with?",
+    "featuresLead": "Pick a topic and ask the AI right away. Answers are general information, and we point you to a professional when your case needs one.",
     "stepsHeading": "How it works",
     "stepsLead": "A consultation takes three steps.",
     "steps": {
@@ -77,7 +56,67 @@
       }
     },
     "closingTitle": "Start with a simple question",
-    "closingBody": "You don't have to figure out life in Japan on your own."
+    "closingBody": "You don't have to figure out life in Japan on your own.",
+    "ctaAsk": "Ask MORITA AI",
+    "askBarPlaceholder": "How do I renew my residence card (zairyu card / 在留カード)?",
+    "quickQuestionsLabel": "Popular questions",
+    "quickQuestions": {
+      "visa": "Visa renewal",
+      "school": "Enrolling my child in school",
+      "insurance": "Health insurance (kokuho / 国民健康保険)"
+    },
+    "trustPills": {
+      "free": "Free to use",
+      "operator": "Run by Novalis Inc.",
+      "languages": "3 languages"
+    },
+    "topicsLabel": "Topics",
+    "topics": {
+      "food": "Filipino Food"
+    },
+    "concerns": {
+      "visa": {
+        "title": "Visa & Residency",
+        "body": "Renewal and change of status (在留資格)"
+      },
+      "family": {
+        "title": "Marriage & Family",
+        "body": "Marriage, divorce and family matters"
+      },
+      "insurance": {
+        "title": "Insurance & Pension",
+        "body": "Health insurance (健康保険) and pension (年金)"
+      },
+      "kids": {
+        "title": "Children",
+        "body": "School, daycare (保育園) and nationality"
+      },
+      "work": {
+        "title": "Work",
+        "body": "Questions about your job and contract"
+      },
+      "cityhall": {
+        "title": "City Hall & Tax",
+        "body": "Address registration (住民登録) and taxes (税金)"
+      }
+    },
+    "latestHeading": "Latest guides",
+    "latestLead": "Practical articles on life in Japan, newest first.",
+    "latestViewAll": "See all articles",
+    "stats": {
+      "languages": {
+        "value": "3",
+        "label": "languages: 日本語, English and Tagalog"
+      },
+      "free": {
+        "value": "Free",
+        "label": "to use for now"
+      },
+      "operator": {
+        "value": "Novalis Inc.",
+        "label": "runs this service"
+      }
+    }
   },
   "login": {
     "heading": "Sign in",
@@ -212,13 +251,21 @@
     "loadError": "Failed to load articles. Please try again in a moment.",
     "prev": "Previous",
     "next": "Next",
-    "pageOf": "Page {page} of {total}"
+    "pageOf": "Page {page} of {total}",
+    "kicker": "Guides",
+    "newBadge": "New"
   },
   "restaurantsList": {
     "title": "Restaurants",
     "subtitle": "A hand-picked list of Filipino restaurants and grocery stores in Japan.",
     "empty": "No restaurants are listed yet.",
-    "loadError": "Failed to load restaurants. Please try again later."
+    "loadError": "Failed to load restaurants. Please try again later.",
+    "kicker": "Pinoy sa Japan",
+    "kind": {
+      "restaurant": "Restaurant",
+      "grocery": "Grocery"
+    },
+    "view": "View"
   },
   "restaurantDetail": {
     "back": "Back to list",
