@@ -43,7 +43,7 @@
     "trustLead": "Questions about your status and your family involve important personal information. Here is how we protect it.",
     "trust": {
       "pii": {
-        "title": "Personal details are checked before they reach the AI",
+        "title": "How we protect your info",
         "body": "If we detect a number in a fixed format, such as a residence card number, My Number, a Japanese passport number, a Japanese phone number or an email address, your message is not sent to the AI or saved, and you are asked to rewrite it. We cannot detect everything, so please do not enter information that identifies you.",
         "summary": "Please don't enter your residence card number, My Number or passport number.",
         "points": {
@@ -113,15 +113,18 @@
     "stats": {
       "languages": {
         "value": "3",
-        "label": "languages: 日本語, English and Tagalog"
+        "label": "languages: 日本語, English and Tagalog",
+        "short": "languages"
       },
       "free": {
         "value": "Free",
-        "label": "to use for now"
+        "label": "to use for now",
+        "short": "to use"
       },
       "operator": {
         "value": "Novalis Inc.",
-        "label": "runs this service"
+        "label": "runs this service",
+        "short": "runs it"
       }
     }
   },
@@ -272,7 +275,12 @@
       "restaurant": "Restaurant",
       "grocery": "Grocery"
     },
-    "view": "View"
+    "view": "View",
+    "comingSoon": {
+      "title": "Coming soon",
+      "body": "We're gathering Filipino restaurants and grocery stores in Japan. They'll show up here as soon as they're listed.",
+      "action": "Read the guides"
+    }
   },
   "restaurantDetail": {
     "back": "Back to list",
@@ -330,7 +338,8 @@
     "error": "An error occurred",
     "language": "Language",
     "reload": "Reload",
-    "close": "Close"
+    "close": "Close",
+    "backHome": "Back to MORITA home"
   },
   "chat": {
     "disclaimer": "I am an AI and may present inaccurate information, so please verify my responses yourself. This is general information only; for final decisions or matters specific to your situation, please consult a professional.",

@@ -15,18 +15,30 @@ import { cn } from "@/lib/utils/cn";
 // One row of a Philstar / GMA style headline list: a square thumbnail on
 // the left, then an uppercase category label, a bold two-line headline and
 // a meta line (date, plus a NEW badge for fresh pieces). Articles have no
-// image column, so the thumbnail is a soft-blue tile with the category's
-// icon. Shared by the articles page and the landing page's latest guides.
+// image column, so the thumbnail is a soft tile in the category's tint
+// with its icon. Shared by the articles page and the landing page's latest guides.
 
-const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  visa: IdCardIcon,
-  social_ins: HeartPulseIcon,
-  family: UsersIcon,
-  school: GraduationCapIcon,
-  admin_proc: LandmarkIcon,
-  escalation: ScaleIcon,
-  restaurants: UtensilsCrossedIcon,
+// Each category gets its own icon and its own soft tint, so a reader can
+// pick out "visa" or "insurance" pieces by colour alone, the way Philstar
+// colour-codes its sections. All tints are tokens (globals.css).
+const TONES = {
+  blue: "bg-primary-soft text-primary",
+  green: "bg-success-soft text-success-soft-foreground",
+  terracotta: "bg-caution-soft text-caution-soft-foreground",
+  yellow: "bg-highlight-soft text-highlight-soft-foreground",
+  slate: "bg-slate-soft text-slate-soft-foreground",
+} as const;
+
+const CATEGORY_LOOK: Record<string, { icon: LucideIcon; tone: keyof typeof TONES }> = {
+  visa: { icon: IdCardIcon, tone: "blue" },
+  social_ins: { icon: HeartPulseIcon, tone: "green" },
+  family: { icon: UsersIcon, tone: "terracotta" },
+  school: { icon: GraduationCapIcon, tone: "yellow" },
+  admin_proc: { icon: LandmarkIcon, tone: "slate" },
+  escalation: { icon: ScaleIcon, tone: "terracotta" },
+  restaurants: { icon: UtensilsCrossedIcon, tone: "yellow" },
 };
+const DEFAULT_LOOK = { icon: BookOpenIcon, tone: "blue" } as const;
 
 /** Published within this many days counts as new. */
 export const FRESH_DAYS = 14;
@@ -76,7 +88,7 @@ export function ArticleRow({
   /** Smaller thumbnail for the landing page list. */
   compact?: boolean;
 }) {
-  const Icon = (categorySlug && CATEGORY_ICONS[categorySlug]) || BookOpenIcon;
+  const { icon: Icon, tone } = (categorySlug && CATEGORY_LOOK[categorySlug]) || DEFAULT_LOOK;
   return (
     <Link
       href={href}
@@ -85,11 +97,12 @@ export function ArticleRow({
       <span
         aria-hidden
         className={cn(
-          "inline-flex shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary",
+          "inline-flex shrink-0 items-center justify-center rounded-xl",
+          TONES[tone],
           compact ? "size-[72px] [&_svg]:size-7" : "size-[72px] md:size-24 [&_svg]:size-7 md:[&_svg]:size-9",
         )}
       >
-        <Icon strokeWidth={1.75} />
+        <Icon strokeWidth={2.25} />
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-1">
         {categoryLabel && <span className="kicker text-primary">{categoryLabel}</span>}

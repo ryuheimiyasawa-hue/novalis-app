@@ -11,7 +11,7 @@ import {
   RefreshCwIcon,
   TriangleAlertIcon,
 } from "lucide-react";
-import { HomeLink } from "@/components/layout/home-link";
+import { PublicBackLink } from "@/components/layout/public-back-link";
 import { PageBand } from "@/components/layout/page-band";
 import {
   ArticleRow,
@@ -136,7 +136,7 @@ export default async function ArticlesListPage({
           kicker={t("kicker")}
           title={t("title")}
           description={t("subtitle")}
-          top={<HomeLink locale={safeLocale} tone="brand" />}
+          top={<PublicBackLink locale={safeLocale} />}
         />
         <div className="mx-auto max-w-[1120px] px-4 py-8 md:px-6 md:py-12">
         <EmptyState
@@ -172,7 +172,7 @@ export default async function ArticlesListPage({
         kicker={t("kicker")}
         title={t("title")}
         description={t("subtitle")}
-        top={<HomeLink locale={safeLocale} tone="brand" />}
+        top={<PublicBackLink locale={safeLocale} />}
       />
       <div className="mx-auto max-w-[1120px] px-4 py-6 md:px-6 md:py-10">
 

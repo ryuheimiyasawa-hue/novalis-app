@@ -43,6 +43,7 @@ import {
   isFresh,
 } from "@/components/articles/article-row";
 import { RestaurantCard, restaurantKind } from "@/components/restaurants/restaurant-card";
+import { showcaseRestaurants } from "@/lib/restaurants/photo";
 import { StickyAskCta } from "./sticky-ask-cta";
 
 // ISR: the restaurant strip and the latest guides read the DB, so cache the
@@ -226,7 +227,9 @@ export default async function LandingPage({
     if (articlesRes.error) {
       console.warn("[landing] latest guides skipped:", articlesRes.error.message);
     }
-    restaurants = (restaurantsRes.data ?? []) as RestaurantCard[];
+    // Only real shops with a photo make the showcase; with none (today the
+    // seeded "(Sample)" shops), the whole section stays hidden.
+    restaurants = showcaseRestaurants((restaurantsRes.data ?? []) as RestaurantCard[]);
     latest = (articlesRes.data ?? []) as unknown as LatestArticle[];
   } catch (err) {
     console.warn(
@@ -295,7 +298,7 @@ export default async function LandingPage({
           aria-labelledby="hero-heading"
           className="bg-gradient-to-b from-primary to-primary-hover text-primary-foreground"
         >
-          <nav aria-label={t("topicsLabel")} className="mx-auto max-w-[1120px] md:hidden">
+          <nav aria-label={t("topicsLabel")} className="mx-auto max-w-[1120px] lg:hidden">
             <ul className="no-scrollbar flex gap-2 overflow-x-auto px-4 pt-1 pb-3 md:px-6">
               {topics.map(({ href, label, icon: Icon }) => (
                 <li key={href} className="shrink-0">
@@ -346,7 +349,7 @@ export default async function LandingPage({
               <div className="mt-3">
                 <p className="sr-only">{t("quickQuestionsLabel")}</p>
                 <ul className="flex flex-wrap gap-2">
-                  {(["visa", "school", "insurance"] as const).map((key) => (
+                  {(["visa", "school"] as const).map((key) => (
                     <li key={key}>
                       <Link
                         href={askHref}
@@ -573,10 +576,13 @@ export default async function LandingPage({
           </section>
         )}
 
-        {/* Safeguards: facts only (languages, price, operator). */}
+        {/* Safeguards: facts only (languages, price, operator). Kept short
+            on phones: one row of three figures, a privacy card with two
+            points (the rest folds away), and one card for languages and
+            the operator. */}
         <section
           aria-labelledby="trust-heading"
-          className="mx-auto max-w-[1120px] px-4 py-12 md:px-6 md:py-20"
+          className="mx-auto max-w-[1120px] px-4 py-8 md:px-6 md:py-20"
         >
           <div className="max-w-[680px] space-y-1.5">
             <h2 id="trust-heading" className="text-2xl">
@@ -585,33 +591,48 @@ export default async function LandingPage({
             <p className="text-base text-muted-foreground">{t("trustLead")}</p>
           </div>
           <dl
-            className={`mt-6 grid divide-y divide-border rounded-2xl border border-border bg-card shadow-card sm:divide-x sm:divide-y-0 ${
-              stats.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"
+            className={`mt-4 grid divide-x divide-border rounded-2xl border border-border bg-card shadow-card md:mt-6 ${
+              stats.length === 3 ? "grid-cols-3" : "grid-cols-2"
             }`}
           >
-            {stats.map(({ key }) => (
-              <div key={key} className="flex flex-col-reverse gap-1 px-5 py-4 md:px-6 md:py-6">
-                <dt className="text-sm text-muted-foreground">{t(`stats.${key}.label`)}</dt>
-                <dd className="font-display text-2xl leading-tight font-extrabold text-primary md:text-3xl">
-                  {t(`stats.${key}.value`)}
-                </dd>
-              </div>
-            ))}
+            {stats.map(({ key }) => {
+              const value = t(`stats.${key}.value`);
+              return (
+                <div
+                  key={key}
+                  className="flex min-w-0 flex-col-reverse items-center justify-end gap-1 px-2 py-3 text-center sm:items-start sm:px-5 sm:py-4 sm:text-left md:px-6 md:py-6"
+                >
+                  <dt className="text-[13px] leading-snug text-muted-foreground sm:text-sm">
+                    <span className="sm:hidden">{t(`stats.${key}.short`)}</span>
+                    <span className="hidden sm:inline">{t(`stats.${key}.label`)}</span>
+                  </dt>
+                  <dd
+                    className={`font-display leading-tight font-extrabold break-words text-primary ${
+                      value.length > 6 ? "text-sm sm:text-2xl md:text-3xl" : "text-3xl"
+                    }`}
+                  >
+                    {value}
+                  </dd>
+                </div>
+              );
+            })}
           </dl>
           <ul className="mt-4 grid gap-4 md:grid-cols-3">
-            <li className="rounded-2xl border border-border bg-card p-5 shadow-card md:p-6">
-              <IconTile icon={ShieldCheckIcon} size="lg" />
-              <h3 className="mt-4 text-lg leading-snug">{t("trust.pii.title")}</h3>
-              <p className="mt-2 text-base font-semibold text-foreground">{t("trust.pii.summary")}</p>
-              <ul className="mt-2 space-y-1.5 text-base text-muted-foreground">
-                {(["notSent", "rewrite", "notAll"] as const).map((k) => (
+            <li className="rounded-2xl border border-border bg-card p-4 shadow-card md:p-6">
+              <div className="flex items-center gap-3 md:block">
+                <IconTile icon={ShieldCheckIcon} size="sm" className="md:hidden" />
+                <IconTile icon={ShieldCheckIcon} size="lg" className="hidden md:inline-flex" />
+                <h3 className="text-lg leading-snug md:mt-4">{t("trust.pii.title")}</h3>
+              </div>
+              <ul className="mt-3 space-y-1.5 text-base text-muted-foreground">
+                {(["summary", "points.notSent"] as const).map((k) => (
                   <li key={k} className="flex gap-2">
                     <CheckIcon className="mt-1 size-4 shrink-0 text-primary" strokeWidth={2.25} aria-hidden />
-                    {t(`trust.pii.points.${k}`)}
+                    {t(`trust.pii.${k}`)}
                   </li>
                 ))}
               </ul>
-              <details className="group mt-3">
+              <details className="group mt-2">
                 <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-1 text-sm font-bold text-primary underline-offset-4 hover:underline lg:min-h-8 [&::-webkit-details-marker]:hidden">
                   {t("trust.pii.more")}
                   <ChevronDownIcon className="size-4 transition-transform group-open:rotate-180" strokeWidth={2} aria-hidden />
@@ -625,39 +646,34 @@ export default async function LandingPage({
                 </Link>
               </details>
             </li>
-            <li className="rounded-2xl border border-border bg-card p-5 shadow-card md:p-6">
-              <IconTile icon={LanguagesIcon} size="lg" />
-              <h3 className="mt-4 text-lg leading-snug">{t("trust.languages.title")}</h3>
-              <p className="mt-2 text-base text-muted-foreground">{t("trust.languages.body")}</p>
-            </li>
-            <li className="rounded-2xl border border-border bg-card p-5 shadow-card md:p-6">
-              <IconTile icon={Building2Icon} size="lg" />
-              <h3 className="mt-4 text-lg leading-snug">{t("trust.operator.title")}</h3>
-              <p className="mt-2 text-base text-muted-foreground">{t("trust.operator.body")}</p>
-              <ul className="mt-3 flex flex-wrap gap-x-4">
-                <li>
-                  <Link
-                    href={`/${safeLocale}/contact`}
-                    className="inline-flex min-h-11 items-center text-sm font-bold text-primary underline-offset-4 hover:underline lg:min-h-8"
-                  >
-                    {tNav("contact")}
-                  </Link>
+            <li className="md:col-span-2">
+              <ul className="h-full divide-y divide-border rounded-2xl border border-border bg-card shadow-card md:grid md:grid-cols-2 md:divide-x md:divide-y-0">
+                <li className="flex gap-3 p-4 md:block md:p-6">
+                  <IconTile icon={LanguagesIcon} size="sm" className="md:hidden" />
+                  <IconTile icon={LanguagesIcon} size="lg" className="hidden md:inline-flex" />
+                  <div className="min-w-0 md:mt-4">
+                    <h3 className="text-base leading-snug md:text-lg">{t("trust.languages.title")}</h3>
+                    <p className="mt-1 text-sm text-muted-foreground md:mt-2 md:text-base">
+                      {t("trust.languages.body")}
+                    </p>
+                  </div>
                 </li>
-                <li>
-                  <Link
-                    href={`/${safeLocale}/legal/terms`}
-                    className="inline-flex min-h-11 items-center text-sm font-bold text-primary underline-offset-4 hover:underline lg:min-h-8"
-                  >
-                    {tLegal("termsTitle")}
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href={`/${safeLocale}/legal/privacy`}
-                    className="inline-flex min-h-11 items-center text-sm font-bold text-primary underline-offset-4 hover:underline lg:min-h-8"
-                  >
-                    {tLegal("privacyTitle")}
-                  </Link>
+                <li className="flex gap-3 p-4 md:block md:p-6">
+                  <IconTile icon={Building2Icon} size="sm" className="md:hidden" />
+                  <IconTile icon={Building2Icon} size="lg" className="hidden md:inline-flex" />
+                  <div className="min-w-0 md:mt-4">
+                    <h3 className="text-base leading-snug md:text-lg">{t("trust.operator.title")}</h3>
+                    <p className="mt-1 text-sm text-muted-foreground md:mt-2 md:text-base">
+                      {t("trust.operator.body")}
+                    </p>
+                    <Link
+                      href={`/${safeLocale}/contact`}
+                      className="inline-flex min-h-11 items-center gap-1 text-sm font-bold text-primary underline-offset-4 hover:underline lg:mt-2 lg:min-h-8"
+                    >
+                      {tNav("contact")}
+                      <ArrowRightIcon className="size-4" strokeWidth={2} aria-hidden />
+                    </Link>
+                  </div>
                 </li>
               </ul>
             </li>
@@ -670,8 +686,9 @@ export default async function LandingPage({
           aria-labelledby="closing-heading"
           className="bg-gradient-to-b from-primary to-primary-hover text-primary-foreground"
         >
-          <div className="mx-auto flex max-w-[1120px] flex-col gap-6 px-4 py-12 md:flex-row md:items-center md:justify-between md:gap-8 md:px-6 md:py-16">
-            <CommunityIllustration className="mx-auto h-auto w-52 shrink-0 md:order-first md:mx-0 md:w-60" />
+          <div className="mx-auto flex max-w-[1120px] flex-col gap-5 px-4 py-10 md:flex-row md:items-center md:justify-between md:gap-8 md:px-6 md:py-16">
+            {/* Phones skip the drawing to keep the page end short. */}
+            <CommunityIllustration className="hidden h-auto shrink-0 md:order-first md:block md:w-60" />
             <div className="max-w-[600px] flex-1 space-y-2">
               <h2 id="closing-heading" className="text-2xl md:text-3xl">
                 {t("closingTitle")}

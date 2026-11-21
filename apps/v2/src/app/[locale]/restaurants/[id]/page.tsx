@@ -15,7 +15,7 @@ import {
   MapPinIcon,
   UtensilsCrossedIcon,
 } from "lucide-react";
-import { HomeLink } from "@/components/layout/home-link";
+import { PublicBackLink } from "@/components/layout/public-back-link";
 import { IconTile } from "@/components/layout/icon-tile";
 import { Button } from "@/components/ui/button";
 
@@ -102,7 +102,7 @@ export default async function RestaurantDetailPage({ params }: PageProps) {
   return (
     <main id="main-content" className="mx-auto w-full max-w-[728px] flex-1 px-4 py-10 md:px-6 md:py-16">
       <div className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-2">
-        <HomeLink locale={safeLocale} />
+        <PublicBackLink locale={safeLocale} tone="button" />
         <Link
           href={`/${safeLocale}/restaurants`}
           className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline lg:min-h-9"

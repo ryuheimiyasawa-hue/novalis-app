@@ -63,6 +63,15 @@
   --caution-foreground: #a8462c;
   --success: #1f7a5c;
   --success-foreground: #ffffff;
+  /* Soft tints for category thumbnails (article lists): one tone per
+     category so readers can pick them out at a glance. Icon colours are
+     4.5:1 or more on their tint. */
+  --success-soft: #e3f4ec;
+  --success-soft-foreground: #17694f;
+  --caution-soft: #fcebe4;
+  --caution-soft-foreground: #a8462c;
+  --slate-soft: #e9edf3;
+  --slate-soft-foreground: #33415c;
   --destructive: #b42318;
   --destructive-foreground: #ffffff;
   --border: #dde3ec;
@@ -127,6 +136,12 @@
   --caution-foreground: #e59a80;
   --success: #5fb3a1;
   --success-foreground: #0f1726;
+  --success-soft: #163229;
+  --success-soft-foreground: #7ed3b8;
+  --caution-soft: #34211b;
+  --caution-soft-foreground: #f0a98f;
+  --slate-soft: #222c3d;
+  --slate-soft-foreground: #c9d3e3;
   --destructive: #f97066;
   --destructive-foreground: #0f1726;
   --border: #2a3a57;
@@ -192,6 +207,12 @@
   --color-caution-foreground: var(--caution-foreground);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
+  --color-success-soft: var(--success-soft);
+  --color-success-soft-foreground: var(--success-soft-foreground);
+  --color-caution-soft: var(--caution-soft);
+  --color-caution-soft-foreground: var(--caution-soft-foreground);
+  --color-slate-soft: var(--slate-soft);
+  --color-slate-soft-foreground: var(--slate-soft-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);

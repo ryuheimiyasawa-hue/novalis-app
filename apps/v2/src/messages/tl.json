@@ -43,7 +43,7 @@
     "trustLead": "Mahalagang personal na impormasyon ang tungkol sa inyong status at pamilya. Ganito namin ito pinoprotektahan.",
     "trust": {
       "pii": {
-        "title": "Sinusuri ang personal na detalye bago umabot sa AI",
+        "title": "Proteksyon ng personal info mo",
         "body": "Kapag may nakita kaming numerong may tiyak na format, gaya ng residence card number, My Number, Japanese passport number, Japanese phone number o email address, hindi ito ipinapadala sa AI at hindi rin sine-save, at hihilingin na isulat muli ang mensahe. Hindi namin kayang makita ang lahat, kaya huwag po ninyong ilagay ang impormasyong makapagpapakilala sa inyo.",
         "summary": "Huwag po ilagay ang residence card number, My Number o passport number.",
         "points": {
@@ -113,15 +113,18 @@
     "stats": {
       "languages": {
         "value": "3",
-        "label": "wika: 日本語, English at Tagalog"
+        "label": "wika: 日本語, English at Tagalog",
+        "short": "wika"
       },
       "free": {
         "value": "Libre",
-        "label": "gamitin sa ngayon"
+        "label": "gamitin sa ngayon",
+        "short": "gamitin"
       },
       "operator": {
         "value": "Novalis Inc.",
-        "label": "ang nagpapatakbo ng serbisyo"
+        "label": "ang nagpapatakbo ng serbisyo",
+        "short": "nagpapatakbo"
       }
     }
   },
@@ -272,7 +275,12 @@
       "restaurant": "Restaurant",
       "grocery": "Grocery"
     },
-    "view": "Tingnan"
+    "view": "Tingnan",
+    "comingSoon": {
+      "title": "Malapit na",
+      "body": "Naghahanap pa kami ng mga Pinoy store at restaurant sa Japan. Lalabas sila rito kapag nailista na.",
+      "action": "Basahin ang mga gabay"
+    }
   },
   "restaurantDetail": {
     "back": "Bumalik sa listahan",
@@ -330,7 +338,8 @@
     "error": "May naganap na error",
     "language": "Wika",
     "reload": "I-reload",
-    "close": "Isara"
+    "close": "Isara",
+    "backHome": "Bumalik sa MORITA home"
   },
   "chat": {
     "disclaimer": "Ako ay isang AI at maaaring magpakita ng hindi tumpak na impormasyon, kaya mangyaring suriin ninyong muli ang aking mga sagot. Pangkalahatang impormasyon lamang din ito; para sa panghuling pasya o sa mga bagay na partikular sa inyong sitwasyon, mangyaring kumonsulta sa isang propesyonal.",

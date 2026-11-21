@@ -5,12 +5,15 @@ import { routing } from "@/lib/i18n/routing";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPrefectureLabel } from "@/lib/i18n/prefectures";
 import { pickRestaurantCity, pickRestaurantName } from "@/lib/restaurants/localize";
+import { isSampleRestaurant } from "@/lib/restaurants/photo";
 import {
+  BookOpenIcon,
   RefreshCwIcon,
+  StoreIcon,
   TriangleAlertIcon,
   UtensilsCrossedIcon,
 } from "lucide-react";
-import { HomeLink } from "@/components/layout/home-link";
+import { PublicBackLink } from "@/components/layout/public-back-link";
 import { PageBand } from "@/components/layout/page-band";
 import { RestaurantCard, restaurantKind } from "@/components/restaurants/restaurant-card";
 import { EmptyState } from "@/components/layout/empty-state";
@@ -92,7 +95,7 @@ export default async function RestaurantsListPage({
           kicker={t("kicker")}
           title={t("title")}
           description={t("subtitle")}
-          top={<HomeLink locale={safeLocale} tone="brand" />}
+          top={<PublicBackLink locale={safeLocale} />}
         />
         <div className="mx-auto max-w-[1120px] px-4 py-8 md:px-6 md:py-12">
         <EmptyState
@@ -114,7 +117,10 @@ export default async function RestaurantsListPage({
     );
   }
 
-  const rows = (data ?? []) as RestaurantRow[];
+  // Seeded demo shops ("… (Sample)") are left out; with none left the page
+  // shows a "coming soon" card, and real shops appear as soon as they are
+  // entered.
+  const rows = ((data ?? []) as RestaurantRow[]).filter((r) => !isSampleRestaurant(r));
 
   return (
     <main id="main-content" className="w-full flex-1">
@@ -123,16 +129,25 @@ export default async function RestaurantsListPage({
         kicker={t("kicker")}
         title={t("title")}
         description={t("subtitle")}
-        top={<HomeLink locale={safeLocale} tone="brand" />}
+        top={<PublicBackLink locale={safeLocale} />}
       />
       <div className="mx-auto max-w-[1120px] px-4 py-8 md:px-6 md:py-12">
         {rows.length === 0 ? (
           <EmptyState
             role="status"
-            icon={UtensilsCrossedIcon}
+            icon={StoreIcon}
             tone="highlight"
-            title={t("empty")}
-            action={<HomeLink locale={safeLocale} />}
+            titleAs="h2"
+            title={t("comingSoon.title")}
+            description={t("comingSoon.body")}
+            action={
+              <Button asChild variant="outline">
+                <Link href={`/${safeLocale}/articles`}>
+                  <BookOpenIcon aria-hidden />
+                  {t("comingSoon.action")}
+                </Link>
+              </Button>
+            }
           />
         ) : (
           <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
