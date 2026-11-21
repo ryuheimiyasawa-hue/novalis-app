@@ -44,7 +44,14 @@
     "trust": {
       "pii": {
         "title": "Personal details are checked before they reach the AI",
-        "body": "If we detect a number in a fixed format, such as a residence card number, My Number, a Japanese passport number, a Japanese phone number or an email address, your message is not sent to the AI or saved, and you are asked to rewrite it. We cannot detect everything, so please do not enter information that identifies you."
+        "body": "If we detect a number in a fixed format, such as a residence card number, My Number, a Japanese passport number, a Japanese phone number or an email address, your message is not sent to the AI or saved, and you are asked to rewrite it. We cannot detect everything, so please do not enter information that identifies you.",
+        "summary": "Please don't enter your residence card number, My Number or passport number.",
+        "points": {
+          "notSent": "Numbers in a fixed format are not sent to the AI or saved.",
+          "rewrite": "You'll be asked to rewrite your message.",
+          "notAll": "We cannot detect everything."
+        },
+        "more": "Read more"
       },
       "languages": {
         "title": "Three languages",

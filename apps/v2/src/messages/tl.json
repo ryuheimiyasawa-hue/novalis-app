@@ -44,7 +44,14 @@
     "trust": {
       "pii": {
         "title": "Sinusuri ang personal na detalye bago umabot sa AI",
-        "body": "Kapag may nakita kaming numerong may tiyak na format, gaya ng residence card number, My Number, Japanese passport number, Japanese phone number o email address, hindi ito ipinapadala sa AI at hindi rin sine-save, at hihilingin na isulat muli ang mensahe. Hindi namin kayang makita ang lahat, kaya huwag po ninyong ilagay ang impormasyong makapagpapakilala sa inyo."
+        "body": "Kapag may nakita kaming numerong may tiyak na format, gaya ng residence card number, My Number, Japanese passport number, Japanese phone number o email address, hindi ito ipinapadala sa AI at hindi rin sine-save, at hihilingin na isulat muli ang mensahe. Hindi namin kayang makita ang lahat, kaya huwag po ninyong ilagay ang impormasyong makapagpapakilala sa inyo.",
+        "summary": "Huwag po ilagay ang residence card number, My Number o passport number.",
+        "points": {
+          "notSent": "Ang numerong may tiyak na format ay hindi ipinapadala sa AI at hindi sine-save.",
+          "rewrite": "Hihilingin sa inyo na isulat muli ang mensahe.",
+          "notAll": "Hindi namin kayang makita ang lahat."
+        },
+        "more": "Basahin pa"
       },
       "languages": {
         "title": "Tatlong wika",

@@ -5,6 +5,8 @@ import {
   BotIcon,
   BriefcaseIcon,
   Building2Icon,
+  CheckIcon,
+  ChevronDownIcon,
   ChevronRightIcon,
   FacebookIcon,
   GraduationCapIcon,
@@ -34,6 +36,7 @@ import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { IconTile } from "@/components/layout/icon-tile";
+import { CommunityIllustration } from "@/components/layout/community-illustration";
 import {
   ArticleRow,
   formatArticleDate,
@@ -241,7 +244,6 @@ export default async function LandingPage({
   const topics: Array<{ href: string; label: string; icon: LucideIcon }> = [
     { href: `/${safeLocale}/articles`, label: tNav("articles"), icon: BookOpenIcon },
     { href: `/${safeLocale}/restaurants`, label: t("topics.food"), icon: UtensilsCrossedIcon },
-    { href: askHref, label: t("ctaAsk"), icon: MessagesSquareIcon },
     { href: `/${safeLocale}/contact`, label: tNav("contact"), icon: MailIcon },
   ];
 
@@ -263,7 +265,10 @@ export default async function LandingPage({
   ].filter((s) => s.show);
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    // No min-h-dvh here: the landing always outgrows the viewport, and a
+    // forced full-height column only opened a gap above the footer on
+    // tall windows.
+    <div className="flex flex-col">
       <SiteHeader
         locale={safeLocale}
         mobileNav={false}
@@ -290,7 +295,7 @@ export default async function LandingPage({
           aria-labelledby="hero-heading"
           className="bg-gradient-to-b from-primary to-primary-hover text-primary-foreground"
         >
-          <nav aria-label={t("topicsLabel")} className="mx-auto max-w-[1120px] lg:hidden">
+          <nav aria-label={t("topicsLabel")} className="mx-auto max-w-[1120px] md:hidden">
             <ul className="no-scrollbar flex gap-2 overflow-x-auto px-4 pt-1 pb-3 md:px-6">
               {topics.map(({ href, label, icon: Icon }) => (
                 <li key={href} className="shrink-0">
@@ -470,11 +475,7 @@ export default async function LandingPage({
                     {i + 1}
                   </span>
                   <div className="space-y-1.5">
-                    <h3
-                      className={`text-lg leading-snug ${key === "experts" ? "text-caution-foreground" : ""}`}
-                    >
-                      {t(`steps.${key}.title`)}
-                    </h3>
+                    <h3 className="text-lg leading-snug">{t(`steps.${key}.title`)}</h3>
                     <p className="text-base text-muted-foreground">{t(`steps.${key}.body`)}</p>
                   </div>
                 </li>
@@ -601,7 +602,28 @@ export default async function LandingPage({
             <li className="rounded-2xl border border-border bg-card p-5 shadow-card md:p-6">
               <IconTile icon={ShieldCheckIcon} size="lg" />
               <h3 className="mt-4 text-lg leading-snug">{t("trust.pii.title")}</h3>
-              <p className="mt-2 text-base text-muted-foreground">{t("trust.pii.body")}</p>
+              <p className="mt-2 text-base font-semibold text-foreground">{t("trust.pii.summary")}</p>
+              <ul className="mt-2 space-y-1.5 text-base text-muted-foreground">
+                {(["notSent", "rewrite", "notAll"] as const).map((k) => (
+                  <li key={k} className="flex gap-2">
+                    <CheckIcon className="mt-1 size-4 shrink-0 text-primary" strokeWidth={2.25} aria-hidden />
+                    {t(`trust.pii.points.${k}`)}
+                  </li>
+                ))}
+              </ul>
+              <details className="group mt-3">
+                <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-1 text-sm font-bold text-primary underline-offset-4 hover:underline lg:min-h-8 [&::-webkit-details-marker]:hidden">
+                  {t("trust.pii.more")}
+                  <ChevronDownIcon className="size-4 transition-transform group-open:rotate-180" strokeWidth={2} aria-hidden />
+                </summary>
+                <p className="mt-2 text-sm text-muted-foreground">{t("trust.pii.body")}</p>
+                <Link
+                  href={`/${safeLocale}/legal/privacy`}
+                  className="mt-1 inline-flex min-h-11 items-center text-sm font-bold text-primary underline-offset-4 hover:underline lg:min-h-8"
+                >
+                  {tLegal("privacyTitle")}
+                </Link>
+              </details>
             </li>
             <li className="rounded-2xl border border-border bg-card p-5 shadow-card md:p-6">
               <IconTile icon={LanguagesIcon} size="lg" />
@@ -648,8 +670,9 @@ export default async function LandingPage({
           aria-labelledby="closing-heading"
           className="bg-gradient-to-b from-primary to-primary-hover text-primary-foreground"
         >
-          <div className="mx-auto flex max-w-[1120px] flex-col gap-6 px-4 py-12 md:flex-row md:items-center md:justify-between md:px-6 md:py-16">
-            <div className="max-w-[600px] space-y-2">
+          <div className="mx-auto flex max-w-[1120px] flex-col gap-6 px-4 py-12 md:flex-row md:items-center md:justify-between md:gap-8 md:px-6 md:py-16">
+            <CommunityIllustration className="mx-auto h-auto w-52 shrink-0 md:order-first md:mx-0 md:w-60" />
+            <div className="max-w-[600px] flex-1 space-y-2">
               <h2 id="closing-heading" className="text-2xl md:text-3xl">
                 {t("closingTitle")}
               </h2>

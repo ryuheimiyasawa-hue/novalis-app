@@ -7,6 +7,7 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { getPrefectureLabel } from "@/lib/i18n/prefectures";
 import { getCuisineLabel } from "@/lib/i18n/cuisines";
 import { pickRestaurantCity, pickRestaurantName } from "@/lib/restaurants/localize";
+import { displayablePhotoUrl } from "@/lib/restaurants/photo";
 import {
   ArrowLeftIcon,
   ClockIcon,
@@ -88,6 +89,7 @@ export default async function RestaurantDetailPage({ params }: PageProps) {
   const r = data as RestaurantDetail | null;
   // Inactive rows are not public even by direct id.
   if (!r || !r.is_active) notFound();
+  const photo = displayablePhotoUrl(r.photo_url);
 
   const t = await getTranslations({
     locale: safeLocale,
@@ -110,10 +112,10 @@ export default async function RestaurantDetailPage({ params }: PageProps) {
         </Link>
       </div>
 
-      {r.photo_url ? (
+      {photo ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={r.photo_url}
+          src={photo}
           alt={pickRestaurantName(r, safeLocale)}
           className="aspect-[16/9] w-full rounded-lg border border-border object-cover"
         />

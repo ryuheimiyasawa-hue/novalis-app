@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRightIcon, MapPinIcon, UtensilsCrossedIcon } from "lucide-react";
+import { displayablePhotoUrl } from "@/lib/restaurants/photo";
 
 // When In Manila style place card: a 16:9 photo with a solid blue type tag
 // (Restaurant / Grocery) on its corner, then the bold name, the area with a
@@ -26,17 +27,18 @@ export function RestaurantCard({
   viewLabel: string;
   priority?: boolean;
 }) {
+  const photo = displayablePhotoUrl(photoUrl);
   return (
     <Link
       href={href}
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-colors hover:border-primary/40"
     >
       <span className="relative block aspect-video w-full overflow-hidden bg-highlight-soft">
-        {photoUrl ? (
+        {photo ? (
           // Photos come from operator-entered URLs on any host, so they are
           // served as-is (unoptimized) rather than through the image proxy.
           <Image
-            src={photoUrl}
+            src={photo}
             alt={name}
             fill
             unoptimized
