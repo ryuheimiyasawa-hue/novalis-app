@@ -226,6 +226,8 @@ export default async function ChatPage({ params, searchParams }: Props) {
                 emptyPrivacyHint: t("emptyPrivacyHint"),
                 composerHint: t("composerHint"),
                 escalationTitle: t("escalationTitle"),
+                escalationFormStep: t("escalationFormStep"),
+                escalationFormCta: t("escalationFormCta"),
               }}
             />
           </div>

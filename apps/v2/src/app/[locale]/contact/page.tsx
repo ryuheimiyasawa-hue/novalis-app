@@ -2,10 +2,11 @@ import Link from "next/link";
 import { hasLocale } from "next-intl";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { routing } from "@/lib/i18n/routing";
-import { HomeIcon, InfoIcon, MailIcon } from "lucide-react";
+import { HomeIcon, InfoIcon, LogInIcon, MailIcon, ScaleIcon } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { createClient } from "@/lib/supabase/server";
 import { ContactForm, type ContactFormLabels } from "./contact-form";
+import { ESCALATION_FORM_SOURCE, escalationFormPath } from "@/lib/chat/escalation-form";
 
 // Contact page (P2-M, Feature A). First-party inquiry form that writes to
 // the `inquiries` table via /api/inquiries, replacing the earlier Google
@@ -19,10 +20,14 @@ export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ from?: string }>;
 }
 
-export default async function ContactPage({ params }: PageProps) {
+export default async function ContactPage({ params, searchParams }: PageProps) {
   const { locale } = await params;
+  // Arrived from an AI escalation: explain what to write and pre-fill
+  // the subject, so staff can point the user to the right expert.
+  const fromEscalation = (await searchParams).from === ESCALATION_FORM_SOURCE;
   const safeLocale = (
     hasLocale(routing.locales, locale) ? locale : routing.defaultLocale
   ) as "ja" | "en" | "tl";
@@ -64,13 +69,36 @@ export default async function ContactPage({ params }: PageProps) {
       </div>
       <PageHeader icon={MailIcon} title={t("title")} description={t("subtitle")} />
 
+      {fromEscalation && (
+        <div className="mb-6 flex items-start gap-3 rounded-lg border border-primary/30 bg-primary-soft p-5 text-base text-foreground">
+          <ScaleIcon className="mt-1 size-5 shrink-0 text-primary" strokeWidth={1.75} aria-hidden />
+          <p>{t("escalationIntro")}</p>
+        </div>
+      )}
+
       {canSubmit ? (
         <div className="rounded-lg border border-border bg-card p-5 shadow-card md:p-8">
           <ContactForm
             labels={labels}
             defaultEmail={user?.email ?? undefined}
+            defaultSubject={fromEscalation ? t("escalationSubject") : undefined}
             doneHref={`/${safeLocale}/dashboard`}
           />
+        </div>
+      ) : !user ? (
+        // Not signed in (typically arriving from a Messenger reply): the
+        // form needs an account, so offer login and come straight back.
+        <div className="space-y-4 rounded-lg border border-border bg-card p-5 shadow-card md:p-8">
+          <p className="text-base text-foreground">{t("loginToSubmit")}</p>
+          <Link
+            href={`/${safeLocale}/login?redirect=${encodeURIComponent(
+              fromEscalation ? escalationFormPath(safeLocale) : `/${safeLocale}/contact`,
+            )}`}
+            className="inline-flex min-h-11 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-hover"
+          >
+            <LogInIcon className="size-4" strokeWidth={1.75} aria-hidden />
+            {t("loginCta")}
+          </Link>
         </div>
       ) : (
         <div
