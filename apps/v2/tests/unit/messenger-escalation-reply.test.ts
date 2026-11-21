@@ -30,18 +30,18 @@ const EXPERTS = [
 const TEXT = "ご質問の内容は個別の状況に応じた専門的な判断が必要なため、お答えすることができません。";
 
 describe("buildEscalationReply", () => {
-  it("keeps the escalation text first, then experts, then the support link", () => {
+  it("keeps the escalation text first, then the consultation form, then the experts", () => {
     const reply = buildEscalationReply(TEXT, EXPERTS, "ja", "https://app.example.test");
 
     expect(reply.indexOf(TEXT)).toBe(0);
+    expect(reply).toContain(
+      `${jaMessages.chat.ui.escalationFormStep}\nhttps://app.example.test/ja/contact?from=escalation`,
+    );
     expect(reply).toContain(jaMessages.chat.ui.expertHeading);
     expect(reply).toContain("山田 太郎（行政書士／在留資格）");
     expect(reply).toContain("佐藤 花子（弁護士／家族法）");
-    expect(reply).toContain(
-      `${jaMessages.chat.ui.contactCta}: https://app.example.test/ja/contact`,
-    );
-    expect(reply.indexOf(jaMessages.chat.ui.expertHeading)).toBeLessThan(
-      reply.indexOf(jaMessages.chat.ui.contactCta),
+    expect(reply.indexOf(jaMessages.chat.ui.escalationFormStep)).toBeLessThan(
+      reply.indexOf(jaMessages.chat.ui.expertHeading),
     );
   });
 
@@ -68,14 +68,14 @@ describe("buildEscalationReply", () => {
     expect(reply).toContain("在留資格");
   });
 
-  it("drops the expert section when nobody is active, keeping text and support link", () => {
+  it("drops the expert section when nobody is active, keeping text and the form", () => {
     const reply = buildEscalationReply(TEXT, [], "ja", "https://app.example.test");
     expect(reply).toContain(TEXT);
     expect(reply).not.toContain(jaMessages.chat.ui.expertHeading);
     expect(reply).toContain("/ja/contact");
   });
 
-  it("omits the support link when no app URL is configured", () => {
+  it("omits the form link when no app URL is configured", () => {
     const reply = buildEscalationReply(TEXT, [], "ja", "");
     expect(reply).toBe(TEXT);
   });
