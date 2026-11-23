@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { cn } from "@/lib/utils/cn";
+import { RESTAURANTS_PUBLIC } from "@/lib/features";
 import { BrandMark } from "./brand-mark";
 
 export type SiteSection = "dashboard" | "articles" | "restaurants" | "contact";
@@ -56,12 +57,16 @@ export async function SiteHeader({
         ]
       : []),
     { key: "articles", href: `/${locale}/articles`, label: t("articles"), icon: BookOpenIcon },
-    {
-      key: "restaurants",
-      href: `/${locale}/restaurants`,
-      label: t("restaurants"),
-      icon: UtensilsCrossedIcon,
-    },
+    ...(RESTAURANTS_PUBLIC
+      ? [
+          {
+            key: "restaurants" as const,
+            href: `/${locale}/restaurants`,
+            label: t("restaurants"),
+            icon: UtensilsCrossedIcon,
+          },
+        ]
+      : []),
     { key: "contact", href: `/${locale}/contact`, label: t("contact"), icon: MailIcon },
   ];
 

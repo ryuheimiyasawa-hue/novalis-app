@@ -9,7 +9,6 @@ import {
 } from "@/lib/auth/login-failure-cookie";
 import { LoginForm } from "./login-form";
 import { EmailPasswordForm } from "./email-password-form";
-import { AnonSignInButton } from "./anon-signin-button";
 import { ErrorBanner } from "./error-banner";
 
 export default async function LoginPage({
@@ -94,19 +93,6 @@ export default async function LoginPage({
           }}
         />
 
-        <div className="flex items-center gap-3 font-display text-sm font-bold text-muted-foreground">
-          <span className="h-px flex-1 bg-border" />
-          <span>{t("orDivider")}</span>
-          <span className="h-px flex-1 bg-border" />
-        </div>
-
-        <AnonSignInButton
-          locale={safeLocale}
-          redirect={safeRedirect}
-          label={t("tryWithoutLogin")}
-          loadingLabel={t("tryWithoutLoginLoading")}
-          errorLabel={t("tryWithoutLoginFailed")}
-        />
 
         <div className="border-t border-border pt-5 text-center text-sm text-muted-foreground">
           <p>

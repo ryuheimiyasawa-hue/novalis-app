@@ -1,4 +1,6 @@
+import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
+import { RESTAURANTS_PUBLIC } from "@/lib/features";
 import { routing } from "@/lib/i18n/routing";
 import { SiteFrame } from "@/components/layout/site-frame";
 
@@ -11,6 +13,8 @@ export default async function RestaurantsLayout({
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
+  // Hidden while the listing only holds sample shops (see lib/features).
+  if (!RESTAURANTS_PUBLIC) notFound();
   const { locale } = await params;
   const safeLocale = (
     hasLocale(routing.locales, locale) ? locale : routing.defaultLocale
