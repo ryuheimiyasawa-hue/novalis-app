@@ -20,6 +20,8 @@ export interface RestaurantFull {
   lng: number | null;
   cuisine_type: string | null;
   hours: string | null;
+  phone: string | null;
+  website_url: string | null;
   photo_url: string | null;
   description_ja: string | null;
   description_en: string | null;

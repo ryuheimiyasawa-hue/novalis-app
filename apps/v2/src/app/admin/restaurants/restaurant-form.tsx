@@ -32,6 +32,8 @@ interface FormState {
   address: string;
   cuisine_type: string;
   hours: string;
+  phone: string;
+  website_url: string;
   photo_url: string;
   description_ja: string;
   description_en: string;
@@ -53,6 +55,8 @@ function emptyForm(): FormState {
     address: "",
     cuisine_type: "",
     hours: "",
+    phone: "",
+    website_url: "",
     photo_url: "",
     description_ja: "",
     description_en: "",
@@ -71,6 +75,8 @@ function fromInitial(r: RestaurantFull): FormState {
     address: r.address ?? "",
     cuisine_type: r.cuisine_type ?? "",
     hours: r.hours ?? "",
+    phone: r.phone ?? "",
+    website_url: r.website_url ?? "",
     photo_url: r.photo_url ?? "",
     description_ja: r.description_ja ?? "",
     description_en: r.description_en ?? "",
@@ -90,6 +96,8 @@ function buildPayload(form: FormState) {
     address: form.address.trim() || null,
     cuisine_type: form.cuisine_type.trim() || null,
     hours: form.hours.trim() || null,
+    phone: form.phone.trim() || null,
+    website_url: form.website_url.trim() || null,
     photo_url: form.photo_url.trim() || null,
     description_ja: form.description_ja.trim() ? form.description_ja : null,
     description_en: form.description_en.trim() ? form.description_en : null,
@@ -229,6 +237,24 @@ export function RestaurantForm({ mode, initial }: Props) {
             value={form.hours}
             onChange={(e) => update("hours", e.target.value)}
             placeholder="11:00-22:00 / 火曜定休"
+          />
+        </div>
+        <div className="col-span-4 space-y-1.5">
+          <Label htmlFor="phone">電話（任意）</Label>
+          <Input
+            id="phone"
+            value={form.phone}
+            onChange={(e) => update("phone", e.target.value)}
+            placeholder="03-1234-5678"
+          />
+        </div>
+        <div className="col-span-8 space-y-1.5">
+          <Label htmlFor="website_url">お店のURL（任意・https）</Label>
+          <Input
+            id="website_url"
+            value={form.website_url}
+            onChange={(e) => update("website_url", e.target.value)}
+            placeholder="https://www.facebook.com/..."
           />
         </div>
       </section>
