@@ -462,6 +462,17 @@
       "contact_name": "Please enter your name.",
       "contact_email": "Please enter a valid email address.",
       "consent": "Please tick the box to agree to the listing."
-    }
+    },
+    "videoHeading": "About MORITA (30-second video)",
+    "sampleHeading": "How your listing will look",
+    "sampleName": "Kusina ni Maria (sample)",
+    "sampleArea": "Shinjuku, Tokyo",
+    "sampleDescription": "Home-style adobo and sinigang. Lechon on weekends.",
+    "sampleKind": "Restaurant",
+    "sampleView": "View details",
+    "sampleNote": "Your restaurant page also shows the address, opening hours, phone, link and a map.",
+    "flyerHeading": "Flyer for customers (feel free to display it in your shop)",
+    "flyerTl": "Tagalog (PDF)",
+    "flyerJa": "Japanese (PDF)"
   }
 }
