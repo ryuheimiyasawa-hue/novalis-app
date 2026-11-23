@@ -133,19 +133,38 @@ export default async function DashboardPage({
                   here. Replaced by the always-visible sidebar inside
                   /chat itself (Phase 1 chat UX rework), so the dashboard
                   only needs the entry point now. */}
-              <Button asChild size="lg" className="w-full md:w-auto">
-                <Link href={`/${safeLocale}/chat`}>
-                  {t("chatCtaButton")}
-                  <ArrowRightIcon aria-hidden />
-                </Link>
-              </Button>
+              {/* Messenger is a second door into the same AI consultation, so
+                  it sits under the main button rather than in its own card.
+                  Hidden for anonymous sessions: a link would be stranded when
+                  the session is purged. */}
+              <div className="flex w-full flex-col gap-3 md:w-auto">
+                <Button asChild size="lg" className="w-full">
+                  <Link href={`/${safeLocale}/chat`}>
+                    {t("chatCtaButton")}
+                    <ArrowRightIcon aria-hidden />
+                  </Link>
+                </Button>
+                {!isAnon && (
+                  <>
+                    <Button asChild size="lg" variant="outline" className="w-full">
+                      <Link href={`/${safeLocale}/messenger`}>
+                        <MessageCircleIcon aria-hidden />
+                        {t("messengerCtaButton")}
+                      </Link>
+                    </Button>
+                    <p className="max-w-[280px] text-xs text-muted-foreground">
+                      {t("messengerCtaBody")}
+                    </p>
+                  </>
+                )}
+              </div>
             </div>
             <div className="h-1 bg-highlight" aria-hidden />
           </div>
 
           <div className="space-y-4">
             <h2 className="text-xl font-bold">{t("moreHeading")}</h2>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4">
               <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-6 shadow-card">
                 <IconTile icon={BookOpenIcon} tone="highlight" />
                 <div className="flex-1 space-y-2">
@@ -160,28 +179,6 @@ export default async function DashboardPage({
                   </Link>
                 </Button>
               </div>
-
-              {/* Messenger linking is unavailable to anonymous beta sessions (the
-                  link would be stranded when the session is purged), so the entry
-                  point is hidden rather than shown and then refused. */}
-              {!isAnon && (
-                <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-6 shadow-card">
-                  <IconTile icon={MessageCircleIcon} tone="highlight" />
-                  <div className="flex-1 space-y-2">
-                    <h3 className="text-xl font-bold">
-                      {t("messengerCtaTitle")}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {t("messengerCtaBody")}
-                    </p>
-                  </div>
-                  <Button asChild variant="outline" className="w-full sm:w-auto sm:self-start">
-                    <Link href={`/${safeLocale}/messenger`}>
-                      {t("messengerCtaButton")}
-                    </Link>
-                  </Button>
-                </div>
-              )}
             </div>
           </div>
         </section>
