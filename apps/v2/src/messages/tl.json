@@ -462,6 +462,17 @@
       "contact_name": "Ilagay ang inyong pangalan.",
       "contact_email": "Ilagay ang tamang email address.",
       "consent": "Lagyan ng check para pumayag sa listing."
-    }
+    },
+    "videoHeading": "Tungkol sa MORITA (30 segundong video)",
+    "sampleHeading": "Ganito lalabas ang inyong listing",
+    "sampleName": "Kusina ni Maria (halimbawa)",
+    "sampleArea": "Shinjuku, Tokyo",
+    "sampleDescription": "Lutong-bahay na adobo at sinigang. May lechon tuwing weekend.",
+    "sampleKind": "Restawran",
+    "sampleView": "Tingnan",
+    "sampleNote": "Makikita rin sa page ng restawran ang address, oras, telepono, link at mapa.",
+    "flyerHeading": "Flyer para sa customers (puwedeng ilagay sa inyong restawran)",
+    "flyerTl": "Tagalog (PDF)",
+    "flyerJa": "Japanese (PDF)"
   }
 }

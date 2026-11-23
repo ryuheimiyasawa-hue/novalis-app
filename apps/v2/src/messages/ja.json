@@ -462,6 +462,17 @@
       "contact_name": "お名前を入力してください。",
       "contact_email": "メールアドレスの形式が正しくありません。",
       "consent": "掲載への同意にチェックしてください。"
-    }
+    },
+    "videoHeading": "MORITAの紹介動画(30秒)",
+    "sampleHeading": "掲載されるとこう表示されます",
+    "sampleName": "Kusina ni Maria(見本)",
+    "sampleArea": "東京都 新宿区",
+    "sampleDescription": "家庭の味のアドボとシニガンが人気。週末はレチョンもあります。",
+    "sampleKind": "飲食店",
+    "sampleView": "詳しく見る",
+    "sampleNote": "お店のページには、住所・営業時間・電話・お店のURL・地図も表示されます。",
+    "flyerHeading": "利用者向けチラシ(お店に置いていただけます)",
+    "flyerTl": "タガログ語版(PDF)",
+    "flyerJa": "日本語版(PDF)"
   }
 }
