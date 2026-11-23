@@ -23,6 +23,12 @@ import { linkMessengerAccount } from "@/lib/messenger/link-account";
 import type { WhitelistLocale } from "@/lib/ai/whitelist-keywords";
 import { checkConsent } from "@/lib/legal/consent";
 import { buildEscalationReply, loadActiveExperts } from "@/lib/messenger/escalation-reply";
+import {
+  INVALID_CODE_PREFIX,
+  LINK_ERROR_REPLY,
+  LINKED_REPLY,
+  unlinkedGuidance,
+} from "@/lib/messenger/unlinked-reply";
 
 // Facebook Messenger webhook (P2-K).
 //   GET  — one-time verification handshake (echo hub.challenge).
@@ -137,8 +143,9 @@ function replyText(result: ChatResult): string {
 /**
  * A sender we have no messenger_links row for. Either they are sending the
  * link code they got from the web app, or they need to be told how to get one.
- * Replies are Japanese-only here: locale lives on the profile, which we cannot
- * read until the account is linked.
+ * Replies go out in Tagalog, English and Japanese: locale lives on the
+ * profile, which we cannot read until the account is linked, and most people
+ * arriving here (e.g. from the flyer QR code) read Tagalog or English first.
  */
 async function handleUnlinked(
   ev: { psid: string; text: string },
@@ -146,10 +153,7 @@ async function handleUnlinked(
   send: (text: string) => Promise<{ ok: boolean; error?: string }>,
   appUrl: string,
 ): Promise<void> {
-  const guidance =
-    "アカウントの連携が必要です。\n" +
-    `1. ${appUrl}/ja/messenger をブラウザで開いてログイン\n` +
-    "2. 表示された6桁の連携コードを、このトークにそのまま送信してください。";
+  const guidance = unlinkedGuidance(appUrl);
 
   const candidate = normalizeLinkCode(ev.text);
   if (!isLinkCodeShape(candidate)) {
@@ -159,20 +163,14 @@ async function handleUnlinked(
 
   const outcome = await linkMessengerAccount(admin, candidate, ev.psid);
   if (outcome.status === "linked") {
-    await send(
-      "連携が完了しました。日本での生活に関するご質問をお気軽にどうぞ。",
-    );
+    await send(LINKED_REPLY);
     return;
   }
   if (outcome.status === "invalid_code") {
-    await send(
-      "コードが無効か、有効期限が切れています。\n" + guidance,
-    );
+    await send(INVALID_CODE_PREFIX + "\n\n" + guidance);
     return;
   }
-  await send(
-    "連携処理でエラーが発生しました。時間を置いてもう一度お試しください。",
-  );
+  await send(LINK_ERROR_REPLY);
 }
 
 async function handleEvent(
