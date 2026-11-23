@@ -38,6 +38,7 @@ export const EXPECTED_MIGRATIONS = [
   "011_applied_migrations_reader",
   "012_consent_logs_independent",
   "013_restaurant_names_en",
+  "014_restaurant_applications",
 ] as const;
 
 export type ExpectedMigration = (typeof EXPECTED_MIGRATIONS)[number];

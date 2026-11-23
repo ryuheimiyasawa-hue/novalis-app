@@ -282,7 +282,9 @@
     "back": "一覧へ戻る",
     "address": "住所",
     "hours": "営業時間",
-    "viewOnMap": "地図で見る"
+    "viewOnMap": "地図で見る",
+    "phone": "電話",
+    "website": "お店のページ"
   },
   "contact": {
     "title": "MORITA お問い合わせ",
@@ -407,5 +409,59 @@
     "body": "ページが移動または削除されたか、URLが間違っている可能性があります。ホームや記事一覧からお探しください。",
     "home": "ホームへ戻る",
     "articles": "記事一覧を見る"
+  },
+  "restaurantApply": {
+    "metaTitle": "飲食店の無料掲載のお申し込み | MORITA",
+    "badge": "掲載無料",
+    "title": "MORITAに、あなたのお店を無料で掲載しませんか",
+    "lead": "MORITAは、日本で暮らすフィリピン人のための相談アプリです。アプリ内の飲食店ページで、フィリピン料理のお店を紹介します。",
+    "point1": "掲載料は無料です(現在、無料開放中)。",
+    "point2": "下のフォームに入力するだけで申し込めます。内容を確認したうえで掲載します。",
+    "point3": "掲載内容の変更や掲載の取りやめは、いつでもご連絡ください。",
+    "sectionShop": "お店の情報",
+    "name": "店名",
+    "prefecture": "都道府県",
+    "prefecturePlaceholder": "選んでください",
+    "city": "市区町村",
+    "cityPlaceholder": "例: 新宿区",
+    "address": "住所(番地・建物名)",
+    "hours": "営業時間",
+    "hoursPlaceholder": "例: 11:00-22:00 火曜定休",
+    "phone": "電話番号",
+    "website": "お店のURL(Facebook・Instagram・ホームページ)",
+    "websiteHelp": "お客さんが見られるページを1つ入れてください。",
+    "description": "お店の紹介文",
+    "descriptionPlaceholder": "看板メニューやお店の雰囲気など",
+    "descriptionLang": "紹介文の言語:",
+    "lang": {
+      "ja": "日本語",
+      "tl": "Tagalog",
+      "en": "English"
+    },
+    "sectionContact": "ご担当者さま(公開されません)",
+    "contactHelp": "掲載前の確認でご連絡するときに使います。アプリには表示しません。",
+    "contactName": "お名前",
+    "contactEmail": "メールアドレス",
+    "consent": "入力したお店の情報(担当者情報を除く)がMORITAに掲載されることに同意します。",
+    "submit": "申し込む",
+    "submitting": "送信中…",
+    "doneTitle": "お申し込みを受け付けました",
+    "doneBody": "ありがとうございます。内容を確認のうえ掲載します。確認のためご連絡することがあります。",
+    "duplicateBody": "このお店のお申し込みはすでに受け付けています。確認が終わるまでお待ちください。",
+    "errorGeneric": "送信できませんでした。時間をおいてもう一度お試しください。",
+    "errorRate": "短い時間に送信が続いたため、受け付けを止めています。1時間ほどおいてからお試しください。",
+    "error": {
+      "name": "店名を入力してください。",
+      "prefecture_code": "都道府県を選んでください。",
+      "city_name": "市区町村を入力してください。",
+      "address": "住所が長すぎます(200文字まで)。",
+      "hours": "営業時間が長すぎます(200文字まで)。",
+      "phone": "電話番号は数字と - で入力してください。",
+      "website_url": "URLの形式が正しくありません。",
+      "description": "紹介文が長すぎます(1000文字まで)。",
+      "contact_name": "お名前を入力してください。",
+      "contact_email": "メールアドレスの形式が正しくありません。",
+      "consent": "掲載への同意にチェックしてください。"
+    }
   }
 }

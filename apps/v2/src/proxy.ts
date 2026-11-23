@@ -21,6 +21,7 @@ const PUBLIC_API_PATHS = [
   // Facebook calls the Messenger webhook unauthenticated; it does its own
   // X-Hub-Signature-256 verification instead of relying on a session.
   "/api/messenger/webhook",
+  "/api/restaurant-applications",
 ];
 
 const LOCALE_RE = "(ja|en|tl)";
@@ -42,6 +43,7 @@ const PUBLIC_UI_PATTERNS: RegExp[] = [
   // gates on getUser() and redirects to /login when no session, so
   // it's safe to allow through here.
   new RegExp(`^/${LOCALE_RE}/reset-password(/.*)?$`),
+  new RegExp(`^/${LOCALE_RE}/restaurant-apply/?$`),
 ];
 
 // Authenticated paths that must remain reachable while onboarded_at IS NULL.

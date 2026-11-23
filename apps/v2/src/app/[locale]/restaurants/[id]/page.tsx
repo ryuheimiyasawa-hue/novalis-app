@@ -12,7 +12,9 @@ import {
   ArrowLeftIcon,
   ClockIcon,
   ExternalLinkIcon,
+  GlobeIcon,
   MapPinIcon,
+  PhoneIcon,
   UtensilsCrossedIcon,
 } from "lucide-react";
 import { PublicBackLink } from "@/components/layout/public-back-link";
@@ -35,6 +37,8 @@ interface RestaurantDetail {
   lng: number | null;
   cuisine_type: string | null;
   hours: string | null;
+  phone: string | null;
+  website_url: string | null;
   photo_url: string | null;
   description_ja: string | null;
   description_en: string | null;
@@ -77,7 +81,7 @@ export default async function RestaurantDetailPage({ params }: PageProps) {
   const { data, error } = await admin
     .from("restaurants")
     .select(
-      "id, name, name_en, prefecture_code, city_name, city_name_en, address, lat, lng, cuisine_type, hours, photo_url, description_ja, description_en, description_tl, is_active",
+      "id, name, name_en, prefecture_code, city_name, city_name_en, address, lat, lng, cuisine_type, hours, phone, website_url, photo_url, description_ja, description_en, description_tl, is_active",
     )
     .eq("id", id)
     .maybeSingle();
@@ -141,7 +145,7 @@ export default async function RestaurantDetailPage({ params }: PageProps) {
         </p>
       </header>
 
-      {(r.address || r.hours) && (
+      {(r.address || r.hours || r.phone || r.website_url) && (
         <dl className="mt-8 grid gap-4 rounded-lg border border-border bg-card p-5 shadow-card sm:grid-cols-2 md:p-6">
           {r.address && (
             <div className="flex gap-3">
@@ -159,6 +163,32 @@ export default async function RestaurantDetailPage({ params }: PageProps) {
                 <dt className="text-sm font-bold">{t("hours")}</dt>
                 <dd className="whitespace-pre-line text-sm text-muted-foreground">
                   {r.hours}
+                </dd>
+              </div>
+            </div>
+          )}
+          {r.phone && (
+            <div className="flex gap-3">
+              <IconTile icon={PhoneIcon} size="sm" />
+              <div>
+                <dt className="text-sm font-bold">{t("phone")}</dt>
+                <dd className="text-sm text-muted-foreground">
+                  <a href={`tel:${r.phone.replace(/[^0-9+]/g, "")}`} className="hover:underline">
+                    {r.phone}
+                  </a>
+                </dd>
+              </div>
+            </div>
+          )}
+          {r.website_url && (
+            <div className="flex gap-3">
+              <IconTile icon={GlobeIcon} size="sm" />
+              <div className="min-w-0">
+                <dt className="text-sm font-bold">{t("website")}</dt>
+                <dd className="truncate text-sm text-muted-foreground">
+                  <a href={r.website_url} target="_blank" rel="noopener noreferrer nofollow" className="hover:underline">
+                    {r.website_url.replace(/^https:\/\//, "")}
+                  </a>
                 </dd>
               </div>
             </div>

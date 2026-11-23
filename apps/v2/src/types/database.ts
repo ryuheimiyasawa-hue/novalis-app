@@ -443,6 +443,8 @@ export type Database = {
           description_ja: string | null;
           description_en: string | null;
           description_tl: string | null;
+          phone: string | null;
+          website_url: string | null;
           is_active: boolean;
           created_at: string;
         };
@@ -462,6 +464,8 @@ export type Database = {
           description_ja?: string | null;
           description_en?: string | null;
           description_tl?: string | null;
+          phone?: string | null;
+          website_url?: string | null;
           is_active?: boolean;
           created_at?: string;
         };
@@ -480,7 +484,74 @@ export type Database = {
           description_ja: string | null;
           description_en: string | null;
           description_tl: string | null;
+          phone: string | null;
+          website_url: string | null;
           is_active: boolean;
+        }>;
+        Relationships: [];
+      };
+      restaurant_applications: {
+        Row: {
+          id: string;
+          name: string;
+          prefecture_code: string;
+          city_name: string;
+          address: string | null;
+          hours: string | null;
+          phone: string | null;
+          website_url: string | null;
+          description: string | null;
+          description_lang: "ja" | "en" | "tl";
+          contact_name: string;
+          contact_email: string;
+          source_code: string | null;
+          ip_hash: string | null;
+          status: "pending" | "approved" | "rejected";
+          restaurant_id: string | null;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          prefecture_code: string;
+          city_name: string;
+          address?: string | null;
+          hours?: string | null;
+          phone?: string | null;
+          website_url?: string | null;
+          description?: string | null;
+          description_lang?: "ja" | "en" | "tl";
+          contact_name: string;
+          contact_email: string;
+          source_code?: string | null;
+          ip_hash?: string | null;
+          status?: "pending" | "approved" | "rejected";
+          restaurant_id?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<{
+          name: string;
+          prefecture_code: string;
+          city_name: string;
+          address: string | null;
+          hours: string | null;
+          phone: string | null;
+          website_url: string | null;
+          description: string | null;
+          description_lang: "ja" | "en" | "tl";
+          contact_name: string;
+          contact_email: string;
+          source_code: string | null;
+          ip_hash: string | null;
+          status: "pending" | "approved" | "rejected";
+          restaurant_id: string | null;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          created_at: string;
         }>;
         Relationships: [];
       };
@@ -590,6 +661,10 @@ export type Database = {
     };
     Views: Record<string, never>;
     Functions: {
+      approve_restaurant_application: {
+        Args: { p_application_id: string; p_reviewer: string };
+        Returns: string | null;
+      };
       match_content: {
         Args: {
           query_embedding: number[];

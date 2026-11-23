@@ -282,7 +282,9 @@
     "back": "Bumalik sa listahan",
     "address": "Address",
     "hours": "Oras",
-    "viewOnMap": "Tingnan sa mapa"
+    "viewOnMap": "Tingnan sa mapa",
+    "phone": "Telepono",
+    "website": "Page ng restawran"
   },
   "contact": {
     "title": "Makipag-ugnayan sa MORITA",
@@ -407,5 +409,59 @@
     "body": "Maaaring inilipat o tinanggal na ang pahina, o mali ang URL. Pakihanap po ito mula sa home page o sa listahan ng mga artikulo.",
     "home": "Bumalik sa home",
     "articles": "Tingnan ang mga artikulo"
+  },
+  "restaurantApply": {
+    "metaTitle": "Libreng listing ng inyong restawran | MORITA",
+    "badge": "Libreng listing",
+    "title": "Ilista nang libre ang inyong restawran sa MORITA",
+    "lead": "Ang MORITA ay app para sa mga Pilipinong naninirahan sa Japan. Sa restaurant page ng app, ipinapakilala namin ang mga Filipino restaurant.",
+    "point1": "Libre ang listing (libre ang MORITA sa ngayon).",
+    "point2": "Punan lang ang form sa ibaba. Susuriin muna namin bago i-publish.",
+    "point3": "Puwede ninyo kaming kontakin anumang oras para baguhin o alisin ang listing.",
+    "sectionShop": "Tungkol sa restawran",
+    "name": "Pangalan ng restawran",
+    "prefecture": "Prefecture",
+    "prefecturePlaceholder": "Pumili",
+    "city": "Lungsod / ward",
+    "cityPlaceholder": "hal. Shinjuku",
+    "address": "Address",
+    "hours": "Oras ng bukas",
+    "hoursPlaceholder": "hal. 11:00-22:00, sarado tuwing Martes",
+    "phone": "Numero ng telepono",
+    "website": "Link ng restawran (Facebook, Instagram o website)",
+    "websiteHelp": "Isang page na makikita ng mga customer.",
+    "description": "Tungkol sa restawran",
+    "descriptionPlaceholder": "Mga sikat na putahe, ambiance, atbp.",
+    "descriptionLang": "Wika ng text:",
+    "lang": {
+      "ja": "日本語",
+      "tl": "Tagalog",
+      "en": "English"
+    },
+    "sectionContact": "Contact person (hindi ipapakita)",
+    "contactHelp": "Gagamitin lang para makontak kayo bago i-publish. Hindi ito ipapakita sa app.",
+    "contactName": "Pangalan",
+    "contactEmail": "Email",
+    "consent": "Pumapayag ako na ilathala sa MORITA ang impormasyon ng restawran sa itaas (maliban sa contact person).",
+    "submit": "Ipadala",
+    "submitting": "Ipinapadala…",
+    "doneTitle": "Salamat, natanggap namin ang inyong aplikasyon",
+    "doneBody": "Susuriin namin ang impormasyon at ililista ang inyong restawran. Maaari namin kayong kontakin para kumpirmahin.",
+    "duplicateBody": "Natanggap na namin ang aplikasyon para sa restawrang ito. Hintayin lang po ang aming pagsusuri.",
+    "errorGeneric": "Hindi naipadala. Pakisubukan ulit mamaya.",
+    "errorRate": "Masyadong maraming padala sa maikling oras. Pakisubukan ulit pagkalipas ng mga isang oras.",
+    "error": {
+      "name": "Ilagay ang pangalan ng restawran.",
+      "prefecture_code": "Pumili ng prefecture.",
+      "city_name": "Ilagay ang lungsod o ward.",
+      "address": "Masyadong mahaba ang address (hanggang 200 character).",
+      "hours": "Masyadong mahaba ang oras (hanggang 200 character).",
+      "phone": "Numero at - lang ang gamitin.",
+      "website_url": "Hindi tamang URL ang link.",
+      "description": "Masyadong mahaba (hanggang 1000 character).",
+      "contact_name": "Ilagay ang inyong pangalan.",
+      "contact_email": "Ilagay ang tamang email address.",
+      "consent": "Lagyan ng check para pumayag sa listing."
+    }
   }
 }

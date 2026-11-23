@@ -16,6 +16,7 @@ const ITEMS = [
   { href: "/admin/faqs", label: "FAQ" },
   { href: "/admin/experts", label: "士業" },
   { href: "/admin/restaurants", label: "飲食店" },
+  { href: "/admin/restaurant-applications", label: "飲食店の掲載申請" },
   { href: "/admin/inquiries", label: "問い合わせ" },
   { href: "/admin/conversations", label: "会話" },
 ];

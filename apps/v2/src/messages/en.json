@@ -282,7 +282,9 @@
     "back": "Back to list",
     "address": "Address",
     "hours": "Hours",
-    "viewOnMap": "View on map"
+    "viewOnMap": "View on map",
+    "phone": "Phone",
+    "website": "Restaurant page"
   },
   "contact": {
     "title": "Contact MORITA",
@@ -407,5 +409,59 @@
     "body": "The page may have moved or been removed, or the URL may be incorrect. Please look for it from the home page or the article list.",
     "home": "Back to home",
     "articles": "See all articles"
+  },
+  "restaurantApply": {
+    "metaTitle": "List your restaurant for free | MORITA",
+    "badge": "Free listing",
+    "title": "List your restaurant on MORITA for free",
+    "lead": "MORITA is a support app for Filipinos living in Japan. Its restaurant page introduces Filipino restaurants to our users.",
+    "point1": "Listing is free (MORITA is currently free to use).",
+    "point2": "Just fill in the form below. We review the details before publishing.",
+    "point3": "Contact us any time to change or remove your listing.",
+    "sectionShop": "About your restaurant",
+    "name": "Restaurant name",
+    "prefecture": "Prefecture",
+    "prefecturePlaceholder": "Select",
+    "city": "City / ward",
+    "cityPlaceholder": "e.g. Shinjuku",
+    "address": "Street address",
+    "hours": "Opening hours",
+    "hoursPlaceholder": "e.g. 11:00-22:00, closed Tuesdays",
+    "phone": "Phone number",
+    "website": "Restaurant link (Facebook, Instagram or website)",
+    "websiteHelp": "One page customers can visit.",
+    "description": "About your restaurant",
+    "descriptionPlaceholder": "Signature dishes, atmosphere, etc.",
+    "descriptionLang": "Language of this text:",
+    "lang": {
+      "ja": "日本語",
+      "tl": "Tagalog",
+      "en": "English"
+    },
+    "sectionContact": "Contact person (not published)",
+    "contactHelp": "Used only to contact you before publishing. Not shown in the app.",
+    "contactName": "Name",
+    "contactEmail": "Email",
+    "consent": "I agree that the restaurant details above (except the contact person) will be published on MORITA.",
+    "submit": "Submit",
+    "submitting": "Sending…",
+    "doneTitle": "Thank you, we received your application",
+    "doneBody": "We will review the details and publish your restaurant. We may contact you to confirm.",
+    "duplicateBody": "We have already received an application for this restaurant. Please wait while we review it.",
+    "errorGeneric": "Could not send. Please try again later.",
+    "errorRate": "Too many submissions in a short time. Please try again in about an hour.",
+    "error": {
+      "name": "Please enter the restaurant name.",
+      "prefecture_code": "Please select a prefecture.",
+      "city_name": "Please enter the city or ward.",
+      "address": "Address is too long (max 200 characters).",
+      "hours": "Opening hours are too long (max 200 characters).",
+      "phone": "Use digits and - only.",
+      "website_url": "The link is not a valid URL.",
+      "description": "Text is too long (max 1000 characters).",
+      "contact_name": "Please enter your name.",
+      "contact_email": "Please enter a valid email address.",
+      "consent": "Please tick the box to agree to the listing."
+    }
   }
 }
