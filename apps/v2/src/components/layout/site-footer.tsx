@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { RESTAURANTS_PUBLIC } from "@/lib/features";
 import { BrandMark } from "./brand-mark";
 
 // Shared footer: who runs the service, what the AI is (and is not), the
@@ -40,11 +41,13 @@ export async function SiteFooter({ locale }: { locale: "ja" | "en" | "tl" }) {
                 {tNav("articles")}
               </Link>
             </li>
-            <li>
-              <Link href={`/${locale}/restaurants`} className={linkClass}>
-                {tNav("restaurants")}
-              </Link>
-            </li>
+            {RESTAURANTS_PUBLIC && (
+              <li>
+                <Link href={`/${locale}/restaurants`} className={linkClass}>
+                  {tNav("restaurants")}
+                </Link>
+              </li>
+            )}
             <li>
               <Link href={`/${locale}/contact`} className={linkClass}>
                 {tNav("contact")}

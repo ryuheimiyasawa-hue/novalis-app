@@ -30,6 +30,7 @@ import { routing } from "@/lib/i18n/routing";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPrefectureLabel } from "@/lib/i18n/prefectures";
 import { pickRestaurantName } from "@/lib/restaurants/localize";
+import { RESTAURANTS_PUBLIC } from "@/lib/features";
 import { isPaymentEnabled } from "@/lib/payment/is-payment-enabled";
 import { Button } from "@/components/ui/button";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
@@ -203,12 +204,14 @@ export default async function LandingPage({
   try {
     const admin = getAdminClient();
     const [restaurantsRes, articlesRes] = await Promise.all([
-      admin
-        .from("restaurants")
-        .select("id, name, name_en, prefecture_code, city_name, cuisine_type, photo_url")
-        .eq("is_active", true)
-        .order("created_at", { ascending: false })
-        .limit(4),
+      RESTAURANTS_PUBLIC
+        ? admin
+            .from("restaurants")
+            .select("id, name, name_en, prefecture_code, city_name, cuisine_type, photo_url")
+            .eq("is_active", true)
+            .order("created_at", { ascending: false })
+            .limit(4)
+        : Promise.resolve({ data: [], error: null }),
       // Read-only: the same published-articles listing as /articles,
       // first four rows only.
       admin
@@ -226,8 +229,8 @@ export default async function LandingPage({
     if (articlesRes.error) {
       console.warn("[landing] latest guides skipped:", articlesRes.error.message);
     }
-    // Sample shops stay visible on purpose (owner decision, 2026-10-12);
-    // cards without a usable photo show their icon tile instead.
+    // Cards without a usable photo show their icon tile instead. The whole
+    // strip is off while RESTAURANTS_PUBLIC is false (sample shops only).
     restaurants = (restaurantsRes.data ?? []) as RestaurantCard[];
     latest = (articlesRes.data ?? []) as unknown as LatestArticle[];
   } catch (err) {
@@ -245,7 +248,9 @@ export default async function LandingPage({
 
   const topics: Array<{ href: string; label: string; icon: LucideIcon }> = [
     { href: `/${safeLocale}/articles`, label: tNav("articles"), icon: BookOpenIcon },
-    { href: `/${safeLocale}/restaurants`, label: t("topics.food"), icon: UtensilsCrossedIcon },
+    ...(RESTAURANTS_PUBLIC
+      ? [{ href: `/${safeLocale}/restaurants`, label: t("topics.food"), icon: UtensilsCrossedIcon }]
+      : []),
     { href: `/${safeLocale}/contact`, label: tNav("contact"), icon: MailIcon },
   ];
 

@@ -155,9 +155,6 @@
     "switchLanguage": "Language",
     "supportLink": "Contact support",
     "supportText": "Trouble signing in?",
-    "tryWithoutLogin": "Try without signing in (beta test)",
-    "tryWithoutLoginLoading": "Preparing your session...",
-    "tryWithoutLoginFailed": "Could not create a guest session.",
     "panelTitle": "What MORITA offers"
   },
   "resetPassword": {

@@ -155,9 +155,6 @@
     "switchLanguage": "Wika",
     "supportLink": "Makipag-ugnayan sa suporta",
     "supportText": "May problema sa pag-sign in?",
-    "tryWithoutLogin": "Subukan nang hindi nagsa-sign in (beta test)",
-    "tryWithoutLoginLoading": "Inihahanda ang iyong session...",
-    "tryWithoutLoginFailed": "Hindi makagawa ng guest session.",
     "panelTitle": "Ang maiaalok ng MORITA"
   },
   "resetPassword": {

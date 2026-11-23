@@ -155,9 +155,6 @@
     "switchLanguage": "言語",
     "supportLink": "サポートに連絡",
     "supportText": "ログインできない場合は",
-    "tryWithoutLogin": "ログインせずに試す（ベータテスト用）",
-    "tryWithoutLoginLoading": "セッションを準備中...",
-    "tryWithoutLoginFailed": "ゲストセッションの作成に失敗しました。",
     "panelTitle": "MORITA でできること"
   },
   "resetPassword": {

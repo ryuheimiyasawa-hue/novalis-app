@@ -168,8 +168,10 @@ async function checkAuth(req: NextRequest): Promise<AuthCheckResult> {
   );
 
   const { data, error } = await supabase.auth.getUser();
+  // Guest (anonymous) sessions count as signed out: sign-in is Facebook or
+  // email only (owner decision, 2026-11-23). Same rule as requireAuth.
   return {
-    ok: !error && !!data.user,
+    ok: !error && !!data.user && data.user.is_anonymous !== true,
     userId: data.user?.id,
     supabase,
     response,
